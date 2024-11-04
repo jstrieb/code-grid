@@ -1,0 +1,43 @@
+:root {
+  --fg-color: black;
+  --bg-color: white;
+  --error-color: red;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-variant-ligatures: none;
+  color: inherit;
+  background: inherit;
+  border-color: inherit;
+  border-radius: 0;
+  line-height: inherit;
+  touch-action: manipulation;
+}
+
+*:focus {
+  outline: none;
+}
+
+html,
+body {
+  font-family: sans-serif;
+  color: var(--fg-color);
+  accent-color: var(--fg-color);
+  caret-color: var(--fg-color);
+  background: var(--bg-color);
+}
+
+body {
+  padding: 0.5em;
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+}
