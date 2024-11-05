@@ -1,26 +1,104 @@
 <style>
   td {
     border: 1px solid var(--fg-color);
-    padding: 0.1em 0.25em;
+    padding: calc(0.1em + 1px) calc(0.25em + 1px);
     text-align: center;
     user-select: none;
     -webkit-user-select: none;
   }
 
   .left {
-    border-left: 2px solid var(--fg-color);
+    box-shadow: inset 1px 0 0 0 var(--fg-color);
   }
 
   .right {
-    border-right: 2px solid var(--fg-color);
+    box-shadow: inset -1px 0 0 0 var(--fg-color);
   }
 
   .top {
-    border-top: 2px solid var(--fg-color);
+    box-shadow: inset 0 1px 0 0 var(--fg-color);
   }
 
   .bottom {
-    border-bottom: 2px solid var(--fg-color);
+    box-shadow: inset 0 -1px 0 0 var(--fg-color);
+  }
+
+  /* 
+    All these combinations are required to prevent the above classes from
+    overwriting each other when multiple are true.
+
+    Including the above four cases and the case where none are selected at all,
+    there should be 2^4 == 16 total cases covered.
+  */
+
+  .top.left {
+    box-shadow:
+      inset 0 1px 0 0 var(--fg-color),
+      inset 1px 0 0 0 var(--fg-color);
+  }
+
+  .top.right {
+    box-shadow:
+      inset 0 1px 0 0 var(--fg-color),
+      inset -1px 0 0 0 var(--fg-color);
+  }
+
+  .bottom.left {
+    box-shadow:
+      inset 0 -1px 0 0 var(--fg-color),
+      inset 1px 0 0 0 var(--fg-color);
+  }
+
+  .bottom.right {
+    box-shadow:
+      inset 0 -1px 0 0 var(--fg-color),
+      inset -1px 0 0 0 var(--fg-color);
+  }
+
+  .left.right {
+    box-shadow:
+      inset 1px 0 0 0 var(--fg-color),
+      inset -1px 0 0 0 var(--fg-color);
+  }
+
+  .bottom.top {
+    box-shadow:
+      inset 0 1px 0 0 var(--fg-color),
+      inset 0 -1px 0 0 var(--fg-color);
+  }
+
+  .top.left.bottom {
+    box-shadow:
+      inset 0 1px 0 0 var(--fg-color),
+      inset 1px 0 0 0 var(--fg-color),
+      inset 0 -1px 0 0 var(--fg-color);
+  }
+
+  .top.right.bottom {
+    box-shadow:
+      inset 0 1px 0 0 var(--fg-color),
+      inset -1px 0 0 0 var(--fg-color),
+      inset 0 -1px 0 0 var(--fg-color);
+  }
+
+  .left.bottom.right {
+    box-shadow:
+      inset 0 -1px 0 0 var(--fg-color),
+      inset 1px 0 0 0 var(--fg-color),
+      inset -1px 0 0 0 var(--fg-color);
+  }
+
+  .left.top.right {
+    box-shadow:
+      inset 0 1px 0 0 var(--fg-color),
+      inset 1px 0 0 0 var(--fg-color),
+      inset -1px 0 0 0 var(--fg-color);
+  }
+
+  .top.left.bottom.right {
+    box-shadow:
+      inset -1px -1px 0 0 var(--fg-color),
+      inset 1px 1px 0 0 var(--fg-color);
   }
 </style>
 
