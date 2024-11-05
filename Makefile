@@ -4,7 +4,7 @@ build: lint dep-npm dep-node-modules
 	npx vite build
 
 dev: dep-npm dep-node-modules
-	npx vite
+	npx vite --host 0
 
 lint: dep-npm dep-node-modules
 	npx prettier --write .
