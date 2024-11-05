@@ -25,11 +25,11 @@
 </style>
 
 <script>
-  const { cell, row, col, selected } = $props();
-  let top = $derived(Math.min($selected.start?.y, $selected.end?.y)),
-    bottom = $derived(Math.max($selected.start?.y, $selected.end?.y)),
-    left = $derived(Math.min($selected.start?.x, $selected.end?.x)),
-    right = $derived(Math.max($selected.start?.x, $selected.end?.x));
+  let { cell, row, col, selected = $bindable() } = $props();
+  let top = $derived(Math.min(selected.start?.y, selected.end?.y)),
+    bottom = $derived(Math.max(selected.start?.y, selected.end?.y)),
+    left = $derived(Math.min(selected.start?.x, selected.end?.x)),
+    right = $derived(Math.max(selected.start?.x, selected.end?.x));
   let contained = $derived(
     top <= row && row <= bottom && left <= col && col <= right,
   );
@@ -41,19 +41,19 @@
   class:top={contained && top == row}
   class:bottom={contained && bottom == row}
   onfocus={() => {
-    /* TODO */
+    // TODO
   }}
   onmouseover={(e) => {
     if (e.buttons == 0) {
       return;
     }
-    $selected.end = { x: col, y: row };
+    selected.end = { x: col, y: row };
   }}
   onmousedown={(e) => {
     e.stopPropagation();
     e.stopImmediatePropagation();
     e.preventDefault();
-    $selected.start = { x: col, y: row };
-    $selected.end = { x: col, y: row };
+    selected.start = { x: col, y: row };
+    selected.end = { x: col, y: row };
   }}>{cell}</td
 >

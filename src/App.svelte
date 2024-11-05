@@ -7,13 +7,13 @@
   }
 
   const cells = newArray(10, (_, i) => newArray(20, (_, j) => `${i},${j}`));
-  const selected = writable({});
+  let selected = $state({});
 </script>
 
 <svelte:window
   onmousedown={() => {
-    $selected = {};
+    selected = {};
   }}
 />
 
-<Table {cells} {selected} />
+<Table {cells} bind:selected />

@@ -7,7 +7,7 @@
 <script>
   import Cell from "./Cell.svelte";
 
-  const { cells, selected } = $props();
+  let { cells, selected = $bindable() } = $props();
 </script>
 
 <table>
@@ -15,7 +15,7 @@
     {#each cells as row, i}
       <tr>
         {#each row as cell, j}
-          <Cell {cell} {selected} row={i} col={j} />
+          <Cell {cell} bind:selected row={i} col={j} />
         {/each}
       </tr>
     {/each}
