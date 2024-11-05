@@ -2,6 +2,7 @@
   table {
     border-collapse: collapse;
     box-shadow: 4px 4px 0 0 var(--fg-color);
+    table-layout: fixed;
   }
 </style>
 

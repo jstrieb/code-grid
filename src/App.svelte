@@ -21,13 +21,16 @@
     return new Array(length).fill(undefined).map(f);
   }
 
-  const cells = newArray(100, (_, i) => newArray(20, (_, j) => `${i},${j}`));
-  const selected = writable({});
+  const cells = newArray(100, (_, i) =>
+    newArray(20, (_, j) => writable(`${i},${j}`)),
+  );
+  const unselected = { start: {}, end: {} };
+  const selected = writable({ ...unselected });
 </script>
 
 <svelte:window
   onmousedown={() => {
-    $selected = {};
+    $selected = { ...unselected };
   }}
 />
 

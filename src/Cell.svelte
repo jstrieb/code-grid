@@ -1,10 +1,20 @@
 <style>
   td {
     border: 1px solid var(--fg-color);
-    padding: calc(0.1em + 1px) calc(0.25em + 1px);
+    padding: 0.1em 0.25em;
     text-align: center;
     user-select: none;
     -webkit-user-select: none;
+    width: 7ch;
+    height: 1.5em;
+  }
+
+  textarea {
+    resize: none;
+    border: 0;
+    background: transparent;
+    width: 7ch;
+    height: 1.5em;
   }
 
   .left {
@@ -111,6 +121,11 @@
   let contained = $derived(
     top <= row && row <= bottom && left <= col && col <= right,
   );
+  let editing = $state(false);
+
+  function focus(e) {
+    e.focus();
+  }
 </script>
 
 <td
@@ -118,6 +133,7 @@
   class:right={contained && right == col}
   class:top={contained && top == row}
   class:bottom={contained && bottom == row}
+  class:editing
   onfocus={() => {
     /* TODO */
   }}
@@ -130,8 +146,25 @@
   onmousedown={(e) => {
     e.stopPropagation();
     e.stopImmediatePropagation();
-    e.preventDefault();
     $selected.start = { x: col, y: row };
     $selected.end = { x: col, y: row };
-  }}>{cell}</td
+  }}
+  ondblclick={(e) => {
+    editing =
+      contained &&
+      $selected.start.x == $selected.end.x &&
+      $selected.start.y == $selected.end.y;
+  }}
 >
+  {#if editing}
+    <textarea
+      use:focus
+      bind:value={$cell}
+      onblur={() => {
+        editing = false;
+      }}
+    ></textarea>
+  {:else}
+    {$cell}
+  {/if}
+</td>
