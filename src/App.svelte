@@ -10,6 +10,7 @@
 
   .scroll {
     overflow: auto;
+    min-height: 100%;
   }
 </style>
 
@@ -21,7 +22,7 @@
     return new Array(length).fill(undefined).map(f);
   }
 
-  const cells = newArray(100, (_, i) =>
+  const cells = newArray(20, (_, i) =>
     newArray(20, (_, j) => writable(`${i},${j}`)),
   );
   const unselected = { start: {}, end: {} };

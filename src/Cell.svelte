@@ -1,20 +1,23 @@
 <style>
   td {
     border: 1px solid var(--fg-color);
-    padding: 0.1em 0.25em;
     text-align: center;
     user-select: none;
     -webkit-user-select: none;
-    width: 7ch;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: ellipsis;
     height: 1.5em;
+    max-height: 1.5em;
+    vertical-align: center;
   }
 
   textarea {
     resize: none;
     border: 0;
     background: transparent;
-    width: 7ch;
     height: 1.5em;
+    max-height: 1.5em;
   }
 
   .left {
