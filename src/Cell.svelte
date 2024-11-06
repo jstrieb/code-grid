@@ -16,8 +16,11 @@
     resize: none;
     border: 0;
     background: transparent;
-    height: 1.5em;
-    max-height: 1.5em;
+    /* 
+      This is ncessary to prevent the switch to textarea from reflowing the
+      table cell (and by extension the row) a few pixels taller;
+    */
+    max-height: 100%;
   }
 
   .left {
