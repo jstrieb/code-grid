@@ -1,21 +1,28 @@
 <style>
   td {
     border: 1px solid var(--fg-color);
-    text-align: center;
     user-select: none;
     -webkit-user-select: none;
+    background: transparent;
+    height: 24px;
+    max-height: 24px;
+  }
+
+  td div {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: 24px;
+    max-height: 24px;
     overflow: hidden;
     white-space: pre;
     text-overflow: ellipsis;
-    height: 24px;
-    max-height: 24px;
-    contain: size layout;
+    text-align: center;
   }
 
   textarea {
     resize: none;
     border: 0;
-    background: transparent;
     font-family: monospace, monospace;
     line-height: 1;
     white-space: pre;
@@ -197,6 +204,6 @@
       spellcheck="false"
     ></textarea>
   {:else}
-    {$cell}
+    <div>{$cell}</div>
   {/if}
 </td>

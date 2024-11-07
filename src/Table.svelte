@@ -5,10 +5,6 @@
     table-layout: fixed;
     box-shadow: 4px 4px 0 0 var(--fg-color);
   }
-
-  tr {
-    max-height: 1.5em;
-  }
 </style>
 
 <script>
