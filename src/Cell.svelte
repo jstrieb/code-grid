@@ -7,21 +7,48 @@
     overflow: hidden;
     white-space: pre;
     text-overflow: ellipsis;
-    height: 1.5em;
-    max-height: 1.5em;
-    vertical-align: center;
+    height: 24px;
+    max-height: 24px;
+    contain: size layout;
   }
 
   textarea {
     resize: none;
     border: 0;
     background: transparent;
+    font-family: monospace, monospace;
+    line-height: 1;
+    white-space: pre;
     /* 
       This is ncessary to prevent the switch to textarea from reflowing the
-      table cell (and by extension the row) a few pixels taller;
+      table cell (and by extension the row) a few pixels taller.
     */
-    max-height: 100%;
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    max-height: 24px;
   }
+
+  /* No scrollbar for text area */
+
+  textarea {
+    overflow: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  textarea::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  /* 
+    All these combinations are required to prevent the above classes from
+    overwriting each other when multiple are true.
+
+    Including the above four cases and the case where none are selected at all,
+    there should be 2^4 == 16 total cases covered.
+  */
 
   .left {
     box-shadow: inset 1px 0 0 0 var(--fg-color);
@@ -38,14 +65,6 @@
   .bottom {
     box-shadow: inset 0 -1px 0 0 var(--fg-color);
   }
-
-  /* 
-    All these combinations are required to prevent the above classes from
-    overwriting each other when multiple are true.
-
-    Including the above four cases and the case where none are selected at all,
-    there should be 2^4 == 16 total cases covered.
-  */
 
   .top.left {
     box-shadow:
@@ -169,6 +188,13 @@
       onblur={() => {
         editing = false;
       }}
+      rows="1"
+      wrap="off"
+      autocorrect="off"
+      autocapitalize="none"
+      autocapitalization="none"
+      autocomplete="off"
+      spellcheck="false"
     ></textarea>
   {:else}
     {$cell}
