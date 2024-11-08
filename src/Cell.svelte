@@ -154,16 +154,7 @@
 </style>
 
 <script>
-  // width and height must be bindable here becuase they are in the parent,
-  // otherwise there are spurious warnings
-  const {
-    cell,
-    row,
-    col,
-    selected,
-    width = $bindable(),
-    height = $bindable(),
-  } = $props();
+  const { cell, row, col, selected, width, height } = $props();
   let top = $derived(Math.min($selected.start?.y, $selected.end?.y)),
     bottom = $derived(Math.max($selected.start?.y, $selected.end?.y)),
     left = $derived(Math.min($selected.start?.x, $selected.end?.x)),

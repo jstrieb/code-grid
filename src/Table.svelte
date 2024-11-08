@@ -121,8 +121,8 @@
           <Cell
             {cell}
             {selected}
-            bind:width={widths[j]}
-            bind:height={heights[i]}
+            width={widths[j]}
+            height={heights[i]}
             row={i}
             col={j}
           />
