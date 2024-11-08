@@ -16,15 +16,20 @@
     max-height: var(--height);
   }
 
-  td div,
+  td .text,
   td textarea {
     padding: 0.1em 0.2em;
   }
 
-  td div {
+  td .text {
     overflow: hidden;
     white-space: pre;
     text-overflow: ellipsis;
+  }
+
+  td .element {
+    display: flex;
+    overflow: hidden;
   }
 
   textarea {
@@ -159,6 +164,12 @@
   );
   let editing = $state(false);
 
+  let innerNode = $state(undefined);
+  $effect(() => {
+    innerNode?.replaceAllChildren?.();
+    innerNode?.appendChild?.($cell);
+  });
+
   function focus(e) {
     e.focus();
   }
@@ -209,7 +220,9 @@
       autocomplete="off"
       spellcheck="false"
     ></textarea>
+  {:else if $cell instanceof Element}
+    <div bind:this={innerNode} class="element"></div>
   {:else}
-    <div>{$cell}</div>
+    <div class="text">{$cell}</div>
   {/if}
 </td>
