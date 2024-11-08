@@ -6,16 +6,23 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: stretch;
+    gap: 0.5em;
   }
 
   .scroll {
     overflow: auto;
-    flex-grow: 1;
+    padding-bottom: 5px;
+  }
+
+  .tabs {
+    margin-top: calc(-0.5em + -6px);
+    max-width: max-content;
   }
 </style>
 
 <script>
   import Table from "./Table.svelte";
+  import Tabs from "./Tabs.svelte";
   import { writable } from "svelte/store";
 
   function newArray(length, f = (x) => x) {
@@ -24,14 +31,37 @@
 
   const INIT_ROWS = 20,
     INIT_COLS = 20;
-  const cells = newArray(INIT_ROWS, (_, i) =>
-    newArray(INIT_COLS, (_, j) => writable(`${i},${j}`)),
-  );
+
+  let sheets = $state([
+    {
+      name: "Sheet 1",
+      cells: newArray(INIT_ROWS, (_, i) =>
+        newArray(INIT_COLS, (_, j) => writable(`${i},${j}`)),
+      ),
+      widths: newArray(INIT_COLS, () => 56),
+      heights: newArray(INIT_ROWS, () => 24),
+    },
+    {
+      name: "Other sheet",
+      cells: newArray(30, (_, i) =>
+        newArray(10, (_, j) => writable(`${i},${j}`)),
+      ),
+      widths: newArray(10, () => 56),
+      heights: newArray(30, () => 24),
+    },
+    {
+      name: "Sheet three with a very long name",
+      cells: newArray(300, (_, i) =>
+        newArray(100, (_, j) => writable(`${i},${j}`)),
+      ),
+      widths: newArray(100, () => 32),
+      heights: newArray(300, () => 32),
+    },
+  ]);
+  let currentSheet = $state(0);
+
   const unselected = { start: {}, end: {} };
   const selected = writable({ ...unselected });
-
-  let widths = $state(newArray(INIT_COLS, () => 56)),
-    heights = $state(newArray(INIT_ROWS, () => 24));
 </script>
 
 <svelte:window
@@ -41,5 +71,13 @@
 />
 
 <div class="scroll">
-  <Table {cells} {selected} bind:widths bind:heights />
+  <Table
+    {selected}
+    cells={sheets[currentSheet].cells}
+    bind:widths={sheets[currentSheet].widths}
+    bind:heights={sheets[currentSheet].heights}
+  />
+</div>
+<div class="tabs">
+  <Tabs tabs={sheets.map((s) => s.name)} bind:value={currentSheet} />
 </div>
