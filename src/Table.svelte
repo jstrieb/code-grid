@@ -8,20 +8,28 @@
   th {
     user-select: none;
     -webkit-user-select: none;
-    padding: 0.1em 0.2em;
     border: 1px solid var(--fg-color);
     background: #dddddd;
     /* Required for draggable handles to be positioned absolutely */
     position: relative;
   }
 
-  th {
+  th,
+  th .text {
     width: var(--width);
     min-width: var(--width);
     max-width: var(--width);
     height: var(--height);
     min-height: var(--height);
     max-height: var(--height);
+  }
+
+  th .text {
+    padding: 0.1em 0.2em;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: ellipsis;
+    background: none;
   }
 
   thead th:first-of-type {
@@ -108,7 +116,7 @@
       {#each widths as width, i (i)}
         {@const pointermoveHandler = pointermoveX(i)}
         <th style:--width="{width}px">
-          C{i}
+          <div class="text">C{i}</div>
           <div
             onpointerdown={pointerdown(pointermoveHandler)}
             onpointerup={pointerup(pointermoveHandler)}
@@ -123,7 +131,7 @@
       {@const pointermoveHandler = pointermoveY(i)}
       <tr>
         <th style:--height="{heights[i]}px">
-          R{i}
+          <div class="text">R{i}</div>
           <div
             onpointerdown={pointerdown(pointermoveHandler)}
             onpointerup={pointerup(pointermoveHandler)}
