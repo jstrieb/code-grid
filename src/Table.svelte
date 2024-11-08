@@ -50,8 +50,8 @@
   .bottom.handle {
     cursor: ns-resize;
     width: 100%;
-    height: 6px;
-    bottom: -3px;
+    height: 8px;
+    bottom: -4px;
     left: 0;
     right: 0;
   }
@@ -69,11 +69,19 @@
 
   let pointerStart = $state(undefined);
 
-  function pointermove(i) {
+  function pointermoveX(i) {
     return (e) => {
       const dx = e.clientX - pointerStart.x;
       widths[i] += dx;
       pointerStart.x = e.clientX;
+    };
+  }
+
+  function pointermoveY(i) {
+    return (e) => {
+      const dy = e.clientY - pointerStart.y;
+      heights[i] += dy;
+      pointerStart.y = e.clientY;
     };
   }
 
@@ -98,7 +106,7 @@
     <tr>
       <th></th>
       {#each widths as width, i (i)}
-        {@const pointermoveHandler = pointermove(i)}
+        {@const pointermoveHandler = pointermoveX(i)}
         <th style:--width="{width}px">
           C{i}
           <div
@@ -112,10 +120,15 @@
   </thead>
   <tbody>
     {#each cells as row, i (i)}
+      {@const pointermoveHandler = pointermoveY(i)}
       <tr>
-        <th style:--height={heights[i]}>
+        <th style:--height="{heights[i]}px">
           R{i}
-          <div draggable="true" class="bottom handle"></div>
+          <div
+            onpointerdown={pointerdown(pointermoveHandler)}
+            onpointerup={pointerup(pointermoveHandler)}
+            class="bottom handle"
+          ></div>
         </th>
         {#each row as cell, j (j)}
           <Cell
