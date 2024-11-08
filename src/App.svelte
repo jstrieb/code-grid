@@ -10,7 +10,7 @@
 
   .scroll {
     overflow: auto;
-    min-height: 100%;
+    flex-grow: 1;
   }
 </style>
 
@@ -22,11 +22,16 @@
     return new Array(length).fill(undefined).map(f);
   }
 
-  const cells = newArray(20, (_, i) =>
-    newArray(20, (_, j) => writable(`${i},${j}`)),
+  const INIT_ROWS = 20,
+    INIT_COLS = 20;
+  const cells = newArray(INIT_ROWS, (_, i) =>
+    newArray(INIT_COLS, (_, j) => writable(`${i},${j}`)),
   );
   const unselected = { start: {}, end: {} };
   const selected = writable({ ...unselected });
+
+  const widths = newArray(INIT_COLS, () => "56px"),
+    heights = newArray(INIT_ROWS, () => "24px");
 </script>
 
 <svelte:window
@@ -36,5 +41,5 @@
 />
 
 <div class="scroll">
-  <Table {cells} {selected} />
+  <Table {cells} {selected} {widths} {heights} />
 </div>

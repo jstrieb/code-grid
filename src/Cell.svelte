@@ -4,20 +4,27 @@
     user-select: none;
     -webkit-user-select: none;
     background: transparent;
-    height: 24px;
-    max-height: 24px;
+  }
+
+  td,
+  td > * {
+    width: var(--width);
+    min-width: var(--width);
+    max-width: var(--width);
+    height: var(--height);
+    min-height: var(--height);
+    max-height: var(--height);
+  }
+
+  td div,
+  td textarea {
+    padding: 0.1em 0.2em;
   }
 
   td div {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    height: 24px;
-    max-height: 24px;
     overflow: hidden;
     white-space: pre;
     text-overflow: ellipsis;
-    text-align: center;
   }
 
   textarea {
@@ -31,9 +38,6 @@
       table cell (and by extension the row) a few pixels taller.
     */
     display: block;
-    height: 100%;
-    max-width: 100%;
-    max-height: 24px;
   }
 
   /* No scrollbar for text area */
@@ -145,7 +149,7 @@
 </style>
 
 <script>
-  const { cell, row, col, selected } = $props();
+  const { cell, row, col, selected, width, height } = $props();
   let top = $derived(Math.min($selected.start?.y, $selected.end?.y)),
     bottom = $derived(Math.max($selected.start?.y, $selected.end?.y)),
     left = $derived(Math.min($selected.start?.x, $selected.end?.x)),
@@ -161,6 +165,8 @@
 </script>
 
 <td
+  style:--width={width}
+  style:--height={height}
   class:left={contained && left == col}
   class:right={contained && right == col}
   class:top={contained && top == row}
