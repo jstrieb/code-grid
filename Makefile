@@ -25,6 +25,7 @@ install-pre-commit: .git/hooks/pre-commit
 		'' \
 		'make pre-commit-check' \
 		> '$@'
+	chmod +x '$@'
 
 
 .PHONY: dep-npm dep-node-modules
