@@ -17,6 +17,7 @@
   border-radius: 0;
   line-height: inherit;
   touch-action: manipulation;
+  appearance: none;
 }
 
 *:focus {

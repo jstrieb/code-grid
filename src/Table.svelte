@@ -34,6 +34,8 @@
     background: none;
     position: absolute;
     z-index: 1;
+    /* Prevent mobile browsers from scrolling when trying to resize */
+    touch-action: none;
   }
 
   .right.handle {
