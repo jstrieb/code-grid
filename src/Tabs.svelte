@@ -5,7 +5,18 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: flex-start;
+    padding-left: calc(0.5em - 1px);
     gap: 0.4em;
+    position: relative;
+  }
+
+  .tabs::before {
+    content: "";
+    width: 0.5em;
+    border-top: 2px solid var(--fg-color);
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   button {
@@ -25,23 +36,15 @@
   button:not(.selected)::before {
     content: "";
     width: calc(100% + 1em);
-    border-top: 1px solid var(--fg-color);
+    border-top: 2px solid var(--fg-color);
     position: absolute;
     top: 0;
     left: -0.5em;
     right: 0.5em;
   }
 
-  button:not(.selected):first-of-type::before,
   button:not(.selected):last-of-type::before {
     width: calc(100% + 0.5em);
-  }
-
-  button:not(.selected):first-of-type::before {
-    left: 0;
-  }
-
-  button:not(.selected):last-of-type::before {
     right: 0;
   }
 
