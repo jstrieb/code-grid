@@ -10,7 +10,7 @@
     -webkit-user-select: none;
     padding: 0.1em 0.2em;
     border: 1px solid var(--fg-color);
-    background: #eeeeee;
+    background: #dddddd;
     /* Required for draggable handles to be positioned absolutely */
     position: relative;
   }
@@ -32,8 +32,6 @@
   .handle {
     display: inline-block;
     background: none;
-    /* TODO: Remove */
-    background-color: red;
     position: absolute;
     z-index: 1;
   }
@@ -72,8 +70,6 @@
   function pointermove(i) {
     return (e) => {
       const dx = e.clientX - pointerStart.x;
-      // TODO: Remove
-      console.log(pointerStart.x, e.clientX, dx, widths[i]);
       widths[i] += dx;
       pointerStart.x = e.clientX;
     };
@@ -99,7 +95,7 @@
   <thead>
     <tr>
       <th></th>
-      {#each widths as width, i ({ i })}
+      {#each widths as width, i (i)}
         {@const pointermoveHandler = pointermove(i)}
         <th style:--width="{width}px">
           C{i}
