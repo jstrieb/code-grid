@@ -30,8 +30,8 @@
   const unselected = { start: {}, end: {} };
   const selected = writable({ ...unselected });
 
-  const widths = newArray(INIT_COLS, () => "56px"),
-    heights = newArray(INIT_ROWS, () => "24px");
+  let widths = $state(newArray(INIT_COLS, () => 56)),
+    heights = $state(newArray(INIT_ROWS, () => 24));
 </script>
 
 <svelte:window
@@ -41,5 +41,5 @@
 />
 
 <div class="scroll">
-  <Table {cells} {selected} {widths} {heights} />
+  <Table {cells} {selected} bind:widths bind:heights />
 </div>

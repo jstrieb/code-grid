@@ -154,7 +154,16 @@
 </style>
 
 <script>
-  const { cell, row, col, selected, width, height } = $props();
+  // width and height must be bindable here becuase they are in the parent,
+  // otherwise there are spurious warnings
+  const {
+    cell,
+    row,
+    col,
+    selected,
+    width = $bindable(),
+    height = $bindable(),
+  } = $props();
   let top = $derived(Math.min($selected.start?.y, $selected.end?.y)),
     bottom = $derived(Math.max($selected.start?.y, $selected.end?.y)),
     left = $derived(Math.min($selected.start?.x, $selected.end?.x)),
@@ -176,8 +185,8 @@
 </script>
 
 <td
-  style:--width={width}
-  style:--height={height}
+  style:--width="{width}px"
+  style:--height="{height}px"
   class:left={contained && left == col}
   class:right={contained && right == col}
   class:top={contained && top == row}
