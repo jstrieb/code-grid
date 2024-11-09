@@ -1,5 +1,9 @@
 <style>
   table {
+    /* 
+      TODO: Fix. Border collapse with box shadows (for showing selected cells)
+      creates a small gap between the border and box shadow in Safari.
+    */
     border-collapse: collapse;
     border-spacing: 0;
     box-shadow: 4px 4px 0 0 var(--fg-color);
