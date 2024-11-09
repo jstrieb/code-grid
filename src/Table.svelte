@@ -34,6 +34,9 @@
     white-space: pre;
     text-overflow: ellipsis;
     background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   thead th:first-of-type {
