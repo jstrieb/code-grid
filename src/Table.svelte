@@ -44,6 +44,7 @@
   .handle {
     display: inline-block;
     background: none;
+    border: 0;
     position: absolute;
     z-index: 1;
     /* Prevent mobile browsers from scrolling when trying to resize */
@@ -71,6 +72,8 @@
 
 <script>
   import Cell from "./Cell.svelte";
+
+  import { get } from "svelte/store";
 
   const {
     cells,
@@ -111,6 +114,45 @@
       e.target.releasePointerCapture(e.pointerId);
     };
   }
+
+  function getMaxCellSize(filteredCells, measureResult) {
+    // TODO: Make this function faster.
+    //       - svelte/store/get is slow
+    //       - Writing DOM elements to the body and measuring is slow
+    //
+    // Note that measuring actual internal parts of cells doesn't work reliably
+    // because cell inner elements all have their width explicitly set. Changing
+    // the width and re-measuring can result in inconsistent results.
+    return (
+      filteredCells
+        .map((cellStore) => {
+          const cell = get(cellStore);
+          if (cell instanceof Element) {
+            return measureResult(cell) ?? 0;
+          } else {
+            const div = Object.assign(document.createElement("div"), {
+              // Match padding of cell in Cell.svelte
+              style: `padding: 0.1em 0.2em; 
+                      z-index: -1; 
+                      min-width: max-content;
+                      width: max-content;
+                      max-width: max-content;
+                      min-height: max-content;
+                      height: max-content;
+                      max-height: max-content;`,
+              innerText: cell.toString(),
+            });
+            document.body.append(div);
+            const result = measureResult(div) ?? 0;
+            div.remove();
+            return result;
+          }
+        })
+        .reduce((a, x) => Math.max(a, x), 0) +
+      // Sometimes the calculated value is just shy of enough so we add more
+      5
+    );
+  }
 </script>
 
 <table>
@@ -121,11 +163,21 @@
         {@const pointermoveHandler = pointermoveX(i)}
         <th style:--width="{width}px">
           <div class="text">C{i}</div>
-          <div
+          <button
             onpointerdown={pointerdown(pointermoveHandler)}
             onpointerup={pointerup(pointermoveHandler)}
+            ondblclick={() => {
+              const newWidth = getMaxCellSize(
+                cells.map((row) => row[i]),
+                (div) => div.scrollWidth,
+              );
+              if (!Number.isNaN(newWidth)) {
+                widths[i] = newWidth;
+              }
+            }}
             class="right handle"
-          ></div>
+            aria-label="Drag handle for column C{i}"
+          ></button>
         </th>
       {/each}
     </tr>
@@ -136,11 +188,21 @@
       <tr>
         <th style:--height="{heights[i]}px">
           <div class="text">R{i}</div>
-          <div
+          <button
             onpointerdown={pointerdown(pointermoveHandler)}
             onpointerup={pointerup(pointermoveHandler)}
+            ondblclick={() => {
+              const newHeight = getMaxCellSize(
+                cells[i],
+                (div) => div.scrollHeight,
+              );
+              if (!Number.isNaN(newHeight)) {
+                heights[i] = newHeight;
+              }
+            }}
             class="bottom handle"
-          ></div>
+            aria-label="Drag handle for row R{i}"
+          ></button>
         </th>
         {#each row as cell, j (j)}
           <Cell
