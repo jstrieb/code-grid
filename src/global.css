@@ -42,3 +42,8 @@ body {
   min-height: 100dvh;
   max-height: 100dvh;
 }
+
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
