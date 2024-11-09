@@ -12,6 +12,8 @@
   .scroll {
     overflow: auto;
     padding-bottom: 5px;
+    /* Prevents scrolling from triggering pull-down refresh on mobile */
+    overscroll-behavior: none;
   }
 
   .tabs {

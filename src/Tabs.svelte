@@ -6,8 +6,11 @@
     justify-content: flex-start;
     align-items: flex-start;
     padding-left: calc(0.5em - 1px);
+    padding-bottom: 3px;
+    padding-right: 3px;
     gap: 0.4em;
     position: relative;
+    overflow: auto;
   }
 
   .tabs::before {
