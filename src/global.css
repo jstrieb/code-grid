@@ -1,6 +1,8 @@
 :root {
   --fg-color: black;
   --bg-color: white;
+  --header-color: #dddddd;
+  --selected-color: #aaaaaa;
   --error-color: red;
 }
 

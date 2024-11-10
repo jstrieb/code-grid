@@ -6,20 +6,10 @@
     justify-content: flex-start;
     align-items: flex-start;
     padding-left: calc(0.5em - 1px);
-    padding-bottom: 3px;
-    padding-right: 3px;
-    gap: 0.4em;
-    position: relative;
+    padding-top: 3px;
+    padding-right: 5px;
+    gap: 0.5em;
     overflow: auto;
-  }
-
-  .tabs::before {
-    content: "";
-    width: 0.5em;
-    border-top: 2px solid var(--fg-color);
-    position: absolute;
-    top: 0;
-    left: 0;
   }
 
   label {
@@ -28,56 +18,77 @@
     white-space: pre;
     text-overflow: ellipsis;
     border: 1px solid var(--fg-color);
-    border-top: 0;
+    border-bottom: 0;
+    user-select: none;
+    -webkit-user-select: none;
     cursor: pointer;
-    box-shadow:
-      3px 3px 0 0 var(--fg-color),
-      3px 0 0 0 var(--fg-color);
-    position: relative;
+    box-shadow: 3px 3px 0 0 var(--fg-color);
   }
 
-  label:not(.selected)::before {
-    content: "";
-    width: calc(100% + 1em);
-    border-top: 2px solid var(--fg-color);
-    position: absolute;
-    top: 0;
-    left: -0.5em;
-    right: 0.5em;
+  label.selected {
+    box-shadow: 4px 4px 0 0 var(--fg-color);
   }
 
-  label:not(.selected):last-of-type::before {
-    width: calc(100% + 0.5em);
-    right: 0;
-  }
-
-  /* Use box shadows instead of outlines to get three sides instead of four */
   label:hover {
-    box-shadow:
-      3px 3px 0 0 var(--fg-color),
-      3px 0 0 0 var(--fg-color),
-      inset -1px -1px 0 0 var(--fg-color),
-      inset 1px 0 0 0 var(--fg-color);
+    outline: 1px solid var(--fg-color);
   }
 
   label:active {
-    box-shadow:
-      1px 1px 0 0 var(--fg-color),
-      1px 0 0 0 var(--fg-color),
-      inset -1px -1px 0 0 var(--fg-color),
-      inset 1px 0 0 0 var(--fg-color);
+    outline: 1px solid var(--fg-color);
+    box-shadow: 2px 2px 0 0 var(--fg-color);
+  }
+
+  /* 
+    This ensures the tabs have a border, even when the table is scrolled down
+    from the top. 
+  */
+  .bottom-border {
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    background: var(--fg-color);
+    z-index: 1;
+  }
+
+  /*
+    This ensures that there is no border under the selected tab so it's clear
+    which tab is selected.
+  */
+  .bottom-border-gap {
+    width: var(--border-cover-width);
+    height: 1px;
+    position: absolute;
+    bottom: -1px;
+    left: var(--border-cover-offset);
+    right: 0;
+    background: var(--bg-color);
+    z-index: 1;
   }
 </style>
 
 <script>
   let { tabs, value = $bindable(0) } = $props();
+
+  let elements = $state(new Array(tabs.length).fill());
+  let scrollLeft = $state(0);
 </script>
 
-<div class="tabs">
+<div
+  onscroll={(e) => {
+    scrollLeft = e.target.scrollLeft;
+  }}
+  class="tabs"
+  style:--border-cover-width="{elements[value]?.offsetWidth - 2}px"
+  style:--border-cover-offset="{elements[value]?.offsetLeft - scrollLeft + 1}px"
+>
   {#each tabs as tab, i}
-    <label class:selected={value == i}>
-      <input type="radio" bind:group={value} value={i} />
-      {tab}
-    </label>
+    <label class:selected={value == i} bind:this={elements[i]}
+      ><input type="radio" bind:group={value} value={i} />{tab}</label
+    >
   {/each}
+  <div class="bottom-border"></div>
+  <div class="bottom-border-gap"></div>
 </div>

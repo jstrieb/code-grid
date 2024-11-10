@@ -13,7 +13,7 @@
     user-select: none;
     -webkit-user-select: none;
     border: 1px solid var(--fg-color);
-    background: #dddddd;
+    background: var(--header-color);
     /* Required for draggable handles to be positioned absolutely */
     position: relative;
   }
@@ -50,7 +50,7 @@
   }
 
   th.selected {
-    background: #aaaaaa;
+    background: var(--selected-color);
   }
 
   thead th.selected {
@@ -68,7 +68,6 @@
   }
 
   thead th:first-of-type {
-    border: 0;
     background: none;
   }
 

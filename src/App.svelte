@@ -17,8 +17,9 @@
   }
 
   .tabs {
-    margin-top: calc(-0.5em + -6px);
+    margin-bottom: calc(-0.5em);
     max-width: max-content;
+    position: relative;
   }
 </style>
 
@@ -78,6 +79,9 @@
   }}
 />
 
+<div class="tabs">
+  <Tabs tabs={sheets.map((s) => s.name)} bind:value={currentSheet} />
+</div>
 <div class="scroll">
   <Table
     {selected}
@@ -86,7 +90,4 @@
     bind:heights={sheets[currentSheet].heights}
     bind:table
   />
-</div>
-<div class="tabs">
-  <Tabs tabs={sheets.map((s) => s.name)} bind:value={currentSheet} />
 </div>
