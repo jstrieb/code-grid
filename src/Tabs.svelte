@@ -38,6 +38,10 @@
     box-shadow: 2px 2px 0 0 var(--fg-color);
   }
 
+  input[type="radio"] {
+    display: none;
+  }
+
   /* 
     This ensures the tabs have a border, even when the table is scrolled down
     from the top. 
