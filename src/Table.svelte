@@ -19,7 +19,7 @@
   }
 
   th,
-  th .text {
+  th .header {
     width: var(--width);
     min-width: var(--width);
     max-width: var(--width);
@@ -28,15 +28,43 @@
     max-height: var(--height);
   }
 
-  th .text {
-    padding: 0.1em 0.2em;
+  th .header {
     overflow: hidden;
     white-space: pre;
     text-overflow: ellipsis;
     background: none;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
+  }
+
+  th .header button {
+    padding: 0.1em 0.2em;
+    flex-grow: 1;
+    background: none;
+    border: 0;
+  }
+
+  th.selected .header button {
+    cursor: grab;
+  }
+
+  th.selected {
+    background: #aaaaaa;
+  }
+
+  thead th.selected {
+    box-shadow:
+      inset 0 1px 0 0 var(--fg-color),
+      inset 1px 0 0 0 var(--fg-color),
+      inset -1px 0 0 0 var(--fg-color);
+  }
+
+  tbody th.selected {
+    box-shadow:
+      inset 0 1px 0 0 var(--fg-color),
+      inset 1px 0 0 0 var(--fg-color),
+      inset 0 -1px 0 0 var(--fg-color);
   }
 
   thead th:first-of-type {
@@ -156,6 +184,22 @@
       5
     );
   }
+
+  function isRowSelected(i) {
+    return (
+      $selected.start.x == -1 &&
+      $selected.start.y == $selected.end.y &&
+      $selected.start.y == i
+    );
+  }
+
+  function isColSelected(i) {
+    return (
+      $selected.start.y == -1 &&
+      $selected.start.x == $selected.end.x &&
+      $selected.start.x == i
+    );
+  }
 </script>
 
 <table>
@@ -164,8 +208,16 @@
       <th></th>
       {#each widths as width, i (i)}
         {@const pointermoveHandler = pointermoveX(i)}
-        <th style:--width="{width}px">
-          <div class="text">C{i}</div>
+        <th style:--width="{width}px" class:selected={isColSelected(i)}>
+          <div class="header">
+            <button
+              draggable={isColSelected(i)}
+              onclick={() => {
+                $selected.start = { x: i, y: -1 };
+                $selected.end = { x: i, y: heights.length };
+              }}>C{i}</button
+            >
+          </div>
           <button
             onpointerdown={pointerdown(pointermoveHandler)}
             onpointerup={pointerup(pointermoveHandler)}
@@ -189,8 +241,15 @@
     {#each cells as row, i (i)}
       {@const pointermoveHandler = pointermoveY(i)}
       <tr>
-        <th style:--height="{heights[i]}px">
-          <div class="text">R{i}</div>
+        <th style:--height="{heights[i]}px" class:selected={isRowSelected(i)}>
+          <div class="header">
+            <button
+              onclick={() => {
+                $selected.start = { x: -1, y: i };
+                $selected.end = { x: widths.length, y: i };
+              }}>R{i}</button
+            >
+          </div>
           <button
             onpointerdown={pointerdown(pointermoveHandler)}
             onpointerup={pointerup(pointermoveHandler)}
