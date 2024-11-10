@@ -21,6 +21,17 @@
   button:active {
     box-shadow: 2px 2px 0 0 var(--fg-color);
   }
+
+  button:disabled {
+    cursor: not-allowed;
+    --fg-color: #909090;
+    color: var(--fg-color);
+    outline: none;
+  }
+
+  button:active:disabled {
+    box-shadow: 3px 3px 0 0 var(--fg-color);
+  }
 </style>
 
 <script>

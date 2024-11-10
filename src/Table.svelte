@@ -190,7 +190,8 @@
     //
     // Note that measuring actual internal parts of cells doesn't work reliably
     // because cell inner elements all have their width explicitly set. Changing
-    // the width and re-measuring can result in inconsistent results.
+    // the width and re-measuring can result in inconsistent results. That is
+    // why we create new <div>s instead of measuring existing ones.
     return (
       filteredCells
         .map((cellStore) => {
@@ -323,26 +324,44 @@
   <div class="add columns">
     <Button
       style="width: 100%;"
+      disabled={!Number.isInteger(toAdd) || toAdd == 0}
       onclick={() => {
-        for (let i = 0; i < toAdd; i++) {
+        if (toAdd > 0) {
+          for (let i = 0; i < toAdd; i++) {
+            cells.forEach((row) => {
+              row.push(writable(undefined));
+            });
+            widths.push(56);
+          }
+        } else if (toAdd < 0) {
+          // Note that toAdd is negative in the calculations below
           cells.forEach((row) => {
-            row.push(writable(undefined));
+            row.splice(row.length + toAdd, -toAdd);
           });
-          widths.push(56);
+          widths.splice(widths.length + toAdd, -toAdd);
         }
-      }}>Add {toAdd} column{toAdd != 1 ? "s" : ""}</Button
+      }}
+      >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} column{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
   </div>
   <div class="add rows">
     <Button
+      disabled={!Number.isInteger(toAdd) || toAdd == 0}
       onclick={() => {
-        for (let i = 0; i < toAdd; i++) {
-          cells.push(
-            new Array(widths.length).fill().map((_) => writable(undefined)),
-          );
-          heights.push(24);
+        if (toAdd > 0) {
+          for (let i = 0; i < toAdd; i++) {
+            cells.push(
+              new Array(widths.length).fill().map((_) => writable(undefined)),
+            );
+            heights.push(24);
+          }
+        } else if (toAdd < 0) {
+          // Note that toAdd is negative in the calculations below
+          cells.splice(cells.length + toAdd, -toAdd);
+          heights.splice(heights.length + toAdd, -toAdd);
         }
-      }}>Add {toAdd} row{toAdd != 1 ? "s" : ""}</Button
+      }}
+      >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} row{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
   </div>
   <div class="numberinput">
@@ -352,7 +371,6 @@
       onfocus={(e) => {
         e.target.select();
       }}
-      min="0"
     />
   </div>
 </div>
