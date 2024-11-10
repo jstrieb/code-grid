@@ -106,10 +106,11 @@
 
   import { get } from "svelte/store";
 
-  const {
+  let {
     cells,
     widths = $bindable(),
     heights = $bindable(),
+    table = $bindable(),
     selected,
   } = $props();
 
@@ -202,7 +203,7 @@
   }
 </script>
 
-<table>
+<table bind:this={table}>
   <thead>
     <tr>
       <th></th>

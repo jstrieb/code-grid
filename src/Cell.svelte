@@ -193,8 +193,6 @@
     $selected.end = { x: col, y: row };
   }}
   onmousedown={(e) => {
-    e.stopPropagation();
-    e.stopImmediatePropagation();
     $selected.start = { x: col, y: row };
     $selected.end = { x: col, y: row };
   }}

@@ -64,10 +64,16 @@
 
   const unselected = { start: {}, end: {} };
   const selected = writable({ ...unselected });
+
+  let table = $state();
 </script>
 
-<svelte:window
-  onmousedown={() => {
+<svelte:body
+  onmousedown={(e) => {
+    // Only deselect if clicking outside of the table
+    if (table.contains(e.target)) {
+      return;
+    }
     $selected = { ...unselected };
   }}
 />
@@ -78,6 +84,7 @@
     cells={sheets[currentSheet].cells}
     bind:widths={sheets[currentSheet].widths}
     bind:heights={sheets[currentSheet].heights}
+    bind:table
   />
 </div>
 <div class="tabs">
