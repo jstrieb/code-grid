@@ -22,7 +22,7 @@
     left: 0;
   }
 
-  button {
+  label {
     padding: 0.35em;
     text-align: center;
     white-space: pre;
@@ -36,7 +36,7 @@
     position: relative;
   }
 
-  button:not(.selected)::before {
+  label:not(.selected)::before {
     content: "";
     width: calc(100% + 1em);
     border-top: 2px solid var(--fg-color);
@@ -46,13 +46,13 @@
     right: 0.5em;
   }
 
-  button:not(.selected):last-of-type::before {
+  label:not(.selected):last-of-type::before {
     width: calc(100% + 0.5em);
     right: 0;
   }
 
   /* Use box shadows instead of outlines to get three sides instead of four */
-  button:hover {
+  label:hover {
     box-shadow:
       3px 3px 0 0 var(--fg-color),
       3px 0 0 0 var(--fg-color),
@@ -60,7 +60,7 @@
       inset 1px 0 0 0 var(--fg-color);
   }
 
-  button:active {
+  label:active {
     box-shadow:
       1px 1px 0 0 var(--fg-color),
       1px 0 0 0 var(--fg-color),
@@ -75,11 +75,9 @@
 
 <div class="tabs">
   {#each tabs as tab, i}
-    <button
-      class:selected={i == value}
-      onclick={() => {
-        value = i;
-      }}>{tab}</button
-    >
+    <label class:selected={value == i}>
+      <input type="radio" bind:group={value} value={i} />
+      {tab}
+    </label>
   {/each}
 </div>
