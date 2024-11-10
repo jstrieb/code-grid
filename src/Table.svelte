@@ -1,4 +1,38 @@
 <style>
+  .container {
+    max-width: max-content;
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    grid-template-rows: repeat(2, auto);
+    gap: 0.5em;
+  }
+
+  .add.rows {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+  }
+
+  .add.columns {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+  }
+
+  .numberinput {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+  }
+
   table {
     /* 
       TODO: Fix. Border collapse with box shadows (for showing selected cells)
@@ -101,12 +135,14 @@
 </style>
 
 <script>
+  import Button from "./Button.svelte";
   import Cell from "./Cell.svelte";
+  import NumericInput from "./NumericInput.svelte";
 
-  import { get } from "svelte/store";
+  import { get, writable } from "svelte/store";
 
   let {
-    cells,
+    cells = $bindable(),
     widths = $bindable(),
     heights = $bindable(),
     table = $bindable(),
@@ -114,6 +150,7 @@
   } = $props();
 
   let pointerStart = $state(undefined);
+  let toAdd = $state(1);
 
   function pointermoveX(i) {
     return (e) => {
@@ -160,7 +197,7 @@
           const cell = get(cellStore);
           if (cell instanceof Element) {
             return measureResult(cell) ?? 0;
-          } else {
+          } else if (cell != null) {
             const div = Object.assign(document.createElement("div"), {
               // Match padding of cell in Cell.svelte
               style: `padding: 0.1em 0.2em; 
@@ -177,6 +214,8 @@
             const result = measureResult(div) ?? 0;
             div.remove();
             return result;
+          } else {
+            return 5;
           }
         })
         .reduce((a, x) => Math.max(a, x), 0) +
@@ -202,81 +241,118 @@
   }
 </script>
 
-<table bind:this={table}>
-  <thead>
-    <tr>
-      <th></th>
-      {#each widths as width, i (i)}
-        {@const pointermoveHandler = pointermoveX(i)}
-        <th style:--width="{width}px" class:selected={isColSelected(i)}>
-          <div class="header">
-            <button
-              draggable={isColSelected(i)}
-              onclick={() => {
-                $selected.start = { x: i, y: -1 };
-                $selected.end = { x: i, y: heights.length - 1 };
-              }}>C{i}</button
-            >
-          </div>
-          <button
-            onpointerdown={pointerdown(pointermoveHandler)}
-            onpointerup={pointerup(pointermoveHandler)}
-            ondblclick={() => {
-              const newWidth = getMaxCellSize(
-                cells.map((row) => row[i]),
-                (div) => div.scrollWidth,
-              );
-              if (!Number.isNaN(newWidth)) {
-                widths[i] = newWidth;
-              }
-            }}
-            class="right handle"
-            aria-label="Drag handle for column C{i}"
-          ></button>
-        </th>
-      {/each}
-    </tr>
-  </thead>
-  <tbody>
-    {#each cells as row, i (i)}
-      {@const pointermoveHandler = pointermoveY(i)}
+<div class="container">
+  <table bind:this={table}>
+    <thead>
       <tr>
-        <th style:--height="{heights[i]}px" class:selected={isRowSelected(i)}>
-          <div class="header">
+        <th></th>
+        {#each widths as width, i (i)}
+          {@const pointermoveHandler = pointermoveX(i)}
+          <th style:--width="{width}px" class:selected={isColSelected(i)}>
+            <div class="header">
+              <button
+                draggable={isColSelected(i)}
+                onclick={() => {
+                  $selected.start = { x: i, y: -1 };
+                  $selected.end = { x: i, y: heights.length - 1 };
+                }}>C{i}</button
+              >
+            </div>
             <button
-              onclick={() => {
-                $selected.start = { x: -1, y: i };
-                $selected.end = { x: widths.length - 1, y: i };
-              }}>R{i}</button
-            >
-          </div>
-          <button
-            onpointerdown={pointerdown(pointermoveHandler)}
-            onpointerup={pointerup(pointermoveHandler)}
-            ondblclick={() => {
-              const newHeight = getMaxCellSize(
-                cells[i],
-                (div) => div.scrollHeight,
-              );
-              if (!Number.isNaN(newHeight)) {
-                heights[i] = newHeight;
-              }
-            }}
-            class="bottom handle"
-            aria-label="Drag handle for row R{i}"
-          ></button>
-        </th>
-        {#each row as cell, j (j)}
-          <Cell
-            {cell}
-            {selected}
-            width={widths[j]}
-            height={heights[i]}
-            row={i}
-            col={j}
-          />
+              onpointerdown={pointerdown(pointermoveHandler)}
+              onpointerup={pointerup(pointermoveHandler)}
+              ondblclick={() => {
+                const newWidth = getMaxCellSize(
+                  cells.map((row) => row[i]),
+                  (div) => div.scrollWidth,
+                );
+                if (!Number.isNaN(newWidth)) {
+                  widths[i] = newWidth;
+                }
+              }}
+              class="right handle"
+              aria-label="Drag handle for column C{i}"
+            ></button>
+          </th>
         {/each}
       </tr>
-    {/each}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {#each cells as row, i (i)}
+        {@const pointermoveHandler = pointermoveY(i)}
+        <tr>
+          <th style:--height="{heights[i]}px" class:selected={isRowSelected(i)}>
+            <div class="header">
+              <button
+                onclick={() => {
+                  $selected.start = { x: -1, y: i };
+                  $selected.end = { x: widths.length - 1, y: i };
+                }}>R{i}</button
+              >
+            </div>
+            <button
+              onpointerdown={pointerdown(pointermoveHandler)}
+              onpointerup={pointerup(pointermoveHandler)}
+              ondblclick={() => {
+                const newHeight = getMaxCellSize(
+                  cells[i],
+                  (div) => div.scrollHeight,
+                );
+                if (!Number.isNaN(newHeight)) {
+                  heights[i] = newHeight;
+                }
+              }}
+              class="bottom handle"
+              aria-label="Drag handle for row R{i}"
+            ></button>
+          </th>
+          {#each row as cell, j (j)}
+            <Cell
+              {cell}
+              {selected}
+              width={widths[j]}
+              height={heights[i]}
+              row={i}
+              col={j}
+            />
+          {/each}
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+  <div class="add columns">
+    <Button
+      style="width: 100%;"
+      onclick={() => {
+        for (let i = 0; i < toAdd; i++) {
+          cells.forEach((row) => {
+            row.push(writable(undefined));
+          });
+          widths.push(56);
+        }
+      }}>Add {toAdd} column{toAdd != 1 ? "s" : ""}</Button
+    >
+  </div>
+  <div class="add rows">
+    <Button
+      onclick={() => {
+        for (let i = 0; i < toAdd; i++) {
+          cells.push(
+            new Array(widths.length).fill().map((_) => writable(undefined)),
+          );
+          heights.push(24);
+        }
+      }}>Add {toAdd} row{toAdd != 1 ? "s" : ""}</Button
+    >
+  </div>
+  <div class="numberinput">
+    <NumericInput
+      style="width: 100%; text-align: center; max-width: 5ch;"
+      bind:value={toAdd}
+      onfocus={(e) => {
+        e.target.select();
+      }}
+      min="0"
+    />
+  </div>
+</div>

@@ -12,6 +12,7 @@
   .scroll {
     overflow: auto;
     padding-bottom: 5px;
+    padding-right: 5px;
     /* Prevents scrolling from triggering pull-down refresh on mobile */
     overscroll-behavior: none;
   }
@@ -85,7 +86,7 @@
 <div class="scroll">
   <Table
     {selected}
-    cells={sheets[currentSheet].cells}
+    bind:cells={sheets[currentSheet].cells}
     bind:widths={sheets[currentSheet].widths}
     bind:heights={sheets[currentSheet].heights}
     bind:table
