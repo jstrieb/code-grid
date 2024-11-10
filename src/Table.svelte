@@ -215,7 +215,7 @@
               draggable={isColSelected(i)}
               onclick={() => {
                 $selected.start = { x: i, y: -1 };
-                $selected.end = { x: i, y: heights.length };
+                $selected.end = { x: i, y: heights.length - 1 };
               }}>C{i}</button
             >
           </div>
@@ -247,7 +247,7 @@
             <button
               onclick={() => {
                 $selected.start = { x: -1, y: i };
-                $selected.end = { x: widths.length, y: i };
+                $selected.end = { x: widths.length - 1, y: i };
               }}>R{i}</button
             >
           </div>
