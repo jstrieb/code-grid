@@ -37,12 +37,14 @@ body {
 
 body {
   padding: 0.5em;
+  /* Fall back on vh units if svh doesn't work (i.e., not on mobile). */
   height: 100vh;
   min-height: 100vh;
   max-height: 100vh;
-  height: 100dvh;
-  min-height: 100dvh;
-  max-height: 100dvh;
+  /* Use svh instead of dvh so it doesn't reflow when dynamic parts move. */
+  height: 100svh;
+  min-height: 100svh;
+  max-height: 100svh;
 }
 
 button {

@@ -13,6 +13,8 @@
     overflow: auto;
     padding-bottom: 5px;
     padding-right: 5px;
+    width: 100%;
+    height: 100%;
     /* Prevents scrolling from triggering pull-down refresh on mobile */
     overscroll-behavior: none;
   }
