@@ -146,7 +146,7 @@
     widths = $bindable(),
     heights = $bindable(),
     table = $bindable(),
-    selected,
+    selected = $bindable(),
   } = $props();
 
   let pointerStart = $state(undefined);
@@ -226,19 +226,11 @@
   }
 
   function isRowSelected(i) {
-    return (
-      $selected.start.x == -1 &&
-      $selected.start.y == $selected.end.y &&
-      $selected.start.y == i
-    );
+    return selected.type == "row" && selected.start == i;
   }
 
   function isColSelected(i) {
-    return (
-      $selected.start.y == -1 &&
-      $selected.start.x == $selected.end.x &&
-      $selected.start.x == i
-    );
+    return selected.type == "col" && selected.start == i;
   }
 </script>
 
@@ -254,8 +246,11 @@
               <button
                 draggable={isColSelected(i)}
                 onclick={() => {
-                  $selected.start = { x: i, y: -1 };
-                  $selected.end = { x: i, y: heights.length - 1 };
+                  selected = {
+                    type: "col",
+                    start: i,
+                    end: i,
+                  };
                 }}>C{i}</button
               >
             </div>
@@ -286,8 +281,11 @@
             <div class="header">
               <button
                 onclick={() => {
-                  $selected.start = { x: -1, y: i };
-                  $selected.end = { x: widths.length - 1, y: i };
+                  selected = {
+                    type: "row",
+                    start: i,
+                    end: i,
+                  };
                 }}>R{i}</button
               >
             </div>
@@ -310,7 +308,7 @@
           {#each row as cell, j (j)}
             <Cell
               {cell}
-              {selected}
+              bind:selected
               width={widths[j]}
               height={heights[i]}
               row={i}

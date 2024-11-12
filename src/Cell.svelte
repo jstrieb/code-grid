@@ -154,11 +154,43 @@
 </style>
 
 <script>
-  const { cell, row, col, selected, width, height } = $props();
-  let top = $derived(Math.min($selected.start?.y, $selected.end?.y)),
-    bottom = $derived(Math.max($selected.start?.y, $selected.end?.y)),
-    left = $derived(Math.min($selected.start?.x, $selected.end?.x)),
-    right = $derived(Math.max($selected.start?.x, $selected.end?.x));
+  let { cell, row, col, selected = $bindable(), width, height } = $props();
+  let top = $derived.by(() => {
+      if (selected.type == "cell") {
+        return Math.min(selected.start.y, selected.end.y);
+      } else if (selected.type == "row") {
+        return Math.min(selected.start, selected.end);
+      } else if (selected.type == "col") {
+        return -Infinity;
+      }
+    }),
+    bottom = $derived.by(() => {
+      if (selected.type == "cell") {
+        return Math.max(selected.start.y, selected.end.y);
+      } else if (selected.type == "row") {
+        return Math.max(selected.start, selected.end);
+      } else if (selected.type == "col") {
+        return Infinity;
+      }
+    }),
+    left = $derived.by(() => {
+      if (selected.type == "cell") {
+        return Math.min(selected.start?.x, selected.end?.x);
+      } else if (selected.type == "col") {
+        return Math.min(selected.start, selected.end);
+      } else if (selected.type == "row") {
+        return -Infinity;
+      }
+    }),
+    right = $derived.by(() => {
+      if (selected.type == "cell") {
+        return Math.max(selected.start?.x, selected.end?.x);
+      } else if (selected.type == "col") {
+        return Math.max(selected.start, selected.end);
+      } else if (selected.type == "row") {
+        return Infinity;
+      }
+    });
   let contained = $derived(
     top <= row && row <= bottom && left <= col && col <= right,
   );
@@ -190,17 +222,24 @@
     if (e.buttons == 0) {
       return;
     }
-    $selected.end = { x: col, y: row };
+    if (selected.type != "cell") {
+      return;
+    }
+    selected.end = { x: col, y: row };
   }}
   onmousedown={(e) => {
-    $selected.start = { x: col, y: row };
-    $selected.end = { x: col, y: row };
+    selected = {
+      type: "cell",
+      start: { x: col, y: row },
+      end: { x: col, y: row },
+    };
   }}
   ondblclick={(e) => {
     editing =
       contained &&
-      $selected.start.x == $selected.end.x &&
-      $selected.start.y == $selected.end.y;
+      selected.type == "cell" &&
+      selected.start.x == selected.end.x &&
+      selected.start.y == selected.end.y;
   }}
 >
   {#if editing}

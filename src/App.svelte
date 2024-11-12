@@ -66,8 +66,7 @@
   ]);
   let currentSheet = $state(0);
 
-  const unselected = { start: {}, end: {} };
-  const selected = writable({ ...unselected });
+  let selected = $state({});
 
   let table = $state();
 </script>
@@ -78,7 +77,7 @@
     if (table.contains(e.target)) {
       return;
     }
-    $selected = { ...unselected };
+    selected = {};
   }}
 />
 
@@ -87,7 +86,7 @@
 </div>
 <div class="scroll">
   <Table
-    {selected}
+    bind:selected
     bind:cells={sheets[currentSheet].cells}
     bind:widths={sheets[currentSheet].widths}
     bind:heights={sheets[currentSheet].heights}
