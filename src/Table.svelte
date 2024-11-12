@@ -48,6 +48,8 @@
     -webkit-user-select: none;
     border: 1px solid var(--fg-color);
     background: var(--header-color);
+    /* Drag header to highlight instead of scrolling */
+    touch-action: none;
     /* Required for draggable handles to be positioned absolutely */
     position: relative;
   }
@@ -85,20 +87,6 @@
 
   th.selected {
     background: var(--selected-color);
-  }
-
-  thead th.selected {
-    box-shadow:
-      inset 0 1px 0 0 var(--fg-color),
-      inset 1px 0 0 0 var(--fg-color),
-      inset -1px 0 0 0 var(--fg-color);
-  }
-
-  tbody th.selected {
-    box-shadow:
-      inset 0 1px 0 0 var(--fg-color),
-      inset 1px 0 0 0 var(--fg-color),
-      inset 0 -1px 0 0 var(--fg-color);
   }
 
   thead th:first-of-type {
@@ -226,11 +214,19 @@
   }
 
   function isRowSelected(i) {
-    return selected.type == "row" && selected.start == i;
+    return (
+      selected.type == "row" &&
+      ((selected.start <= i && i <= selected.end) ||
+        (selected.start >= i && i >= selected.end))
+    );
   }
 
   function isColSelected(i) {
-    return selected.type == "col" && selected.start == i;
+    return (
+      selected.type == "col" &&
+      ((selected.start <= i && i <= selected.end) ||
+        (selected.start >= i && i >= selected.end))
+    );
   }
 </script>
 
@@ -241,11 +237,31 @@
         <th></th>
         {#each widths as width, i (i)}
           {@const pointermoveHandler = pointermoveX(i)}
-          <th style:--width="{width}px" class:selected={isColSelected(i)}>
+          <th
+            style:--width="{width}px"
+            class:selected={isColSelected(i)}
+            style:box-shadow={[
+              ...(isColSelected(i) ? ["inset 0 1px 0 0 var(--fg-color)"] : []),
+              ...(isColSelected(i) && !isColSelected(i - 1)
+                ? ["inset 1px 0 0 0 var(--fg-color)"]
+                : []),
+              ...(isColSelected(i) && !isColSelected(i + 1)
+                ? ["inset -1px 0 0 0 var(--fg-color)"]
+                : []),
+            ].join(", ")}
+          >
             <div class="header">
               <button
-                draggable={isColSelected(i)}
-                onclick={() => {
+                onfocus={() => {
+                  /* TODO */
+                }}
+                onmouseover={(e) => {
+                  if (e.buttons == 0 || selected.type != "col") {
+                    return;
+                  }
+                  selected.end = i;
+                }}
+                onmousedown={() => {
                   selected = {
                     type: "col",
                     start: i,
@@ -273,14 +289,36 @@
         {/each}
       </tr>
     </thead>
+
     <tbody>
       {#each cells as row, i (i)}
         {@const pointermoveHandler = pointermoveY(i)}
         <tr>
-          <th style:--height="{heights[i]}px" class:selected={isRowSelected(i)}>
+          <th
+            style:--height="{heights[i]}px"
+            class:selected={isRowSelected(i)}
+            style:box-shadow={[
+              ...(isRowSelected(i) ? ["inset 1px 0 0 0 var(--fg-color)"] : []),
+              ...(isRowSelected(i) && !isRowSelected(i - 1)
+                ? ["inset 0 1px 0 0 var(--fg-color)"]
+                : []),
+              ...(isRowSelected(i) && !isRowSelected(i + 1)
+                ? ["inset 0 -1px 0 0 var(--fg-color)"]
+                : []),
+            ].join(", ")}
+          >
             <div class="header">
               <button
-                onclick={() => {
+                onfocus={() => {
+                  /* TODO */
+                }}
+                onmouseover={(e) => {
+                  if (e.buttons == 0 || selected.type != "row") {
+                    return;
+                  }
+                  selected.end = i;
+                }}
+                onmousedown={() => {
                   selected = {
                     type: "row",
                     start: i,
@@ -305,6 +343,7 @@
               aria-label="Drag handle for row R{i}"
             ></button>
           </th>
+
           {#each row as cell, j (j)}
             <Cell
               {cell}
@@ -319,6 +358,7 @@
       {/each}
     </tbody>
   </table>
+
   <div class="add columns">
     <Button
       style="width: 100%;"
@@ -342,6 +382,7 @@
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} column{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
   </div>
+
   <div class="add rows">
     <Button
       disabled={!Number.isInteger(toAdd) || toAdd == 0}
@@ -362,6 +403,7 @@
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} row{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
   </div>
+
   <div class="numberinput">
     <NumericInput
       style="width: 100%; text-align: center; max-width: 5ch;"
