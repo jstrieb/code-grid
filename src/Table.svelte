@@ -228,6 +228,23 @@
         (selected.start >= i && i >= selected.end))
     );
   }
+
+  function autoResizeCol(i) {
+    const newWidth = getMaxCellSize(
+      cells.map((row) => row[i]),
+      (div) => div.scrollWidth,
+    );
+    if (!Number.isNaN(newWidth)) {
+      widths[i] = newWidth;
+    }
+  }
+
+  function autoResizeRow(i) {
+    const newHeight = getMaxCellSize(cells[i], (div) => div.scrollHeight);
+    if (!Number.isNaN(newHeight)) {
+      heights[i] = newHeight;
+    }
+  }
 </script>
 
 <div class="container">
@@ -274,12 +291,16 @@
               onpointerdown={pointerdown(pointermoveHandler)}
               onpointerup={pointerup(pointermoveHandler)}
               ondblclick={() => {
-                const newWidth = getMaxCellSize(
-                  cells.map((row) => row[i]),
-                  (div) => div.scrollWidth,
-                );
-                if (!Number.isNaN(newWidth)) {
-                  widths[i] = newWidth;
+                if (
+                  selected.type == "col" &&
+                  selected.start <= i &&
+                  i <= selected.end
+                ) {
+                  for (let j = selected.start; j <= selected.end; j++) {
+                    autoResizeCol(j);
+                  }
+                } else {
+                  autoResizeCol(i);
                 }
               }}
               class="right handle"
@@ -331,12 +352,16 @@
               onpointerdown={pointerdown(pointermoveHandler)}
               onpointerup={pointerup(pointermoveHandler)}
               ondblclick={() => {
-                const newHeight = getMaxCellSize(
-                  cells[i],
-                  (div) => div.scrollHeight,
-                );
-                if (!Number.isNaN(newHeight)) {
-                  heights[i] = newHeight;
+                if (
+                  selected.type == "row" &&
+                  selected.start <= i &&
+                  i <= selected.end
+                ) {
+                  for (let j = selected.start; j <= selected.end; j++) {
+                    autoResizeRow(j);
+                  }
+                } else {
+                  autoResizeRow(i);
                 }
               }}
               class="bottom handle"
