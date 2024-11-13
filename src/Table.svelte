@@ -143,7 +143,13 @@
   function pointermoveX(i) {
     return (e) => {
       const dx = e.clientX - pointerStart.x;
-      widths[i] += dx;
+      if (selected.type == "col" && selected.start <= i && i <= selected.end) {
+        for (let j = selected.start; j <= selected.end; j++) {
+          widths[j] += dx;
+        }
+      } else {
+        widths[i] += dx;
+      }
       pointerStart.x = e.clientX;
     };
   }
@@ -151,7 +157,13 @@
   function pointermoveY(i) {
     return (e) => {
       const dy = e.clientY - pointerStart.y;
-      heights[i] += dy;
+      if (selected.type == "row" && selected.start <= i && i <= selected.end) {
+        for (let j = selected.start; j <= selected.end; j++) {
+          heights[j] += dy;
+        }
+      } else {
+        heights[i] += dy;
+      }
       pointerStart.y = e.clientY;
     };
   }
