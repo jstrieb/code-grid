@@ -127,12 +127,10 @@
   import Cell from "./Cell.svelte";
   import NumericInput from "./NumericInput.svelte";
 
-  import { get, writable } from "svelte/store";
+  import { get } from "svelte/store";
 
   let {
-    cells = $bindable(),
-    widths = $bindable(),
-    heights = $bindable(),
+    sheet = $bindable(),
     table = $bindable(),
     selected = $bindable(),
   } = $props();
@@ -145,10 +143,10 @@
       const dx = e.clientX - pointerStart.x;
       if (selected.type == "col" && selected.start <= i && i <= selected.end) {
         for (let j = selected.start; j <= selected.end; j++) {
-          widths[j] += dx;
+          sheet.widths[j] += dx;
         }
       } else {
-        widths[i] += dx;
+        sheet.widths[i] += dx;
       }
       pointerStart.x = e.clientX;
     };
@@ -159,10 +157,10 @@
       const dy = e.clientY - pointerStart.y;
       if (selected.type == "row" && selected.start <= i && i <= selected.end) {
         for (let j = selected.start; j <= selected.end; j++) {
-          heights[j] += dy;
+          sheet.heights[j] += dy;
         }
       } else {
-        heights[i] += dy;
+        sheet.heights[i] += dy;
       }
       pointerStart.y = e.clientY;
     };
@@ -194,8 +192,8 @@
     // why we create new <div>s instead of measuring existing ones.
     return (
       filteredCells
-        .map((cellStore) => {
-          const cell = get(cellStore);
+        .map((cell) => get(cell.value))
+        .map((cell) => {
           if (cell instanceof Element) {
             return measureResult(cell) ?? 0;
           } else if (cell != null) {
@@ -243,18 +241,18 @@
 
   function autoResizeCol(i) {
     const newWidth = getMaxCellSize(
-      cells.map((row) => row[i]),
+      sheet.cells.map((row) => row[i]),
       (div) => div.scrollWidth,
     );
     if (!Number.isNaN(newWidth)) {
-      widths[i] = newWidth;
+      sheet.widths[i] = newWidth;
     }
   }
 
   function autoResizeRow(i) {
-    const newHeight = getMaxCellSize(cells[i], (div) => div.scrollHeight);
+    const newHeight = getMaxCellSize(sheet.cells[i], (div) => div.scrollHeight);
     if (!Number.isNaN(newHeight)) {
-      heights[i] = newHeight;
+      sheet.heights[i] = newHeight;
     }
   }
 </script>
@@ -264,7 +262,7 @@
     <thead>
       <tr>
         <th></th>
-        {#each widths as width, i (i)}
+        {#each sheet.widths as width, i (i)}
           {@const pointermoveHandler = pointermoveX(i)}
           <th
             style:--width="{width}px"
@@ -327,11 +325,11 @@
     </thead>
 
     <tbody>
-      {#each cells as row, i (i)}
+      {#each sheet.cells as row, i (i)}
         {@const pointermoveHandler = pointermoveY(i)}
         <tr>
           <th
-            style:--height="{heights[i]}px"
+            style:--height="{sheet.heights[i]}px"
             class:selected={isRowSelected(i)}
             style:box-shadow={[
               ...(isRowSelected(i) ? ["inset 1px 0 0 0 var(--fg-color)"] : []),
@@ -389,10 +387,10 @@
 
           {#each row as cell, j (j)}
             <Cell
-              {cell}
+              cell={cell.value}
               bind:selected
-              width={widths[j]}
-              height={heights[i]}
+              width={sheet.widths[j]}
+              height={sheet.heights[i]}
               row={i}
               col={j}
             />
@@ -408,18 +406,9 @@
       disabled={!Number.isInteger(toAdd) || toAdd == 0}
       onclick={() => {
         if (toAdd > 0) {
-          for (let i = 0; i < toAdd; i++) {
-            cells.forEach((row) => {
-              row.push(writable(undefined));
-            });
-            widths.push(56);
-          }
+          sheet.addCols(toAdd);
         } else if (toAdd < 0) {
-          // Note that toAdd is negative in the calculations below
-          cells.forEach((row) => {
-            row.splice(row.length + toAdd, -toAdd);
-          });
-          widths.splice(widths.length + toAdd, -toAdd);
+          sheet.deleteCols(-toAdd);
         }
       }}
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} column{#if Math.abs(toAdd) != 1}s{/if}</Button
@@ -431,16 +420,9 @@
       disabled={!Number.isInteger(toAdd) || toAdd == 0}
       onclick={() => {
         if (toAdd > 0) {
-          for (let i = 0; i < toAdd; i++) {
-            cells.push(
-              new Array(widths.length).fill().map((_) => writable(undefined)),
-            );
-            heights.push(24);
-          }
+          sheet.addRows(toAdd);
         } else if (toAdd < 0) {
-          // Note that toAdd is negative in the calculations below
-          cells.splice(cells.length + toAdd, -toAdd);
-          heights.splice(heights.length + toAdd, -toAdd);
+          sheet.deleteRows(-toAdd);
         }
       }}
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} row{#if Math.abs(toAdd) != 1}s{/if}</Button

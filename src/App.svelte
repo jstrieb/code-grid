@@ -29,40 +29,18 @@
 <script>
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
-  import { writable } from "svelte/store";
 
-  function newArray(length, f = (x) => x) {
-    return new Array(length).fill(undefined).map(f);
-  }
-
-  const INIT_ROWS = 20,
-    INIT_COLS = 20;
+  import { Sheet } from "./classes.svelte.js";
 
   let sheets = $state([
-    {
-      name: "Sheet 1",
-      cells: newArray(INIT_ROWS, (_, i) =>
-        newArray(INIT_COLS, (_, j) => writable(`${i},${j}`)),
-      ),
-      widths: newArray(INIT_COLS, () => 56),
-      heights: newArray(INIT_ROWS, () => 24),
-    },
-    {
-      name: "Other sheet",
-      cells: newArray(30, (_, i) =>
-        newArray(10, (_, j) => writable(`${i},${j}`)),
-      ),
-      widths: newArray(10, () => 56),
-      heights: newArray(30, () => 24),
-    },
-    {
-      name: "Sheet three with a very long name",
-      cells: newArray(300, (_, i) =>
-        newArray(100, (_, j) => writable(`${i},${j}`)),
-      ),
-      widths: newArray(100, () => 32),
-      heights: newArray(300, () => 32),
-    },
+    new Sheet("Sheet 1", 18, 18, (i, j) => `${i},${j}`),
+    new Sheet("Other Sheet", 35, 10, (i, j) => `${i},${j}`),
+    new Sheet(
+      "Sheet three with a very long name",
+      100,
+      300,
+      (i, j) => `${i},${j}`,
+    ),
   ]);
   let currentSheet = $state(0);
 
@@ -85,11 +63,5 @@
   <Tabs tabs={sheets.map((s) => s.name)} bind:value={currentSheet} />
 </div>
 <div class="scroll">
-  <Table
-    bind:selected
-    bind:cells={sheets[currentSheet].cells}
-    bind:widths={sheets[currentSheet].widths}
-    bind:heights={sheets[currentSheet].heights}
-    bind:table
-  />
+  <Table bind:selected bind:sheet={sheets[currentSheet]} bind:table />
 </div>
