@@ -46,106 +46,90 @@
   }
 
   /* No scrollbar for text area */
-
   textarea {
     overflow: scroll;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-
   textarea::-webkit-scrollbar {
     width: 0;
     height: 0;
   }
 
   /* 
-    All these combinations are required to prevent the above classes from
-    overwriting each other when multiple are true.
+    All these combinations are required to prevent the classes from overwriting
+    each other when multiple are set.
 
-    Including the above four cases and the case where none are selected at all,
-    there should be 2^4 == 16 total cases covered.
+    Including the four basic cases, and the case where none are selected at all,
+    there should be 2^4 == 16 total cases covered (the size of the power set of
+    the four possible classes).
   */
-
   .left {
     box-shadow: inset 1px 0 0 0 var(--fg-color);
   }
-
   .right {
     box-shadow: inset -1px 0 0 0 var(--fg-color);
   }
-
   .top {
     box-shadow: inset 0 1px 0 0 var(--fg-color);
   }
-
   .bottom {
     box-shadow: inset 0 -1px 0 0 var(--fg-color);
   }
-
   .top.left {
     box-shadow:
       inset 0 1px 0 0 var(--fg-color),
       inset 1px 0 0 0 var(--fg-color);
   }
-
   .top.right {
     box-shadow:
       inset 0 1px 0 0 var(--fg-color),
       inset -1px 0 0 0 var(--fg-color);
   }
-
   .bottom.left {
     box-shadow:
       inset 0 -1px 0 0 var(--fg-color),
       inset 1px 0 0 0 var(--fg-color);
   }
-
   .bottom.right {
     box-shadow:
       inset 0 -1px 0 0 var(--fg-color),
       inset -1px 0 0 0 var(--fg-color);
   }
-
   .left.right {
     box-shadow:
       inset 1px 0 0 0 var(--fg-color),
       inset -1px 0 0 0 var(--fg-color);
   }
-
   .bottom.top {
     box-shadow:
       inset 0 1px 0 0 var(--fg-color),
       inset 0 -1px 0 0 var(--fg-color);
   }
-
   .top.left.bottom {
     box-shadow:
       inset 0 1px 0 0 var(--fg-color),
       inset 1px 0 0 0 var(--fg-color),
       inset 0 -1px 0 0 var(--fg-color);
   }
-
   .top.right.bottom {
     box-shadow:
       inset 0 1px 0 0 var(--fg-color),
       inset -1px 0 0 0 var(--fg-color),
       inset 0 -1px 0 0 var(--fg-color);
   }
-
   .left.bottom.right {
     box-shadow:
       inset 0 -1px 0 0 var(--fg-color),
       inset 1px 0 0 0 var(--fg-color),
       inset -1px 0 0 0 var(--fg-color);
   }
-
   .left.top.right {
     box-shadow:
       inset 0 1px 0 0 var(--fg-color),
       inset 1px 0 0 0 var(--fg-color),
       inset -1px 0 0 0 var(--fg-color);
   }
-
   .top.left.bottom.right {
     box-shadow:
       inset -1px -1px 0 0 var(--fg-color),
