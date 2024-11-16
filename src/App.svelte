@@ -43,9 +43,7 @@
     ),
   ]);
   let currentSheet = $state(0);
-
   let selected = $state({});
-
   let table = $state();
 </script>
 

@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { writable, get } from "svelte/store";
 
 const DEFAULT_WIDTH = 56,
   DEFAULT_HEIGHT = 24;
@@ -61,5 +61,49 @@ export class Cell {
 
   constructor(value) {
     this.value = writable(value);
+  }
+
+  get() {
+    return get(this.value);
+  }
+
+  naturalSize() {
+    // TODO: Make this function faster.
+    //       - svelte/store/get is slow
+    //       - Writing DOM elements to the body and measuring is slow
+    //
+    // Note that measuring actual internal parts of cells doesn't work reliably
+    // because cell inner elements all have their width explicitly set. Changing
+    // the width and re-measuring can result in inconsistent results. That is
+    // why we create new <div>s instead of measuring existing ones.
+    const cell = this.get();
+    let width = 5,
+      height = 5;
+    if (cell instanceof Element) {
+      width = cell.scrollWidth;
+      height = cell.scrollHeight;
+    } else if (cell != null) {
+      const div = Object.assign(document.createElement("div"), {
+        // Match padding of cell in Cell.svelte
+        style: `padding: 0.1em 0.2em; 
+                z-index: -1; 
+                min-width: max-content;
+                width: max-content;
+                max-width: max-content;
+                min-height: max-content;
+                height: max-content;
+                max-height: max-content;`,
+        innerText: cell.toString(),
+      });
+      document.body.append(div);
+      width = div.scrollWidth;
+      height = div.scrollHeight;
+      div.remove();
+    }
+    // Add 5 since the exact value still sometimes overflows (due to padding?)
+    return {
+      width: (width ?? 5) + 5,
+      height: (height ?? 5) + 5,
+    };
   }
 }

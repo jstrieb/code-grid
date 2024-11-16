@@ -127,8 +127,6 @@
   import Cell from "./Cell.svelte";
   import NumericInput from "./NumericInput.svelte";
 
-  import { get } from "svelte/store";
-
   let {
     sheet = $bindable(),
     table = $bindable(),
@@ -141,8 +139,10 @@
   function pointermoveX(i) {
     return (e) => {
       const dx = e.clientX - pointerStart.x;
-      if (selected.type == "col" && selected.start <= i && i <= selected.end) {
-        for (let j = selected.start; j <= selected.end; j++) {
+      const start = Math.min(selected.start, selected.end),
+        end = Math.max(selected.start, selected.end);
+      if (selected.type == "col" && start <= i && i <= end) {
+        for (let j = start; j <= end; j++) {
           sheet.widths[j] += dx;
         }
       } else {
@@ -155,8 +155,10 @@
   function pointermoveY(i) {
     return (e) => {
       const dy = e.clientY - pointerStart.y;
-      if (selected.type == "row" && selected.start <= i && i <= selected.end) {
-        for (let j = selected.start; j <= selected.end; j++) {
+      const start = Math.min(selected.start, selected.end),
+        end = Math.max(selected.start, selected.end);
+      if (selected.type == "row" && start <= i && i <= end) {
+        for (let j = start; j <= end; j++) {
           sheet.heights[j] += dy;
         }
       } else {
@@ -181,48 +183,6 @@
     };
   }
 
-  function getMaxCellSize(filteredCells, measureResult) {
-    // TODO: Make this function faster.
-    //       - svelte/store/get is slow
-    //       - Writing DOM elements to the body and measuring is slow
-    //
-    // Note that measuring actual internal parts of cells doesn't work reliably
-    // because cell inner elements all have their width explicitly set. Changing
-    // the width and re-measuring can result in inconsistent results. That is
-    // why we create new <div>s instead of measuring existing ones.
-    return (
-      filteredCells
-        .map((cell) => get(cell.value))
-        .map((cell) => {
-          if (cell instanceof Element) {
-            return measureResult(cell) ?? 0;
-          } else if (cell != null) {
-            const div = Object.assign(document.createElement("div"), {
-              // Match padding of cell in Cell.svelte
-              style: `padding: 0.1em 0.2em; 
-                      z-index: -1; 
-                      min-width: max-content;
-                      width: max-content;
-                      max-width: max-content;
-                      min-height: max-content;
-                      height: max-content;
-                      max-height: max-content;`,
-              innerText: cell.toString(),
-            });
-            document.body.append(div);
-            const result = measureResult(div) ?? 0;
-            div.remove();
-            return result;
-          } else {
-            return 5;
-          }
-        })
-        .reduce((a, x) => Math.max(a, x), 0) +
-      // Sometimes the calculated value is just shy of enough so we add more
-      5
-    );
-  }
-
   function isRowSelected(i) {
     return (
       selected.type == "row" &&
@@ -240,9 +200,10 @@
   }
 
   function autoResizeCol(i) {
-    const newWidth = getMaxCellSize(
-      sheet.cells.map((row) => row[i]),
-      (div) => div.scrollWidth,
+    const newWidth = Math.max(
+      ...sheet.cells
+        .map((row) => row[i])
+        .map((cell) => cell.naturalSize().width),
     );
     if (!Number.isNaN(newWidth)) {
       sheet.widths[i] = newWidth;
@@ -250,7 +211,9 @@
   }
 
   function autoResizeRow(i) {
-    const newHeight = getMaxCellSize(sheet.cells[i], (div) => div.scrollHeight);
+    const newHeight = Math.max(
+      ...sheet.cells[i].map((cell) => cell.naturalSize().height),
+    );
     if (!Number.isNaN(newHeight)) {
       sheet.heights[i] = newHeight;
     }
@@ -304,12 +267,10 @@
               onpointerdown={pointerdown(pointermoveHandler)}
               onpointerup={pointerup(pointermoveHandler)}
               ondblclick={() => {
-                if (
-                  selected.type == "col" &&
-                  selected.start <= i &&
-                  i <= selected.end
-                ) {
-                  for (let j = selected.start; j <= selected.end; j++) {
+                const start = Math.min(selected.start, selected.end),
+                  end = Math.max(selected.start, selected.end);
+                if (selected.type == "col" && start <= i && i <= end) {
+                  for (let j = start; j <= end; j++) {
                     autoResizeCol(j);
                   }
                 } else {
@@ -368,12 +329,10 @@
               onpointerdown={pointerdown(pointermoveHandler)}
               onpointerup={pointerup(pointermoveHandler)}
               ondblclick={() => {
-                if (
-                  selected.type == "row" &&
-                  selected.start <= i &&
-                  i <= selected.end
-                ) {
-                  for (let j = selected.start; j <= selected.end; j++) {
+                const start = Math.min(selected.start, selected.end),
+                  end = Math.max(selected.start, selected.end);
+                if (selected.type == "row" && start <= i && i <= end) {
+                  for (let j = start; j <= end; j++) {
                     autoResizeRow(j);
                   }
                 } else {
