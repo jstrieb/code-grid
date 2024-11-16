@@ -290,12 +290,12 @@
                   }
                   selected.end = i;
                 }}
-                onmousedown={() => {
-                  selected = {
-                    type: "col",
-                    start: i,
-                    end: i,
-                  };
+                onmousedown={(e) => {
+                  selected.type = "col";
+                  selected.end = i;
+                  if (!e.shiftKey) {
+                    selected.start = i;
+                  }
                 }}>C{i}</button
               >
             </div>
@@ -351,12 +351,12 @@
                   }
                   selected.end = i;
                 }}
-                onmousedown={() => {
-                  selected = {
-                    type: "row",
-                    start: i,
-                    end: i,
-                  };
+                onmousedown={(e) => {
+                  selected.type = "row";
+                  selected.end = i;
+                  if (!e.shiftKey) {
+                    selected.start = i;
+                  }
                 }}>R{i}</button
               >
             </div>

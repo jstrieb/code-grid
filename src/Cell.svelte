@@ -228,11 +228,11 @@
     selected.end = { x: col, y: row };
   }}
   onmousedown={(e) => {
-    selected = {
-      type: "cell",
-      start: { x: col, y: row },
-      end: { x: col, y: row },
-    };
+    selected.type = "cell";
+    selected.end = { x: col, y: row };
+    if (!e.shiftKey) {
+      selected.start = { x: col, y: row };
+    }
   }}
   ondblclick={(e) => {
     editing =
