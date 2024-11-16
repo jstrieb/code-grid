@@ -219,7 +219,7 @@
     /* TODO */
   }}
   onmouseover={(e) => {
-    if (e.buttons == 0) {
+    if (e.buttons != 1) {
       return;
     }
     if (selected.type == "cell") {
@@ -231,6 +231,9 @@
     }
   }}
   onmousedown={(e) => {
+    if (e.buttons != 1) {
+      return;
+    }
     selected.type = "cell";
     selected.end = { x: col, y: row };
     if (!e.shiftKey) {

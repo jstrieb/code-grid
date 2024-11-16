@@ -285,12 +285,15 @@
                   /* TODO */
                 }}
                 onmouseover={(e) => {
-                  if (e.buttons == 0 || selected.type != "col") {
+                  if (e.buttons != 1 || selected.type != "col") {
                     return;
                   }
                   selected.end = i;
                 }}
                 onmousedown={(e) => {
+                  if (e.buttons != 1) {
+                    return;
+                  }
                   selected.type = "col";
                   selected.end = i;
                   if (!e.shiftKey) {
@@ -346,12 +349,15 @@
                   /* TODO */
                 }}
                 onmouseover={(e) => {
-                  if (e.buttons == 0 || selected.type != "row") {
+                  if (e.buttons != 1 || selected.type != "row") {
                     return;
                   }
                   selected.end = i;
                 }}
                 onmousedown={(e) => {
+                  if (e.buttons != 1) {
+                    return;
+                  }
                   selected.type = "row";
                   selected.end = i;
                   if (!e.shiftKey) {
