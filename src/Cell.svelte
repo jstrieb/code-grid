@@ -222,10 +222,13 @@
     if (e.buttons == 0) {
       return;
     }
-    if (selected.type != "cell") {
-      return;
+    if (selected.type == "cell") {
+      selected.end = { x: col, y: row };
+    } else if (selected.type == "row") {
+      selected.end = row;
+    } else if (selected.type == "col") {
+      selected.end = col;
     }
-    selected.end = { x: col, y: row };
   }}
   onmousedown={(e) => {
     selected.type = "cell";
