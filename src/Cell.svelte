@@ -141,36 +141,36 @@
   let { cell, row, col, selected = $bindable(), width, height } = $props();
   let top = $derived.by(() => {
       if (selected.type == "cell") {
-        return Math.min(selected.start.y, selected.end.y);
+        return selected.min.y;
       } else if (selected.type == "row") {
-        return Math.min(selected.start, selected.end);
+        return selected.min;
       } else if (selected.type == "col") {
         return -Infinity;
       }
     }),
     bottom = $derived.by(() => {
       if (selected.type == "cell") {
-        return Math.max(selected.start.y, selected.end.y);
+        return selected.max.y;
       } else if (selected.type == "row") {
-        return Math.max(selected.start, selected.end);
+        return selected.max;
       } else if (selected.type == "col") {
         return Infinity;
       }
     }),
     left = $derived.by(() => {
       if (selected.type == "cell") {
-        return Math.min(selected.start?.x, selected.end?.x);
+        return selected.min.x;
       } else if (selected.type == "col") {
-        return Math.min(selected.start, selected.end);
+        return selected.min;
       } else if (selected.type == "row") {
         return -Infinity;
       }
     }),
     right = $derived.by(() => {
       if (selected.type == "cell") {
-        return Math.max(selected.start?.x, selected.end?.x);
+        return selected.max.x;
       } else if (selected.type == "col") {
-        return Math.max(selected.start, selected.end);
+        return selected.max;
       } else if (selected.type == "row") {
         return Infinity;
       }

@@ -107,3 +107,39 @@ export class Cell {
     };
   }
 }
+
+export class Selection {
+  type = $state();
+  start = $state();
+  end = $state();
+
+  get min() {
+    switch (this.type) {
+      case "cell":
+        return {
+          x: Math.min(this.start.x, this.end.x),
+          y: Math.min(this.start.y, this.end.y),
+        };
+      case "row":
+      case "col":
+        return Math.min(this.start, this.end);
+    }
+  }
+
+  get max() {
+    switch (this.type) {
+      case "cell":
+        return {
+          x: Math.max(this.start.x, this.end.x),
+          y: Math.max(this.start.y, this.end.y),
+        };
+      case "row":
+      case "col":
+        return Math.max(this.start, this.end);
+    }
+  }
+
+  contains(i) {
+    return this.min <= i && i <= this.max;
+  }
+}

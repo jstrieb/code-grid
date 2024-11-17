@@ -139,10 +139,8 @@
   function pointermoveX(i) {
     return (e) => {
       const dx = e.clientX - pointerStart.x;
-      const start = Math.min(selected.start, selected.end),
-        end = Math.max(selected.start, selected.end);
-      if (selected.type == "col" && start <= i && i <= end) {
-        for (let j = start; j <= end; j++) {
+      if (selected.type == "col" && selected.contains(i)) {
+        for (let j = selected.min; j <= selected.max; j++) {
           sheet.widths[j] += dx;
         }
       } else {
@@ -155,10 +153,8 @@
   function pointermoveY(i) {
     return (e) => {
       const dy = e.clientY - pointerStart.y;
-      const start = Math.min(selected.start, selected.end),
-        end = Math.max(selected.start, selected.end);
-      if (selected.type == "row" && start <= i && i <= end) {
-        for (let j = start; j <= end; j++) {
+      if (selected.type == "row" && selected.contains(i)) {
+        for (let j = selected.min; j <= selected.max; j++) {
           sheet.heights[j] += dy;
         }
       } else {
@@ -184,19 +180,11 @@
   }
 
   function isRowSelected(i) {
-    return (
-      selected.type == "row" &&
-      ((selected.start <= i && i <= selected.end) ||
-        (selected.start >= i && i >= selected.end))
-    );
+    return selected.type == "row" && selected.contains(i);
   }
 
   function isColSelected(i) {
-    return (
-      selected.type == "col" &&
-      ((selected.start <= i && i <= selected.end) ||
-        (selected.start >= i && i >= selected.end))
-    );
+    return selected.type == "col" && selected.contains(i);
   }
 
   function autoResizeCol(i) {
@@ -267,10 +255,8 @@
               onpointerdown={pointerdown(pointermoveHandler)}
               onpointerup={pointerup(pointermoveHandler)}
               ondblclick={() => {
-                const start = Math.min(selected.start, selected.end),
-                  end = Math.max(selected.start, selected.end);
-                if (selected.type == "col" && start <= i && i <= end) {
-                  for (let j = start; j <= end; j++) {
+                if (selected.type == "col" && selected.contains(i)) {
+                  for (let j = selected.min; j <= selected.max; j++) {
                     autoResizeCol(j);
                   }
                 } else {
@@ -329,10 +315,8 @@
               onpointerdown={pointerdown(pointermoveHandler)}
               onpointerup={pointerup(pointermoveHandler)}
               ondblclick={() => {
-                const start = Math.min(selected.start, selected.end),
-                  end = Math.max(selected.start, selected.end);
-                if (selected.type == "row" && start <= i && i <= end) {
-                  for (let j = start; j <= end; j++) {
+                if (selected.type == "row" && selected.contains(i)) {
+                  for (let j = selected.min; j <= selected.max; j++) {
                     autoResizeRow(j);
                   }
                 } else {

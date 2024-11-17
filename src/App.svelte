@@ -30,7 +30,7 @@
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
 
-  import { Sheet } from "./classes.svelte.js";
+  import { Sheet, Selection } from "./classes.svelte.js";
 
   let sheets = $state([
     new Sheet("Sheet 1", 18, 18, (i, j) => `${i},${j}`),
@@ -43,7 +43,7 @@
     ),
   ]);
   let currentSheet = $state(0);
-  let selected = $state({});
+  let selected = $state(new Selection());
   let table = $state();
 </script>
 
@@ -53,7 +53,7 @@
     if (table.contains(e.target)) {
       return;
     }
-    selected = {};
+    selected = new Selection();
   }}
 />
 
