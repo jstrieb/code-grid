@@ -138,7 +138,16 @@
 </style>
 
 <script>
-  let { cell, row, col, selected = $bindable(), width, height } = $props();
+  let {
+    cell,
+    row,
+    col,
+    width,
+    height,
+    sheet,
+    selected = $bindable(),
+    td = $bindable(),
+  } = $props();
   let top = $derived.by(() => {
       if (selected.type == "cell") {
         return selected.min.y;
@@ -192,6 +201,7 @@
 </script>
 
 <td
+  bind:this={td}
   style:--width="{width}px"
   style:--height="{height}px"
   class:left={contained && left == col}
@@ -213,6 +223,24 @@
     } else if (selected.type == "col") {
       selected.end = col;
     }
+
+    // Scroll if highlighting at the edge of the screen
+    sheet.cells[row]?.[col - 1]?.td?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
+    sheet.cells[row]?.[col + 1]?.td?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
+    sheet.cells[row - 1]?.[col]?.td?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
+    sheet.cells[row + 1]?.[col]?.td?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
   }}
   onmousedown={(e) => {
     if (e.buttons != 1) {

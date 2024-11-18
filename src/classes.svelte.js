@@ -84,6 +84,7 @@ export class Sheet {
 
 export class Cell {
   value = $state();
+  td = $state();
 
   constructor(value) {
     this.value = writable(value);

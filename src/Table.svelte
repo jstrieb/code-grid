@@ -315,11 +315,13 @@
           {#each row as cell, j (j)}
             <Cell
               cell={cell.value}
-              bind:selected
               width={sheet.widths[j]}
               height={sheet.heights[i]}
               row={i}
               col={j}
+              {sheet}
+              bind:td={cell.td}
+              bind:selected
             />
           {/each}
         </tr>
