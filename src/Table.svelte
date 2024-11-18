@@ -179,32 +179,32 @@
     };
   }
 
-  function isRowSelected(i) {
-    return selected.type == "row" && selected.contains(i);
-  }
-
-  function isColSelected(i) {
-    return selected.type == "col" && selected.contains(i);
-  }
-
-  function autoResizeCol(i) {
-    const newWidth = Math.max(
-      ...sheet.cells
-        .map((row) => row[i])
-        .map((cell) => cell.naturalSize().width),
-    );
-    if (!Number.isNaN(newWidth)) {
-      sheet.widths[i] = newWidth;
+  function colBoxShadow(i) {
+    if (!selected.col(i)) {
+      return;
     }
+    const result = ["inset 0 1px 0 0 var(--fg-color)"];
+    if (!selected.col(i - 1)) {
+      result.push("inset 1px 0 0 0 var(--fg-color)");
+    }
+    if (!selected.col(i + 1)) {
+      result.push("inset -1px 0 0 0 var(--fg-color)");
+    }
+    return result.join(", ");
   }
 
-  function autoResizeRow(i) {
-    const newHeight = Math.max(
-      ...sheet.cells[i].map((cell) => cell.naturalSize().height),
-    );
-    if (!Number.isNaN(newHeight)) {
-      sheet.heights[i] = newHeight;
+  function rowBoxShadow(i) {
+    if (!selected.row(i)) {
+      return;
     }
+    const result = ["inset 1px 0 0 0 var(--fg-color)"];
+    if (!selected.row(i - 1)) {
+      result.push("inset 0 1px 0 0 var(--fg-color)");
+    }
+    if (!selected.row(i + 1)) {
+      result.push("inset 0 -1px 0 0 var(--fg-color)");
+    }
+    return result.join(", ");
   }
 </script>
 
@@ -217,16 +217,8 @@
           {@const pointermoveHandler = pointermoveX(i)}
           <th
             style:--width="{width}px"
-            class:selected={isColSelected(i)}
-            style:box-shadow={[
-              ...(isColSelected(i) ? ["inset 0 1px 0 0 var(--fg-color)"] : []),
-              ...(isColSelected(i) && !isColSelected(i - 1)
-                ? ["inset 1px 0 0 0 var(--fg-color)"]
-                : []),
-              ...(isColSelected(i) && !isColSelected(i + 1)
-                ? ["inset -1px 0 0 0 var(--fg-color)"]
-                : []),
-            ].join(", ")}
+            class:selected={selected.col(i)}
+            style:box-shadow={colBoxShadow(i)}
           >
             <div class="header">
               <button
@@ -255,12 +247,12 @@
               onpointerdown={pointerdown(pointermoveHandler)}
               onpointerup={pointerup(pointermoveHandler)}
               ondblclick={() => {
-                if (selected.type == "col" && selected.contains(i)) {
+                if (selected.col(i)) {
                   for (let j = selected.min; j <= selected.max; j++) {
-                    autoResizeCol(j);
+                    sheet.autoResizeCol(j);
                   }
                 } else {
-                  autoResizeCol(i);
+                  sheet.autoResizeCol(i);
                 }
               }}
               class="right handle"
@@ -277,16 +269,8 @@
         <tr>
           <th
             style:--height="{sheet.heights[i]}px"
-            class:selected={isRowSelected(i)}
-            style:box-shadow={[
-              ...(isRowSelected(i) ? ["inset 1px 0 0 0 var(--fg-color)"] : []),
-              ...(isRowSelected(i) && !isRowSelected(i - 1)
-                ? ["inset 0 1px 0 0 var(--fg-color)"]
-                : []),
-              ...(isRowSelected(i) && !isRowSelected(i + 1)
-                ? ["inset 0 -1px 0 0 var(--fg-color)"]
-                : []),
-            ].join(", ")}
+            class:selected={selected.row(i)}
+            style:box-shadow={rowBoxShadow(i)}
           >
             <div class="header">
               <button
@@ -315,12 +299,12 @@
               onpointerdown={pointerdown(pointermoveHandler)}
               onpointerup={pointerup(pointermoveHandler)}
               ondblclick={() => {
-                if (selected.type == "row" && selected.contains(i)) {
+                if (selected.row(i)) {
                   for (let j = selected.min; j <= selected.max; j++) {
-                    autoResizeRow(j);
+                    sheet.autoResizeRow(j);
                   }
                 } else {
-                  autoResizeRow(i);
+                  sheet.autoResizeRow(i);
                 }
               }}
               class="bottom handle"
@@ -347,13 +331,7 @@
     <Button
       style="width: 100%;"
       disabled={!Number.isInteger(toAdd) || toAdd == 0}
-      onclick={() => {
-        if (toAdd > 0) {
-          sheet.addCols(toAdd);
-        } else if (toAdd < 0) {
-          sheet.deleteCols(-toAdd);
-        }
-      }}
+      onclick={() => sheet.addCols(toAdd)}
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} column{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
   </div>
@@ -361,24 +339,16 @@
   <div class="add rows">
     <Button
       disabled={!Number.isInteger(toAdd) || toAdd == 0}
-      onclick={() => {
-        if (toAdd > 0) {
-          sheet.addRows(toAdd);
-        } else if (toAdd < 0) {
-          sheet.deleteRows(-toAdd);
-        }
-      }}
+      onclick={() => sheet.addRows(toAdd)}
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} row{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
   </div>
 
   <div class="numberinput">
     <NumericInput
-      style="width: 100%; text-align: center; max-width: 5ch;"
+      style="width: 100%; text-align: center; max-width: 7ch;"
       bind:value={toAdd}
-      onfocus={(e) => {
-        e.target.select();
-      }}
+      onfocus={(e) => e.target.select()}
     />
   </div>
 </div>

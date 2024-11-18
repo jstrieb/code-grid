@@ -22,6 +22,9 @@ export class Sheet {
   }
 
   addRows(n, start = this.heights.length) {
+    if (n < 0) {
+      return this.deleteRows(-n, start);
+    }
     this.heights.splice(start, 0, ...new Array(n).fill(DEFAULT_HEIGHT));
     this.cells.splice(
       start,
@@ -40,6 +43,9 @@ export class Sheet {
   }
 
   addCols(n, start = this.widths.length) {
+    if (n < 0) {
+      return this.deleteCols(-n, start);
+    }
     this.widths.splice(start, 0, ...new Array(n).fill(DEFAULT_WIDTH));
     this.cells.map((row) =>
       row.splice(
@@ -53,6 +59,26 @@ export class Sheet {
   deleteCols(n, start = this.widths.length - n) {
     this.widths.splice(start, n);
     this.cells.map((row) => row.splice(start, n));
+  }
+
+  autoResizeCol(i) {
+    const newWidth = Math.max(
+      ...this.cells
+        .map((row) => row[i])
+        .map((cell) => cell.naturalSize().width),
+    );
+    if (!Number.isNaN(newWidth)) {
+      this.widths[i] = newWidth;
+    }
+  }
+
+  autoResizeRow(i) {
+    const newHeight = Math.max(
+      ...this.cells[i].map((cell) => cell.naturalSize().height),
+    );
+    if (!Number.isNaN(newHeight)) {
+      this.heights[i] = newHeight;
+    }
   }
 }
 
@@ -141,5 +167,13 @@ export class Selection {
 
   contains(i) {
     return this.min <= i && i <= this.max;
+  }
+
+  row(i) {
+    return this.type == "row" && this.contains(i);
+  }
+
+  col(i) {
+    return this.type == "col" && this.contains(i);
   }
 }
