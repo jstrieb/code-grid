@@ -1,6 +1,11 @@
 <style>
   td {
-    border: 1px solid var(--fg-color);
+    /* 
+      0.5px borders are rounded in many browsers, so instead we do 1px borders
+      on two sides. 
+    */
+    border-bottom: 1px solid var(--fg-color);
+    border-right: 1px solid var(--fg-color);
     user-select: none;
     -webkit-user-select: none;
     background: transparent;

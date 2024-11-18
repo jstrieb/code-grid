@@ -35,10 +35,13 @@
 
   table {
     /* 
-      TODO: Fix. Border collapse with box shadows (for showing selected cells)
-      creates a small gap between the border and box shadow in Safari.
+      Border collapse with box shadows (for showing selected cells) creates a
+      small gap between the border and box shadow in Safari. It also makes the
+      borders of sticky row and column headers scroll away. As a result we don't
+      collapse borders, but set spacing to 0, and only put borders on two sides
+      of each cell.
     */
-    border-collapse: collapse;
+    border-collapse: separate;
     border-spacing: 0;
     box-shadow: 4px 4px 0 0 var(--fg-color);
   }
@@ -46,12 +49,22 @@
   th {
     user-select: none;
     -webkit-user-select: none;
-    border: 1px solid var(--fg-color);
+    border-bottom: 1px solid var(--fg-color);
+    border-right: 1px solid var(--fg-color);
     background: var(--header-color);
     /* Drag header to highlight instead of scrolling */
     touch-action: none;
     /* Required for draggable handles to be positioned absolutely */
     position: relative;
+  }
+
+  thead th {
+    border-top: 1px solid var(--fg-color);
+  }
+
+  /* This selector includes the first th of the tr in the thead, unlike tbody th. */
+  th:first-child {
+    border-left: 1px solid var(--fg-color);
   }
 
   th,
@@ -91,6 +104,16 @@
 
   thead th:first-of-type {
     background: none;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+  }
+
+  tbody th {
+    position: sticky;
+    left: 0;
   }
 
   .handle {
