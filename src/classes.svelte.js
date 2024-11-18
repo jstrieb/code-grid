@@ -23,7 +23,9 @@ export class Sheet {
 
   addRows(n, start = this.heights.length) {
     if (n < 0) {
-      return this.deleteRows(-n, start);
+      // Explicitly use the arguments object to avoid using the default value if
+      // no start is set
+      return this.deleteRows(-n, arguments[1]);
     }
     this.heights.splice(start, 0, ...new Array(n).fill(DEFAULT_HEIGHT));
     this.cells.splice(
@@ -44,7 +46,9 @@ export class Sheet {
 
   addCols(n, start = this.widths.length) {
     if (n < 0) {
-      return this.deleteCols(-n, start);
+      // Explicitly use the arguments object to avoid using the default value if
+      // no start is set
+      return this.deleteCols(-n, arguments[1]);
     }
     this.widths.splice(start, 0, ...new Array(n).fill(DEFAULT_WIDTH));
     this.cells.map((row) =>
