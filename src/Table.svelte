@@ -157,12 +157,8 @@
   import Cell from "./Cell.svelte";
   import NumericInput from "./NumericInput.svelte";
 
-  let {
-    sheet = $bindable(),
-    table = $bindable(),
-    selected = $bindable(),
-  } = $props();
-
+  let { sheet = $bindable(), table = $bindable() } = $props();
+  let selected = $derived(sheet.selected);
   let pointerStart = $state(undefined);
   let toAdd = $state(1);
 
@@ -243,7 +239,7 @@
     <thead>
       <tr>
         <th></th>
-        {#each sheet.widths as width, i (i)}
+        {#each sheet.widths as width, i}
           {@const pointermoveHandler = pointermoveX(i)}
           <th
             style:--width="{width}px"
@@ -259,16 +255,16 @@
                   if (e.buttons != 1 || selected.type != "col") {
                     return;
                   }
-                  selected.end = i;
+                  sheet.setSelectionEnd(i);
                 }}
                 onmousedown={(e) => {
                   if (e.buttons != 1) {
                     return;
                   }
-                  selected.type = "col";
-                  selected.end = i;
-                  if (!e.shiftKey) {
-                    selected.start = i;
+                  if (e.shiftKey) {
+                    sheet.setSelectionEnd(i);
+                  } else {
+                    sheet.setSelectionStart("col", i);
                   }
                 }}>C{i}</button
               >
@@ -294,7 +290,7 @@
     </thead>
 
     <tbody>
-      {#each sheet.cells as row, i (i)}
+      {#each sheet.cells as row, i}
         {@const pointermoveHandler = pointermoveY(i)}
         <tr>
           <th
@@ -311,16 +307,16 @@
                   if (e.buttons != 1 || selected.type != "row") {
                     return;
                   }
-                  selected.end = i;
+                  sheet.setSelectionEnd(i);
                 }}
                 onmousedown={(e) => {
                   if (e.buttons != 1) {
                     return;
                   }
-                  selected.type = "row";
-                  selected.end = i;
-                  if (!e.shiftKey) {
-                    selected.start = i;
+                  if (e.shiftKey) {
+                    sheet.setSelectionEnd(i);
+                  } else {
+                    sheet.setSelectionStart("row", i);
                   }
                 }}>R{i}</button
               >
@@ -342,16 +338,14 @@
             ></button>
           </th>
 
-          {#each row as cell, j (j)}
+          {#each row as cell, j}
             <Cell
-              cell={cell.value}
               width={sheet.widths[j]}
               height={sheet.heights[i]}
               row={i}
               col={j}
-              {sheet}
-              bind:td={cell.td}
-              bind:selected
+              {cell}
+              bind:sheet
             />
           {/each}
         </tr>

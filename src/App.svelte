@@ -30,7 +30,7 @@
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
 
-  import { Sheet, Selection } from "./classes.svelte.js";
+  import { Sheet } from "./classes.svelte.js";
 
   let sheets = $state([
     new Sheet("Sheet 1", 18, 18, (i, j) => `${i},${j}`),
@@ -43,7 +43,6 @@
     ),
   ]);
   let currentSheet = $state(0);
-  let selected = $state(new Selection());
   let table = $state();
 </script>
 
@@ -53,7 +52,7 @@
     if (table.contains(e.target)) {
       return;
     }
-    selected = new Selection();
+    sheets[currentSheet].deselect();
   }}
 />
 
@@ -61,5 +60,5 @@
   <Tabs tabs={sheets.map((s) => s.name)} bind:value={currentSheet} />
 </div>
 <div class="scroll">
-  <Table bind:selected bind:sheet={sheets[currentSheet]} bind:table />
+  <Table bind:sheet={sheets[currentSheet]} bind:table />
 </div>

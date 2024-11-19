@@ -8,9 +8,10 @@ export class Sheet {
   cells = $state();
   widths = $state();
   heights = $state();
+  selected = $state(new Selection());
 
   constructor(name, rows, cols, initial) {
-    // TODO: Test optimizations using sparse arrays (wihtout .fill)
+    // TODO: Test optimizations using sparse arrays (without .fill)
     this.name = name;
     this.cells = new Array(rows)
       .fill()
@@ -34,7 +35,7 @@ export class Sheet {
       ...new Array(n)
         .fill()
         .map(() =>
-          new Array(this.widths.length).fill().map((_) => new Cell(undefined)),
+          new Array(this.widths.length).fill().map(() => new Cell(undefined)),
         ),
     );
   }
@@ -84,11 +85,79 @@ export class Sheet {
       this.heights[i] = newHeight;
     }
   }
+
+  getSelectedCells() {
+    switch (this.selected.type) {
+      case "cell":
+        const { x: startCol, y: startRow } = this.selected.min;
+        const { x: endCol, y: endRow } = this.selected.max;
+        return this.cells
+          .slice(startRow, endRow + 1)
+          .map((row) => row.slice(startCol, endCol + 1));
+      case "row":
+        return this.cells.slice(this.selected.min, this.selected.max + 1);
+      case "col":
+        return this.cells.map((row) =>
+          row.slice(this.selected.min, this.selected.max + 1),
+        );
+    }
+  }
+
+  setSelectedBorders(value = true) {
+    switch (this.selected.type) {
+      case "cell":
+        const { x: startCol, y: startRow } = this.selected.min;
+        const { x: endCol, y: endRow } = this.selected.max;
+        for (let i = startCol; i < endCol + 1; i++) {
+          this.cells[startRow][i].topBorder = value;
+          this.cells[endRow][i].bottomBorder = value;
+        }
+        for (let i = startRow; i < endRow + 1; i++) {
+          this.cells[i][startCol].leftBorder = value;
+          this.cells[i][endCol].rightBorder = value;
+        }
+        break;
+      case "row":
+        for (let i = 0; i < this.widths.length; i++) {
+          this.cells[this.selected.min][i].topBorder = value;
+          this.cells[this.selected.max][i].bottomBorder = value;
+        }
+        break;
+      case "col":
+        for (let i = 0; i < this.heights.length; i++) {
+          this.cells[i][this.selected.min].leftBorder = value;
+          this.cells[i][this.selected.max].rightBorder = value;
+        }
+        break;
+    }
+  }
+
+  setSelectionStart(type, start) {
+    this.setSelectedBorders(false);
+    this.selected.type = type;
+    this.selected.start = start;
+    this.selected.end = start;
+    this.setSelectedBorders(true);
+  }
+
+  setSelectionEnd(end) {
+    this.setSelectedBorders(false);
+    this.selected.end = end;
+    this.setSelectedBorders(true);
+  }
+
+  deselect() {
+    this.setSelectionStart(undefined, undefined);
+  }
 }
 
 export class Cell {
   value = $state();
   td = $state();
+  topBorder = $state(false);
+  bottomBorder = $state(false);
+  rightBorder = $state(false);
+  leftBorder = $state(false);
 
   constructor(value) {
     this.value = writable(value);
@@ -137,6 +206,13 @@ export class Cell {
       height: (height ?? 5) + 5,
     };
   }
+
+  deselect() {
+    this.topBorder = false;
+    this.bottomBorder = false;
+    this.leftBorder = false;
+    this.rightBorder = false;
+  }
 }
 
 export class Selection {
@@ -170,8 +246,19 @@ export class Selection {
     }
   }
 
-  contains(i) {
-    return this.min <= i && i <= this.max;
+  contains(i, j) {
+    switch (this.type) {
+      case "cell":
+        return (
+          this.min.y <= i &&
+          i <= this.max.y &&
+          this.min.x <= j &&
+          j <= this.max.x
+        );
+      case "row":
+      case "col":
+        return this.min <= i && i <= this.max;
+    }
   }
 
   row(i) {

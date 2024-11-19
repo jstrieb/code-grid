@@ -143,61 +143,15 @@
 </style>
 
 <script>
-  let {
-    cell,
-    row,
-    col,
-    width,
-    height,
-    sheet,
-    selected = $bindable(),
-    td = $bindable(),
-  } = $props();
-  let top = $derived.by(() => {
-      if (selected.type == "cell") {
-        return selected.min.y;
-      } else if (selected.type == "row") {
-        return selected.min;
-      } else if (selected.type == "col") {
-        return -Infinity;
-      }
-    }),
-    bottom = $derived.by(() => {
-      if (selected.type == "cell") {
-        return selected.max.y;
-      } else if (selected.type == "row") {
-        return selected.max;
-      } else if (selected.type == "col") {
-        return Infinity;
-      }
-    }),
-    left = $derived.by(() => {
-      if (selected.type == "cell") {
-        return selected.min.x;
-      } else if (selected.type == "col") {
-        return selected.min;
-      } else if (selected.type == "row") {
-        return -Infinity;
-      }
-    }),
-    right = $derived.by(() => {
-      if (selected.type == "cell") {
-        return selected.max.x;
-      } else if (selected.type == "col") {
-        return selected.max;
-      } else if (selected.type == "row") {
-        return Infinity;
-      }
-    });
-  let contained = $derived(
-    top <= row && row <= bottom && left <= col && col <= right,
-  );
+  let { cell, row, col, width, height, sheet = $bindable() } = $props();
+  let value = $derived(cell.value);
+  let selected = $derived(sheet.selected);
   let editing = $state(false);
 
   let innerNode = $state(undefined);
   $effect(() => {
     innerNode?.replaceAllChildren?.();
-    innerNode?.appendChild?.($cell);
+    innerNode?.appendChild?.($value);
   });
 
   function focus(e) {
@@ -206,13 +160,13 @@
 </script>
 
 <td
-  bind:this={td}
+  bind:this={cell.td}
   style:--width="{width}px"
   style:--height="{height}px"
-  class:left={contained && left == col}
-  class:right={contained && right == col}
-  class:top={contained && top == row}
-  class:bottom={contained && bottom == row}
+  class:left={cell.leftBorder}
+  class:right={cell.rightBorder}
+  class:top={cell.topBorder}
+  class:bottom={cell.bottomBorder}
   class:editing
   onfocus={() => {
     /* TODO */
@@ -222,27 +176,27 @@
       return;
     }
     if (selected.type == "cell") {
-      selected.end = { x: col, y: row };
+      sheet.setSelectionEnd({ x: col, y: row });
     } else if (selected.type == "row") {
-      selected.end = row;
+      sheet.setSelectionEnd(row);
     } else if (selected.type == "col") {
-      selected.end = col;
+      sheet.setSelectionEnd(col);
     }
 
     // Scroll if highlighting at the edge of the screen
-    sheet.cells[row]?.[col - 1]?.td?.scrollIntoView({
+    sheet.cells[row]?.[col - 2]?.td?.scrollIntoView({
       block: "nearest",
       inline: "nearest",
     });
-    sheet.cells[row]?.[col + 1]?.td?.scrollIntoView({
+    sheet.cells[row]?.[col + 2]?.td?.scrollIntoView({
       block: "nearest",
       inline: "nearest",
     });
-    sheet.cells[row - 1]?.[col]?.td?.scrollIntoView({
+    sheet.cells[row - 2]?.[col]?.td?.scrollIntoView({
       block: "nearest",
       inline: "nearest",
     });
-    sheet.cells[row + 1]?.[col]?.td?.scrollIntoView({
+    sheet.cells[row + 2]?.[col]?.td?.scrollIntoView({
       block: "nearest",
       inline: "nearest",
     });
@@ -251,16 +205,15 @@
     if (e.buttons != 1) {
       return;
     }
-    selected.type = "cell";
-    selected.end = { x: col, y: row };
-    if (!e.shiftKey) {
-      selected.start = { x: col, y: row };
+    if (e.shiftKey) {
+      sheet.setSelectionEnd({ x: col, y: row });
+    } else {
+      sheet.setSelectionStart("cell", { x: col, y: row });
     }
   }}
-  ondblclick={(e) => {
-    editing =
-      contained &&
-      selected.type == "cell" &&
+  ondblclick={() => {
+    editing = selected.contains(row, col);
+    selected.type == "cell" &&
       selected.start.x == selected.end.x &&
       selected.start.y == selected.end.y;
   }}
@@ -268,7 +221,7 @@
   {#if editing}
     <textarea
       use:focus
-      bind:value={$cell}
+      bind:value={$value}
       onblur={() => {
         editing = false;
       }}
@@ -280,9 +233,9 @@
       autocomplete="off"
       spellcheck="false"
     ></textarea>
-  {:else if $cell instanceof Element}
+  {:else if $value instanceof Element}
     <div bind:this={innerNode} class="element"></div>
   {:else}
-    <div class="text">{$cell}</div>
+    <div class="text">{$value}</div>
   {/if}
 </td>
