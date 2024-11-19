@@ -54,7 +54,7 @@
     left: 0;
     right: 0;
     background: var(--fg-color);
-    z-index: 1;
+    z-index: 3;
   }
 
   /*
@@ -69,7 +69,7 @@
     left: var(--border-cover-offset);
     right: 0;
     background: var(--bg-color);
-    z-index: 1;
+    z-index: 3;
   }
 </style>
 

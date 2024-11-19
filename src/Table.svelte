@@ -103,7 +103,14 @@
   }
 
   thead th:first-of-type {
-    background: none;
+    background: var(--bg-color);
+    top: 0;
+    left: 0;
+    /* 
+      The top left header cell should occlude the other row and column headers
+      on scroll. 
+    */
+    z-index: 1;
   }
 
   thead th {
@@ -121,7 +128,7 @@
     background: none;
     border: 0;
     position: absolute;
-    z-index: 1;
+    z-index: 2;
     /* Prevent mobile browsers from scrolling when trying to resize */
     touch-action: none;
   }
