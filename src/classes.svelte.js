@@ -3,12 +3,89 @@ import { writable, get } from "svelte/store";
 const DEFAULT_WIDTH = 56,
   DEFAULT_HEIGHT = 24;
 
+export class State {
+  sheets = $state([]);
+  currentSheetIndex = $state(0);
+  currentSheet = $derived(this.sheets[this.currentSheetIndex]);
+  selected = $state(new Selection());
+
+  constructor(sheets) {
+    this.sheets = sheets;
+  }
+
+  getSelectedCells() {
+    switch (this.selected.type) {
+      case "cell":
+        const { x: startCol, y: startRow } = this.selected.min;
+        const { x: endCol, y: endRow } = this.selected.max;
+        return this.currentSheet.cells
+          .slice(startRow, endRow + 1)
+          .map((row) => row.slice(startCol, endCol + 1));
+      case "row":
+        return this.currentSheet.cells.slice(
+          this.selected.min,
+          this.selected.max + 1,
+        );
+      case "col":
+        return this.currentSheet.cells.map((row) =>
+          row.slice(this.selected.min, this.selected.max + 1),
+        );
+    }
+  }
+
+  setSelectedBorders(value = true) {
+    switch (this.selected.type) {
+      case "cell":
+        const { x: startCol, y: startRow } = this.selected.min;
+        const { x: endCol, y: endRow } = this.selected.max;
+        for (let i = startCol; i < endCol + 1; i++) {
+          this.currentSheet.cells[startRow][i].topBorder = value;
+          this.currentSheet.cells[endRow][i].bottomBorder = value;
+        }
+        for (let i = startRow; i < endRow + 1; i++) {
+          this.currentSheet.cells[i][startCol].leftBorder = value;
+          this.currentSheet.cells[i][endCol].rightBorder = value;
+        }
+        break;
+      case "row":
+        for (let i = 0; i < this.currentSheet.widths.length; i++) {
+          this.currentSheet.cells[this.selected.min][i].topBorder = value;
+          this.currentSheet.cells[this.selected.max][i].bottomBorder = value;
+        }
+        break;
+      case "col":
+        for (let i = 0; i < this.currentSheet.heights.length; i++) {
+          this.currentSheet.cells[i][this.selected.min].leftBorder = value;
+          this.currentSheet.cells[i][this.selected.max].rightBorder = value;
+        }
+        break;
+    }
+  }
+
+  setSelectionStart(type, start) {
+    this.setSelectedBorders(false);
+    this.selected.type = type;
+    this.selected._start = start;
+    this.selected._end = start;
+    this.setSelectedBorders(true);
+  }
+
+  setSelectionEnd(end) {
+    this.setSelectedBorders(false);
+    this.selected._end = end;
+    this.setSelectedBorders(true);
+  }
+
+  deselect() {
+    this.setSelectionStart(undefined, undefined);
+  }
+}
+
 export class Sheet {
   name = $state();
   cells = $state();
   widths = $state();
   heights = $state();
-  selected = $state(new Selection());
 
   constructor(name, rows, cols, initial) {
     // TODO: Test optimizations using sparse arrays (without .fill)
@@ -84,70 +161,6 @@ export class Sheet {
     if (!Number.isNaN(newHeight)) {
       this.heights[i] = newHeight;
     }
-  }
-
-  getSelectedCells() {
-    switch (this.selected.type) {
-      case "cell":
-        const { x: startCol, y: startRow } = this.selected.min;
-        const { x: endCol, y: endRow } = this.selected.max;
-        return this.cells
-          .slice(startRow, endRow + 1)
-          .map((row) => row.slice(startCol, endCol + 1));
-      case "row":
-        return this.cells.slice(this.selected.min, this.selected.max + 1);
-      case "col":
-        return this.cells.map((row) =>
-          row.slice(this.selected.min, this.selected.max + 1),
-        );
-    }
-  }
-
-  setSelectedBorders(value = true) {
-    switch (this.selected.type) {
-      case "cell":
-        const { x: startCol, y: startRow } = this.selected.min;
-        const { x: endCol, y: endRow } = this.selected.max;
-        for (let i = startCol; i < endCol + 1; i++) {
-          this.cells[startRow][i].topBorder = value;
-          this.cells[endRow][i].bottomBorder = value;
-        }
-        for (let i = startRow; i < endRow + 1; i++) {
-          this.cells[i][startCol].leftBorder = value;
-          this.cells[i][endCol].rightBorder = value;
-        }
-        break;
-      case "row":
-        for (let i = 0; i < this.widths.length; i++) {
-          this.cells[this.selected.min][i].topBorder = value;
-          this.cells[this.selected.max][i].bottomBorder = value;
-        }
-        break;
-      case "col":
-        for (let i = 0; i < this.heights.length; i++) {
-          this.cells[i][this.selected.min].leftBorder = value;
-          this.cells[i][this.selected.max].rightBorder = value;
-        }
-        break;
-    }
-  }
-
-  setSelectionStart(type, start) {
-    this.setSelectedBorders(false);
-    this.selected.type = type;
-    this.selected._start = start;
-    this.selected._end = start;
-    this.setSelectedBorders(true);
-  }
-
-  setSelectionEnd(end) {
-    this.setSelectedBorders(false);
-    this.selected._end = end;
-    this.setSelectedBorders(true);
-  }
-
-  deselect() {
-    this.setSelectionStart(undefined, undefined);
   }
 }
 

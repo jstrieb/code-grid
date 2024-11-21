@@ -143,11 +143,12 @@
 </style>
 
 <script>
-  let { cell, row, col, width, height, sheet = $bindable() } = $props();
+  let { cell, row, col, width, height, globals = $bindable() } = $props();
   let value = $derived(cell.value);
-  let selected = $derived(sheet.selected);
-  let editing = $state(false);
+  let selected = $derived(globals.selected);
+  let sheet = $derived(globals.currentSheet);
 
+  let editing = $state(false);
   let innerNode = $state(undefined);
   $effect(() => {
     innerNode?.replaceAllChildren?.();
@@ -176,11 +177,11 @@
       return;
     }
     if (selected.type == "cell") {
-      sheet.setSelectionEnd({ x: col, y: row });
+      globals.setSelectionEnd({ x: col, y: row });
     } else if (selected.type == "row") {
-      sheet.setSelectionEnd(row);
+      globals.setSelectionEnd(row);
     } else if (selected.type == "col") {
-      sheet.setSelectionEnd(col);
+      globals.setSelectionEnd(col);
     }
 
     // Scroll if highlighting at the edge of the screen
@@ -206,16 +207,15 @@
       return;
     }
     if (e.shiftKey) {
-      sheet.setSelectionEnd({ x: col, y: row });
+      globals.setSelectionEnd({ x: col, y: row });
     } else {
-      sheet.setSelectionStart("cell", { x: col, y: row });
+      globals.setSelectionStart("cell", { x: col, y: row });
     }
   }}
   ondblclick={() => {
+    // Assumes that this cell is the only thing selected when it is
+    // double-clicked
     editing = selected.contains(row, col);
-    selected.type == "cell" &&
-      selected.start.x == selected.end.x &&
-      selected.start.y == selected.end.y;
   }}
 >
   {#if editing}

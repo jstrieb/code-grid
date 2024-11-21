@@ -157,8 +157,10 @@
   import Cell from "./Cell.svelte";
   import NumericInput from "./NumericInput.svelte";
 
-  let { sheet = $bindable(), table = $bindable() } = $props();
-  let selected = $derived(sheet.selected);
+  let { globals = $bindable(), table = $bindable() } = $props();
+  let selected = $derived(globals.selected);
+  let sheet = $derived(globals.currentSheet);
+
   let pointerStart = $state(undefined);
   let toAdd = $state(1);
 
@@ -255,16 +257,16 @@
                   if (e.buttons != 1 || selected.type != "col") {
                     return;
                   }
-                  sheet.setSelectionEnd(i);
+                  globals.setSelectionEnd(i);
                 }}
                 onmousedown={(e) => {
                   if (e.buttons != 1) {
                     return;
                   }
                   if (e.shiftKey) {
-                    sheet.setSelectionEnd(i);
+                    globals.setSelectionEnd(i);
                   } else {
-                    sheet.setSelectionStart("col", i);
+                    globals.setSelectionStart("col", i);
                   }
                 }}>C{i}</button
               >
@@ -307,16 +309,16 @@
                   if (e.buttons != 1 || selected.type != "row") {
                     return;
                   }
-                  sheet.setSelectionEnd(i);
+                  globals.setSelectionEnd(i);
                 }}
                 onmousedown={(e) => {
                   if (e.buttons != 1) {
                     return;
                   }
                   if (e.shiftKey) {
-                    sheet.setSelectionEnd(i);
+                    globals.setSelectionEnd(i);
                   } else {
-                    sheet.setSelectionStart("row", i);
+                    globals.setSelectionStart("row", i);
                   }
                 }}>R{i}</button
               >
@@ -345,7 +347,7 @@
               row={i}
               col={j}
               {cell}
-              bind:sheet
+              bind:globals
             />
           {/each}
         </tr>

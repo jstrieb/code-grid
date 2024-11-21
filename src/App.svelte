@@ -30,19 +30,20 @@
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
 
-  import { Sheet } from "./classes.svelte.js";
+  import { State, Sheet } from "./classes.svelte.js";
 
-  let sheets = $state([
-    new Sheet("Sheet 1", 18, 18, (i, j) => `${i},${j}`),
-    new Sheet("Other Sheet", 35, 10, (i, j) => `${i},${j}`),
-    new Sheet(
-      "Sheet three with a very long name",
-      100,
-      300,
-      (i, j) => `${i},${j}`,
-    ),
-  ]);
-  let currentSheet = $state(0);
+  let globals = $state(
+    new State([
+      new Sheet("Sheet 1", 18, 18, (i, j) => `${i},${j}`),
+      new Sheet("Other Sheet", 35, 10, (i, j) => `${i},${j}`),
+      new Sheet(
+        "Sheet three with a very long name",
+        100,
+        300,
+        (i, j) => `${i},${j}`,
+      ),
+    ]),
+  );
   let table = $state();
 </script>
 
@@ -52,13 +53,16 @@
     if (table.contains(e.target)) {
       return;
     }
-    sheets[currentSheet].deselect();
+    globals.deselect();
   }}
 />
 
 <div class="tabs">
-  <Tabs tabs={sheets.map((s) => s.name)} bind:value={currentSheet} />
+  <Tabs
+    tabs={globals.sheets.map((s) => s.name)}
+    bind:value={globals.currentSheetIndex}
+  />
 </div>
 <div class="scroll">
-  <Table bind:sheet={sheets[currentSheet]} bind:table />
+  <Table bind:globals bind:table />
 </div>
