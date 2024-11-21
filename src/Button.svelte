@@ -12,6 +12,9 @@
     white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Space for the shadow so it doesn't get cut off */
+    margin-right: 3px;
+    margin-bottom: 3px;
   }
 
   button:hover {

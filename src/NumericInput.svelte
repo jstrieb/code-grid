@@ -3,6 +3,9 @@
     padding: 0.1em 0.2em;
     border: 1px solid var(--fg-color);
     box-shadow: 3px 3px 0 0 var(--fg-color);
+    /* Space for the shadow so it doesn't get cut off */
+    margin-right: 3px;
+    margin-bottom: 3px;
   }
 
   input:focus {
