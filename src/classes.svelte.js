@@ -135,14 +135,14 @@ export class Sheet {
   setSelectionStart(type, start) {
     this.setSelectedBorders(false);
     this.selected.type = type;
-    this.selected.start = start;
-    this.selected.end = start;
+    this.selected._start = start;
+    this.selected._end = start;
     this.setSelectedBorders(true);
   }
 
   setSelectionEnd(end) {
     this.setSelectedBorders(false);
-    this.selected.end = end;
+    this.selected._end = end;
     this.setSelectedBorders(true);
   }
 
@@ -217,8 +217,28 @@ export class Cell {
 
 export class Selection {
   type = $state();
-  start = $state();
-  end = $state();
+  _start = $state();
+  _end = $state();
+
+  get start() {
+    return this._start;
+  }
+
+  get end() {
+    return this._end;
+  }
+
+  set start(_) {
+    throw new Error(
+      "Do not set start directly! Set it through one of the methods.",
+    );
+  }
+
+  set end(_) {
+    throw new Error(
+      "Do not set end directly! Set it through one of the methods.",
+    );
+  }
 
   get min() {
     switch (this.type) {
