@@ -1,5 +1,9 @@
 <style>
-  /* The [open] is required for the .close() method to work. */
+  /* 
+    The [open] is required for the .close() method to work, otherwise the
+    display: flex applies to the closed dialog, which is supposed to have
+    display: none. 
+  */
   dialog[open] {
     border: 1px solid var(--fg-color);
     box-shadow: 4px 4px 0 0 var(--fg-color);
@@ -10,8 +14,6 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: stretch;
-    width: 80ch;
-    height: 15em;
     gap: 0.5em;
   }
 
@@ -62,6 +64,7 @@
 <script>
   let {
     children,
+    open = $bindable(false),
     top = $bindable(50),
     left = $bindable(50),
     ...rest
@@ -89,18 +92,18 @@
     pointerStart.y = e.clientY;
   }
 
-  function open(e) {
-    e.show();
-  }
+  // Don't bind directly to dialog open attribute since using it to toggle is
+  // not recommended
+  $effect(() => {
+    if (open) {
+      dialog?.show();
+    } else {
+      dialog?.close();
+    }
+  });
 </script>
 
-<dialog
-  bind:this={dialog}
-  use:open
-  style:top="{top}px"
-  style:left="{left}px"
-  {...rest}
->
+<dialog bind:this={dialog} style:top="{top}px" style:left="{left}px" {...rest}>
   <div class="top">
     <svg class="drag" onpointerdown={pointerdown} onpointerup={pointerup}>
       <defs>
@@ -134,7 +137,7 @@
         style="stroke: var(--bg-color); stroke-width: 2px;"
       ></rect>
     </svg>
-    <button onclick={() => dialog.close()}>X</button>
+    <button onclick={() => (open = false)}>X</button>
   </div>
   <div class="main">
     {@render children()}
