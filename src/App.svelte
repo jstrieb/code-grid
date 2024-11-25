@@ -47,6 +47,8 @@
 
 <script>
   import Button from "./Button.svelte";
+  import Details from "./Details.svelte";
+  import Dialog from "./Dialog.svelte";
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
 
@@ -64,6 +66,7 @@
       ),
     ]),
   );
+  let helpOpen = $state(false);
   let table = $state();
 </script>
 
@@ -88,13 +91,33 @@
   <Table bind:globals bind:table />
 </div>
 
+<Dialog bind:open={helpOpen} style="max-width: min(80ch, 100%);">
+  <div
+    style="display: flex; flex-direction: column; gap: 0.5em; padding: 0.5em;"
+  >
+    <p>
+      Code Grid is a spreadsheet built for programmers. You can extend it with
+      your own formula functions that execute in the browser. Formula functions
+      can create HTML elements.
+    </p>
+    <Details>
+      {#snippet summary()}Keybindings{/snippet}
+      <p>TODO</p>
+    </Details>
+    <Details>
+      {#snippet summary()}Formulas{/snippet}
+      <p>TODO</p>
+    </Details>
+    <Details>
+      {#snippet summary()}All formula functions{/snippet}
+      <p>TODO</p>
+    </Details>
+  </div>
+</Dialog>
+
 <div class="bottombar">
-  <Button
-    style="min-width: 1.5em;"
-    onclick={() => {
-      /* TODO */
-      alert("TODO: Help");
-    }}>?</Button
+  <Button style="min-width: 1.5em;" onclick={() => (helpOpen = !helpOpen)}
+    >?</Button
   >
   <div style="flex-grow: 1;"><!-- Spacer --></div>
   <div class="status">
