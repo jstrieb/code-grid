@@ -66,6 +66,34 @@ export class State {
     }
   }
 
+  scrollSelection(end) {
+    if (end == null) {
+      return;
+    }
+
+    // Scroll if highlighting at the edge of the screen
+    switch (this.selected.type) {
+      case "cell":
+        if (end.x > this.selected.end.x) {
+          this.currentSheet.cells[end.y]?.[end.x + 2]?.scrollIntoView();
+        } else {
+          this.currentSheet.cells[end.y]?.[end.x - 2]?.scrollIntoView();
+        }
+        if (end.y > this.selected.end.y) {
+          this.currentSheet.cells[end.y + 2]?.[end.x]?.scrollIntoView();
+        } else {
+          this.currentSheet.cells[end.y - 2]?.[end.x]?.scrollIntoView();
+        }
+        break;
+      case "row":
+        // TODO
+        break;
+      case "col":
+        // TODO
+        break;
+    }
+  }
+
   setSelectionStart(type, start) {
     switch (type) {
       case "cell":
@@ -81,6 +109,7 @@ export class State {
         start = minmax(0, start, this.currentSheet.widths.length - 1);
         break;
     }
+    this.scrollSelection(start);
     this.setSelectedBorders(false);
     this.selected.type = type;
     this.selected._start = start;
@@ -89,6 +118,7 @@ export class State {
   }
 
   setSelectionEnd(end) {
+    this.scrollSelection(end);
     this.setSelectedBorders(false);
     this.selected._end = end;
     this.setSelectedBorders(true);
@@ -196,6 +226,13 @@ export class Cell {
 
   get() {
     return get(this.value);
+  }
+
+  scrollIntoView() {
+    this.td?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
   }
 
   naturalSize() {

@@ -183,24 +183,6 @@
     } else if (selected.type == "col") {
       globals.setSelectionEnd(col);
     }
-
-    // Scroll if highlighting at the edge of the screen
-    sheet.cells[row]?.[col - 2]?.td?.scrollIntoView({
-      block: "nearest",
-      inline: "nearest",
-    });
-    sheet.cells[row]?.[col + 2]?.td?.scrollIntoView({
-      block: "nearest",
-      inline: "nearest",
-    });
-    sheet.cells[row - 2]?.[col]?.td?.scrollIntoView({
-      block: "nearest",
-      inline: "nearest",
-    });
-    sheet.cells[row + 2]?.[col]?.td?.scrollIntoView({
-      block: "nearest",
-      inline: "nearest",
-    });
   }}
   onmousedown={(e) => {
     if (e.buttons != 1) {
