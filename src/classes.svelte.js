@@ -3,6 +3,10 @@ import { writable, get } from "svelte/store";
 const DEFAULT_WIDTH = 56,
   DEFAULT_HEIGHT = 24;
 
+function minmax(min, x, max) {
+  return Math.min(Math.max(x, min), max);
+}
+
 export class State {
   sheets = $state([]);
   currentSheetIndex = $state(0);
@@ -63,6 +67,20 @@ export class State {
   }
 
   setSelectionStart(type, start) {
+    switch (type) {
+      case "cell":
+        start = {
+          x: minmax(0, start.x, this.currentSheet.widths.length - 1),
+          y: minmax(0, start.y, this.currentSheet.heights.length - 1),
+        };
+        break;
+      case "row":
+        start = minmax(0, start, this.currentSheet.heights.length - 1);
+        break;
+      case "col":
+        start = minmax(0, start, this.currentSheet.widths.length - 1);
+        break;
+    }
     this.setSelectedBorders(false);
     this.selected.type = type;
     this.selected._start = start;

@@ -53,6 +53,7 @@
   import Tabs from "./Tabs.svelte";
 
   import { State, Sheet } from "./classes.svelte.js";
+  import { keyboardHandler } from "./keyboard.svelte.js";
 
   let globals = $state(
     new State([
@@ -69,6 +70,8 @@
   let helpOpen = $state(false);
   let table = $state();
 </script>
+
+<svelte:window onkeydown={(e) => keyboardHandler(e, globals)} />
 
 <svelte:body
   onmousedown={(e) => {
