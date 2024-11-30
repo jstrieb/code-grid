@@ -11,55 +11,70 @@ export const keybindings = {
 
 export const actions = {
   "Move Selection Up": (e, globals) => {
+    const changeSelection = globals.selected.isSingleton
+      ? (...args) => globals.setSelectionStart(...args)
+      : (_, v) => globals.setSelectionEnd(v);
     switch (globals.selected.type) {
       case "cell":
         const { x, y } = globals.selected.end;
-        globals.setSelectionStart("cell", { x, y: y - 1 });
+        changeSelection("cell", { x, y: y - 1 });
         break;
       case "row":
-        globals.setSelectionStart("row", globals.selected.end - 1);
+        changeSelection("row", globals.selected.end - 1);
         break;
       case undefined:
-        globals.setSelectionStart("cell", { x: 0, y: 0 });
+        changeSelection("cell", { x: 0, y: 0 });
     }
   },
+
   "Move Selection Down": (e, globals) => {
+    const changeSelection = globals.selected.isSingleton
+      ? (...args) => globals.setSelectionStart(...args)
+      : (_, v) => globals.setSelectionEnd(v);
     switch (globals.selected.type) {
       case "cell":
         const { x, y } = globals.selected.end;
-        globals.setSelectionStart("cell", { x, y: y + 1 });
+        changeSelection("cell", { x, y: y + 1 });
         break;
       case "row":
-        globals.setSelectionStart("row", globals.selected.end + 1);
+        changeSelection("row", globals.selected.end + 1);
         break;
       case undefined:
-        globals.setSelectionStart("cell", { x: 0, y: 0 });
+        changeSelection("cell", { x: 0, y: 0 });
     }
   },
+
   "Move Selection Left": (e, globals) => {
+    const changeSelection = globals.selected.isSingleton
+      ? (...args) => globals.setSelectionStart(...args)
+      : (_, v) => globals.setSelectionEnd(v);
     switch (globals.selected.type) {
       case "cell":
         const { x, y } = globals.selected.end;
-        globals.setSelectionStart("cell", { y, x: x - 1 });
+        changeSelection("cell", { y, x: x - 1 });
         break;
       case "col":
-        globals.setSelectionStart("col", globals.selected.end - 1);
+        changeSelection("col", globals.selected.end - 1);
         break;
       case undefined:
-        globals.setSelectionStart("cell", { x: 0, y: 0 });
+        changeSelection("cell", { x: 0, y: 0 });
     }
   },
+
   "Move Selection Right": (e, globals) => {
+    const changeSelection = globals.selected.isSingleton
+      ? (...args) => globals.setSelectionStart(...args)
+      : (_, v) => globals.setSelectionEnd(v);
     switch (globals.selected.type) {
       case "cell":
         const { x, y } = globals.selected.end;
-        globals.setSelectionStart("cell", { y, x: x + 1 });
+        changeSelection("cell", { y, x: x + 1 });
         break;
       case "col":
-        globals.setSelectionStart("col", globals.selected.end + 1);
+        changeSelection("col", globals.selected.end + 1);
         break;
       case undefined:
-        globals.setSelectionStart("cell", { x: 0, y: 0 });
+        changeSelection("cell", { x: 0, y: 0 });
     }
   },
 };

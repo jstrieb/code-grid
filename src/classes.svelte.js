@@ -97,9 +97,11 @@ export class State {
   setSelectionStart(type, start) {
     switch (type) {
       case "cell":
+        const maxX = this.currentSheet.widths.length - 1;
+        const maxY = this.currentSheet.heights.length - 1;
         start = {
-          x: minmax(0, start.x, this.currentSheet.widths.length - 1),
-          y: minmax(0, start.y, this.currentSheet.heights.length - 1),
+          x: minmax(0, start.x, maxX),
+          y: minmax(0, start.y, maxY),
         };
         break;
       case "row":
@@ -331,6 +333,16 @@ export class Selection {
       case "row":
       case "col":
         return Math.max(this.start, this.end);
+    }
+  }
+
+  get isSingleton() {
+    switch (this.type) {
+      case "cell":
+        return this.start.x == this.end.x && this.start.y == this.end.y;
+      case "row":
+      case "col":
+        return this.start == this.end;
     }
   }
 
