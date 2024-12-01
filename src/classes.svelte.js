@@ -12,6 +12,7 @@ export class State {
   currentSheetIndex = $state(0);
   currentSheet = $derived(this.sheets[this.currentSheetIndex]);
   selected = $state(new Selection());
+  mode = $state("normal");
 
   constructor(sheets) {
     this.sheets = sheets;
@@ -120,6 +121,21 @@ export class State {
   }
 
   setSelectionEnd(end) {
+    switch (this.selected.type) {
+      case "cell":
+        if (
+          !(this.selected.start.x == end.x && this.selected.start.y == end.y)
+        ) {
+          this.mode = "visual";
+        }
+        break;
+      case "row":
+      case "col":
+        if (this.selected.start != end) {
+          this.mode = "visual";
+        }
+        break;
+    }
     this.scrollSelection(end);
     this.setSelectedBorders(false);
     this.selected._end = end;

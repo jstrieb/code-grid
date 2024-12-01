@@ -65,6 +65,31 @@ export const actions = {
 };
 
 export function keyboardHandler(e, globals) {
+  const key = keyEventToString(e);
+  switch (key) {
+    case "escape":
+    case "Ctrl+c":
+      switch (globals.mode) {
+        case "normal":
+          globals.deselect();
+          break;
+        case "insert":
+          globals.mode = "normal";
+          e.target?.blur();
+          break;
+        case "visual":
+          globals.mode = "normal";
+          globals.setSelectionStart(
+            globals.selected.type,
+            globals.selected.end,
+          );
+          break;
+        default:
+          globals.mode = "normal";
+          break;
+      }
+  }
+
   // Don't handle keypresses from within text or other editable inputs
   if (
     ["input", "textarea"].includes(e.target?.tagName.toLocaleLowerCase()) ||
@@ -73,7 +98,7 @@ export function keyboardHandler(e, globals) {
     return;
   }
 
-  const action = keybindings[keyEventToString(e)];
+  const action = keybindings[key];
   if (action == null) {
     return;
   }

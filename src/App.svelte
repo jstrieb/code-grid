@@ -124,6 +124,8 @@
   >
   <div style="flex-grow: 1;"><!-- Spacer --></div>
   <div class="status">
+    {globals.mode}
+    <!-- 
     {#if globals.selected.type}
       {@const sum = globals
         .getSelectedCells()
@@ -132,6 +134,7 @@
         .reduce((a, x) => a + x, 0)}
       <span>Average: {sum / globals.getSelectedCells().flat().length},</span>
       <span>Sum: {sum}</span>
-    {/if}
+    {/if} 
+    -->
   </div>
 </div>

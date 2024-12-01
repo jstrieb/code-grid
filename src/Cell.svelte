@@ -198,6 +198,9 @@
     // Assumes that this cell is the only thing selected when it is
     // double-clicked
     editing = selected.contains(row, col);
+    if (editing) {
+      globals.mode = "insert";
+    }
   }}
 >
   {#if editing}
