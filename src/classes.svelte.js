@@ -336,16 +336,6 @@ export class Selection {
     }
   }
 
-  get isSingleton() {
-    switch (this.type) {
-      case "cell":
-        return this.start.x == this.end.x && this.start.y == this.end.y;
-      case "row":
-      case "col":
-        return this.start == this.end;
-    }
-  }
-
   contains(i, j) {
     switch (this.type) {
       case "cell":
