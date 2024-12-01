@@ -95,23 +95,29 @@ export class State {
     }
   }
 
-  setSelectionStart(type, start) {
+  withinSheet(type, selection) {
+    let result;
     switch (type) {
       case "cell":
         const maxX = this.currentSheet.widths.length - 1;
         const maxY = this.currentSheet.heights.length - 1;
-        start = {
-          x: minmax(0, start.x, maxX),
-          y: minmax(0, start.y, maxY),
+        result = {
+          x: minmax(0, selection.x, maxX),
+          y: minmax(0, selection.y, maxY),
         };
         break;
       case "row":
-        start = minmax(0, start, this.currentSheet.heights.length - 1);
+        result = minmax(0, selection, this.currentSheet.heights.length - 1);
         break;
       case "col":
-        start = minmax(0, start, this.currentSheet.widths.length - 1);
+        result = minmax(0, selection, this.currentSheet.widths.length - 1);
         break;
     }
+    return result;
+  }
+
+  setSelectionStart(type, start) {
+    start = this.withinSheet(type, start);
     this.scrollSelection(start);
     this.setSelectedBorders(false);
     this.selected.type = type;
@@ -121,6 +127,7 @@ export class State {
   }
 
   setSelectionEnd(end) {
+    end = this.withinSheet(this.selected.type, end);
     switch (this.selected.type) {
       case "cell":
         if (

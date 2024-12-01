@@ -7,59 +7,163 @@ export const keybindings = {
   l: "Move Selection Right",
   k: "Move Selection Up",
   j: "Move Selection Down",
+  v: "Visual Mode",
+  "Ctrl+v": "Select Column",
+  "Shift+v": "Select Row",
 };
 
 export const actions = {
+  "Visual Mode": (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+        globals.mode = "visual";
+        break;
+      case "visual":
+        globals.mode = "normal";
+        globals.setSelectionStart(globals.selected.type, globals.selected.end);
+        break;
+    }
+  },
+
+  "Select Row": (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+        globals.mode = "visual";
+        break;
+    }
+    switch (globals.selected.type) {
+      case "cell":
+        const start = globals.selected.start.y,
+          end = globals.selected.end.y;
+        globals.setSelectionStart("row", start);
+        globals.setSelectionEnd(end);
+        break;
+      case "row":
+        globals.setSelectionStart("row", globals.selected.end);
+        break;
+      case undefined:
+      case "col":
+        globals.setSelectionStart("row", 0);
+        break;
+    }
+  },
+
+  "Select Column": (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+        globals.mode = "visual";
+        break;
+    }
+    switch (globals.selected.type) {
+      case "cell":
+        const start = globals.selected.start.x,
+          end = globals.selected.end.x;
+        globals.setSelectionStart("col", start);
+        globals.setSelectionEnd(end);
+        break;
+      case "col":
+        globals.setSelectionStart("col", globals.selected.end);
+        break;
+      case undefined:
+      case "row":
+        globals.setSelectionStart("col", 0);
+        break;
+    }
+  },
+
   "Move Selection Up": (e, globals) => {
+    let setSelection;
+    switch (globals.mode) {
+      case "visual":
+        setSelection = (type, end) => globals.setSelectionEnd(end);
+        break;
+      case "normal":
+      default:
+        setSelection = (type, end) => globals.setSelectionStart(type, end);
+        break;
+    }
     switch (globals.selected.type) {
       case "cell":
         const { x, y } = globals.selected.end;
-        globals.setSelectionStart("cell", { x, y: y - 1 });
+        setSelection("cell", { x, y: y - 1 });
         break;
       case "row":
-        globals.setSelectionStart("row", globals.selected.end - 1);
+        setSelection("row", globals.selected.end - 1);
         break;
       case undefined:
-        globals.setSelectionStart("cell", { x: 0, y: 0 });
+        setSelection("cell", { x: 0, y: 0 });
     }
   },
+
   "Move Selection Down": (e, globals) => {
+    let setSelection;
+    switch (globals.mode) {
+      case "visual":
+        setSelection = (type, end) => globals.setSelectionEnd(end);
+        break;
+      case "normal":
+      default:
+        setSelection = (type, end) => globals.setSelectionStart(type, end);
+        break;
+    }
     switch (globals.selected.type) {
       case "cell":
         const { x, y } = globals.selected.end;
-        globals.setSelectionStart("cell", { x, y: y + 1 });
+        setSelection("cell", { x, y: y + 1 });
         break;
       case "row":
-        globals.setSelectionStart("row", globals.selected.end + 1);
+        setSelection("row", globals.selected.end + 1);
         break;
       case undefined:
-        globals.setSelectionStart("cell", { x: 0, y: 0 });
+        setSelection("cell", { x: 0, y: 0 });
     }
   },
+
   "Move Selection Left": (e, globals) => {
+    let setSelection;
+    switch (globals.mode) {
+      case "visual":
+        setSelection = (type, end) => globals.setSelectionEnd(end);
+        break;
+      case "normal":
+      default:
+        setSelection = (type, end) => globals.setSelectionStart(type, end);
+        break;
+    }
     switch (globals.selected.type) {
       case "cell":
         const { x, y } = globals.selected.end;
-        globals.setSelectionStart("cell", { y, x: x - 1 });
+        setSelection("cell", { y, x: x - 1 });
         break;
       case "col":
-        globals.setSelectionStart("col", globals.selected.end - 1);
+        setSelection("col", globals.selected.end - 1);
         break;
       case undefined:
-        globals.setSelectionStart("cell", { x: 0, y: 0 });
+        setSelection("cell", { x: 0, y: 0 });
     }
   },
+
   "Move Selection Right": (e, globals) => {
+    let setSelection;
+    switch (globals.mode) {
+      case "visual":
+        setSelection = (type, end) => globals.setSelectionEnd(end);
+        break;
+      case "normal":
+      default:
+        setSelection = (type, end) => globals.setSelectionStart(type, end);
+        break;
+    }
     switch (globals.selected.type) {
       case "cell":
         const { x, y } = globals.selected.end;
-        globals.setSelectionStart("cell", { y, x: x + 1 });
+        setSelection("cell", { y, x: x + 1 });
         break;
       case "col":
-        globals.setSelectionStart("col", globals.selected.end + 1);
+        setSelection("col", globals.selected.end + 1);
         break;
       case undefined:
-        globals.setSelectionStart("cell", { x: 0, y: 0 });
+        setSelection("cell", { x: 0, y: 0 });
     }
   },
 };
