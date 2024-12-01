@@ -151,6 +151,7 @@ export class State {
 
   deselect() {
     this.setSelectionStart(undefined, undefined);
+    this.mode = "normal";
   }
 }
 
@@ -244,6 +245,7 @@ export class Cell {
   bottomBorder = $state(false);
   rightBorder = $state(false);
   leftBorder = $state(false);
+  editing = $state(false);
 
   constructor(value) {
     this.value = writable(value);

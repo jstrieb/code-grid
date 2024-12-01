@@ -146,13 +146,17 @@
   let { cell, row, col, width, height, globals = $bindable() } = $props();
   let value = $derived(cell.value);
   let selected = $derived(globals.selected);
-  let sheet = $derived(globals.currentSheet);
 
-  let editing = $state(false);
   let innerNode = $state(undefined);
   $effect(() => {
     innerNode?.replaceAllChildren?.();
     innerNode?.appendChild?.($value);
+  });
+
+  $effect(() => {
+    if (cell.editing) {
+      globals.mode = "insert";
+    }
   });
 
   function focus(e) {
@@ -168,7 +172,7 @@
   class:right={cell.rightBorder}
   class:top={cell.topBorder}
   class:bottom={cell.bottomBorder}
-  class:editing
+  class:editing={cell.editing}
   onfocus={() => {
     /* TODO */
   }}
@@ -189,26 +193,25 @@
       return;
     }
     if (e.shiftKey) {
+      globals.mode = "visual";
       globals.setSelectionEnd({ x: col, y: row });
     } else {
+      globals.mode = "normal";
       globals.setSelectionStart("cell", { x: col, y: row });
     }
   }}
   ondblclick={() => {
     // Assumes that this cell is the only thing selected when it is
     // double-clicked
-    editing = selected.contains(row, col);
-    if (editing) {
-      globals.mode = "insert";
-    }
+    cell.editing = selected.contains(row, col);
   }}
 >
-  {#if editing}
+  {#if cell.editing}
     <textarea
       use:focus
       bind:value={$value}
       onblur={() => {
-        editing = false;
+        cell.editing = false;
       }}
       rows="1"
       wrap="off"

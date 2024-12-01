@@ -10,9 +10,24 @@ export const keybindings = {
   v: "Visual Mode",
   "Ctrl+v": "Select Column",
   "Shift+v": "Select Row",
+  enter: "Edit",
+  i: "Edit",
 };
 
 export const actions = {
+  Edit: (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+        switch (globals.selected.type) {
+          case "cell":
+            const { x: col, y: row } = globals.selected.end;
+            globals.currentSheet.cells[row][col].editing = true;
+            break;
+        }
+        break;
+    }
+  },
+
   "Visual Mode": (e, globals) => {
     switch (globals.mode) {
       case "normal":
@@ -192,6 +207,16 @@ export function keyboardHandler(e, globals) {
           globals.mode = "normal";
           break;
       }
+      break;
+    case "enter":
+      switch (globals.mode) {
+        case "insert":
+          globals.mode = "normal";
+          e.target?.blur();
+          // TODO: Select next cell (next row? next column? next non-blank?)
+          break;
+      }
+      break;
   }
 
   // Don't handle keypresses from within text or other editable inputs
@@ -203,14 +228,15 @@ export function keyboardHandler(e, globals) {
   }
 
   const action = keybindings[key];
+
+  // TODO: Remove
+  console.log(keyEventToString(e), action);
+
   if (action == null) {
     return;
   }
   e.preventDefault();
   actions[action]?.(e, globals);
-
-  // TODO: Remove
-  console.log(keyEventToString(e), action);
 }
 
 function keyEventToString(e) {
