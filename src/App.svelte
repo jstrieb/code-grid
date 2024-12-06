@@ -43,6 +43,17 @@
     flex-direction: row;
     gap: 1ch;
   }
+
+  kbd {
+    padding: 0 0.5ch;
+    box-shadow: 1px 1px 0 0 var(--fg-color);
+    border: 1px solid var(--fg-color);
+    margin: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: monospace, monospace;
+  }
 </style>
 
 <script>
@@ -53,7 +64,7 @@
   import Tabs from "./Tabs.svelte";
 
   import { State, Sheet } from "./classes.svelte.js";
-  import { keyboardHandler } from "./keyboard.svelte.js";
+  import { keyboardHandler, keybindings } from "./keyboard.svelte.js";
 
   let globals = $state(
     new State([
@@ -69,6 +80,23 @@
   );
   let helpOpen = $state(false);
   let table = $state();
+
+  function prettyPrintKey(key) {
+    switch (key) {
+      case "arrowleft":
+        return "&larr;";
+      case "arrowright":
+        return "&rarr;";
+      case "arrowup":
+        return "&uarr;";
+      case "arrowdown":
+        return "&darr;";
+    }
+    if (key.length > 1) {
+      return key[0].toLocaleUpperCase() + key.slice(1);
+    }
+    return key;
+  }
 </script>
 
 <svelte:window onkeydown={(e) => keyboardHandler(e, globals)} />
@@ -94,7 +122,10 @@
   <Table bind:globals bind:table />
 </div>
 
-<Dialog bind:open={helpOpen} style="max-width: min(80ch, 100%);">
+<Dialog
+  bind:open={helpOpen}
+  style="max-width: min(80ch, 100%); max-height: 100%;"
+>
   <div
     style="display: flex; flex-direction: column; gap: 0.5em; padding: 0.5em;"
   >
@@ -105,7 +136,20 @@
     </p>
     <Details>
       {#snippet summary()}Keybindings{/snippet}
-      <p>TODO</p>
+      <ul style="margin-left: 1.5em;">
+        {#each Object.entries(keybindings) as [combo, name]}
+          <li>
+            <div
+              style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center; gap: 0.25ch;"
+            >
+              {#each combo.split("+") as key, i}
+                <kbd>{@html prettyPrintKey(key)}</kbd
+                >{#if i < combo.split("+").length - 1}+{/if}
+              {/each} &ndash; {name}
+            </div>
+          </li>
+        {/each}
+      </ul>
     </Details>
     <Details>
       {#snippet summary()}Formulas{/snippet}

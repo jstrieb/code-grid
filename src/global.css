@@ -51,3 +51,7 @@ button {
   user-select: none;
   -webkit-user-select: none;
 }
+
+ul {
+  margin-left: 1em;
+}
