@@ -1,4 +1,6 @@
 export const keybindings = {
+  "Shift+tab": "Move Selection Left",
+  tab: "Move Selection Right",
   arrowleft: "Move Selection Left",
   arrowright: "Move Selection Right",
   arrowup: "Move Selection Up",
@@ -183,6 +185,7 @@ export const actions = {
   },
 };
 
+// TODO: This whole thing probably needs to be reworked and rearchitected
 export function keyboardHandler(e, globals) {
   const key = keyEventToString(e);
   switch (key) {
@@ -221,22 +224,54 @@ export function keyboardHandler(e, globals) {
 
   // Don't handle keypresses from within text or other editable inputs
   if (
+    globals.mode == "insert" ||
     ["input", "textarea"].includes(e.target?.tagName.toLocaleLowerCase()) ||
     e.target.isContentEditable
   ) {
     return;
   }
 
-  const action = keybindings[key];
+  switch (key) {
+    case "0":
+      if (
+        !(
+          globals.keyQueue.length &&
+          globals.keyQueue[globals.keyQueue.length - 1].match(/[0-9]/)
+        )
+      ) {
+        break;
+      }
+    case "1":
+    case "2":
+    case "3":
+    case "4":
+    case "5":
+    case "6":
+    case "7":
+    case "8":
+    case "9":
+      globals.keyQueue.push(key);
+      break;
+  }
 
+  const action = keybindings[key];
   // TODO: Remove
   console.log(keyEventToString(e), action);
-
   if (action == null) {
     return;
   }
   e.preventDefault();
-  actions[action]?.(e, globals);
+
+  let iterations = 1;
+  const queue = globals.keyQueue.join("");
+  const match = queue.match(/^[1-9][0-9]*/);
+  if (match) {
+    iterations = parseInt(match[0]);
+    globals.keyQueue = queue.replace(/^[1-9][0-9]*/, "").split("");
+  }
+  for (let i = 0; i < iterations; i++) {
+    actions[action]?.(e, globals);
+  }
 }
 
 function keyEventToString(e) {

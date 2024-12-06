@@ -34,7 +34,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
-    align-items: baseline;
+    align-items: center;
     gap: 1ch;
   }
 
@@ -124,17 +124,7 @@
   >
   <div style="flex-grow: 1;"><!-- Spacer --></div>
   <div class="status">
-    {globals.mode}
-    <!-- 
-    {#if globals.selected.type}
-      {@const sum = globals
-        .getSelectedCells()
-        .flat()
-        .map((cell) => cell.get())
-        .reduce((a, x) => a + x, 0)}
-      <span>Average: {sum / globals.getSelectedCells().flat().length},</span>
-      <span>Sum: {sum}</span>
-    {/if} 
-    -->
+    <span>{globals.keyQueue.join("")}</span>
+    <span>-- {globals.mode.toLocaleUpperCase()} --</span>
   </div>
 </div>

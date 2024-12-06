@@ -13,6 +13,7 @@ export class State {
   currentSheet = $derived(this.sheets[this.currentSheetIndex]);
   selected = $state(new Selection());
   mode = $state("normal");
+  keyQueue = $state([]);
 
   constructor(sheets) {
     this.sheets = sheets;
