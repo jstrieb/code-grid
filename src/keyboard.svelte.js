@@ -245,6 +245,7 @@ export function keyboardHandler(e, globals) {
           globals.mode = "normal";
           break;
       }
+      globals.keyQueue = [];
       break;
     case "enter":
       switch (globals.mode) {
