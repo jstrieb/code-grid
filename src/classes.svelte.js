@@ -14,6 +14,7 @@ export class State {
   selected = $state(new Selection());
   mode = $state("normal");
   keyQueue = $state([]);
+  helpOpen = $state(false);
 
   constructor(sheets) {
     this.sheets = sheets;

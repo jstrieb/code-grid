@@ -78,7 +78,6 @@
       ),
     ]),
   );
-  let helpOpen = $state(false);
   let table = $state();
 
   function prettyPrintKey(key) {
@@ -123,7 +122,7 @@
 </div>
 
 <Dialog
-  bind:open={helpOpen}
+  bind:open={globals.helpOpen}
   style="max-width: min(80ch, 100%); max-height: 100%;"
 >
   <div
@@ -163,8 +162,9 @@
 </Dialog>
 
 <div class="bottombar">
-  <Button style="min-width: 1.5em;" onclick={() => (helpOpen = !helpOpen)}
-    >?</Button
+  <Button
+    style="min-width: 1.5em;"
+    onclick={() => (globals.helpOpen = !globals.helpOpen)}>?</Button
   >
   <div style="flex-grow: 1;"><!-- Spacer --></div>
   <div class="status">

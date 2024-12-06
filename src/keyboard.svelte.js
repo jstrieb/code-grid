@@ -17,9 +17,14 @@ export const keybindings = {
   0: "Go to Start of Row",
   "Shift+^": "Go to Start of Row",
   "Shift+$": "Go to End of Row",
+  "Shift+?": "Toggle Help",
 };
 
 export const actions = {
+  "Toggle Help": (e, globals) => {
+    globals.helpOpen = !globals.helpOpen;
+  },
+
   "Go to Start of Row": (e, globals) => {
     switch (globals.selected.type) {
       case "cell":
