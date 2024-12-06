@@ -14,9 +14,39 @@ export const keybindings = {
   "Shift+v": "Select Row",
   enter: "Edit",
   i: "Edit",
+  0: "Go to Start of Row",
+  "Shift+^": "Go to Start of Row",
+  "Shift+$": "Go to End of Row",
 };
 
 export const actions = {
+  "Go to Start of Row": (e, globals) => {
+    switch (globals.selected.type) {
+      case "cell":
+        const { y } = globals.selected.start;
+        globals.setSelectionStart("cell", { x: 0, y });
+        break;
+      case "col":
+        globals.setSelectionStart("col", 0);
+        break;
+    }
+  },
+
+  "Go to End of Row": (e, globals) => {
+    switch (globals.selected.type) {
+      case "cell":
+        const { y } = globals.selected.start;
+        globals.setSelectionStart("cell", {
+          x: globals.currentSheet.widths.length,
+          y,
+        });
+        break;
+      case "col":
+        globals.setSelectionStart("col", globals.currentSheet.widths.length);
+        break;
+    }
+  },
+
   Edit: (e, globals) => {
     switch (globals.mode) {
       case "normal":
@@ -231,27 +261,14 @@ export function keyboardHandler(e, globals) {
     return;
   }
 
-  switch (key) {
-    case "0":
-      if (
-        !(
-          globals.keyQueue.length &&
-          globals.keyQueue[globals.keyQueue.length - 1].match(/[0-9]/)
-        )
-      ) {
-        break;
-      }
-    case "1":
-    case "2":
-    case "3":
-    case "4":
-    case "5":
-    case "6":
-    case "7":
-    case "8":
-    case "9":
+  if (key?.match(/^[0-9]$/)) {
+    if (
+      key != "0" ||
+      globals.keyQueue[globals.keyQueue.length - 1]?.match(/^[0-9]$/)
+    ) {
       globals.keyQueue.push(key);
-      break;
+      return;
+    }
   }
 
   const action = keybindings[key];
