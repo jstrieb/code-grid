@@ -24,6 +24,8 @@
 
 *:focus {
   outline: none;
+  /* Prevents scrolling from triggering pull-down refresh on mobile */
+  overscroll-behavior: none;
 }
 
 html,

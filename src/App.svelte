@@ -7,6 +7,7 @@
     justify-content: flex-start;
     align-items: stretch;
     gap: 0.5em;
+    overflow: hidden;
   }
 
   .scroll {
@@ -15,8 +16,6 @@
     /* Padding so the box shadows do not get cut off */
     padding-bottom: 5px;
     padding-right: 5px;
-    /* Prevents scrolling from triggering pull-down refresh on mobile */
-    overscroll-behavior: none;
   }
 
   .tabs {
@@ -121,10 +120,7 @@
   <Table bind:globals bind:table />
 </div>
 
-<Dialog
-  bind:open={globals.helpOpen}
-  style="max-width: min(80ch, 100%); max-height: 100%;"
->
+<Dialog bind:open={globals.helpOpen}>
   <div
     style="display: flex; flex-direction: column; gap: 0.5em; padding: 0.5em;"
   >
@@ -134,8 +130,12 @@
       can create HTML elements.
     </p>
     <Details>
+      {#snippet summary()}Tutorial{/snippet}
+      TODO
+    </Details>
+    <Details>
       {#snippet summary()}Keybindings{/snippet}
-      <ul style="margin-left: 1.5em;">
+      <ul style="margin-left: 1.5em; white-space: pre;">
         {#each Object.entries(keybindings) as [combo, name]}
           <li>
             <div
@@ -151,11 +151,7 @@
       </ul>
     </Details>
     <Details>
-      {#snippet summary()}Formulas{/snippet}
-      <p>TODO</p>
-    </Details>
-    <Details>
-      {#snippet summary()}All formula functions{/snippet}
+      {#snippet summary()}Formula functions{/snippet}
       <p>TODO</p>
     </Details>
   </div>

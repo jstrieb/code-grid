@@ -14,7 +14,13 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: stretch;
-    gap: 0.5em;
+    gap: 0.25em;
+    width: var(--width);
+    min-width: var(--width);
+    max-width: var(--width);
+    height: var(--height);
+    min-height: var(--height);
+    max-height: var(--height);
   }
 
   .top {
@@ -38,7 +44,7 @@
     cursor: grabbing;
   }
 
-  button {
+  button.x {
     cursor: pointer;
     font-family: monospace, monospace;
     width: 1.5em;
@@ -48,17 +54,30 @@
     margin-right: 2px;
   }
 
-  button:hover {
+  button.x:hover {
     outline: 1px solid var(--fg-color);
   }
 
-  button:active {
+  button.x:active {
     box-shadow: 1px 1px 0 0 var(--fg-color);
   }
 
   .main {
     flex-grow: 1;
     overflow: auto;
+  }
+
+  /* TODO: Add some sort of indicator for the drag handle. */
+  .resize {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    bottom: -8px;
+    right: -8px;
+    border: 0;
+    background: none;
+    cursor: nwse-resize;
+    touch-action: none;
   }
 </style>
 
@@ -68,28 +87,50 @@
     open = $bindable(false),
     top = $bindable(50),
     left = $bindable(50),
+    width = $bindable(300),
+    height = $bindable(300),
     ...rest
   } = $props();
   let dialog = $state();
   let pointerStart = $state();
 
-  function pointerdown(e) {
-    e.target.addEventListener("pointermove", pointermove);
+  function topPointerDown(e) {
+    e.target.addEventListener("pointermove", topPointerMove);
     e.target.setPointerCapture(e.pointerId);
     pointerStart = { x: e.clientX, y: e.clientY };
   }
 
-  function pointerup(e) {
-    e.target.removeEventListener("pointermove", pointermove);
+  function topPointerUp(e) {
+    e.target.removeEventListener("pointermove", topPointerMove);
     e.target.releasePointerCapture(e.pointerId);
   }
 
-  function pointermove(e) {
+  function topPointerMove(e) {
     const dx = e.clientX - pointerStart.x;
     left += dx;
     const dy = e.clientY - pointerStart.y;
     top += dy;
     pointerStart.x = e.clientX;
+    pointerStart.y = e.clientY;
+  }
+
+  function resizePointerDown(e) {
+    e.target.addEventListener("pointermove", resizePointerMove);
+    e.target.setPointerCapture(e.pointerId);
+    pointerStart = { x: e.clientX, y: e.clientY };
+  }
+
+  function resizePointerUp(e) {
+    e.target.removeEventListener("pointermove", resizePointerMove);
+    e.target.releasePointerCapture(e.pointerId);
+  }
+
+  function resizePointerMove(e) {
+    const dx = e.clientX - pointerStart.x;
+    width += dx;
+    pointerStart.x = e.clientX;
+    const dy = e.clientY - pointerStart.y;
+    height += dy;
     pointerStart.y = e.clientY;
   }
 
@@ -104,9 +145,16 @@
   });
 </script>
 
-<dialog bind:this={dialog} style:top="{top}px" style:left="{left}px" {...rest}>
+<dialog
+  bind:this={dialog}
+  style:top="{top}px"
+  style:left="{left}px"
+  style:--width="{width}px"
+  style:--height="{height}px"
+  {...rest}
+>
   <div class="top">
-    <svg class="drag" onpointerdown={pointerdown} onpointerup={pointerup}>
+    <svg class="drag" onpointerdown={topPointerDown} onpointerup={topPointerUp}>
       <defs>
         <pattern
           id="dots"
@@ -138,9 +186,15 @@
         style="stroke: var(--bg-color); stroke-width: 2px;"
       ></rect>
     </svg>
-    <button onclick={() => (open = false)}>X</button>
+    <button class="x" onclick={() => (open = false)}>X</button>
   </div>
   <div class="main">
     {@render children()}
   </div>
+  <button
+    class="resize"
+    aria-label="Drag to reize dialog"
+    onpointerdown={resizePointerDown}
+    onpointerup={resizePointerUp}
+  ></button>
 </dialog>
