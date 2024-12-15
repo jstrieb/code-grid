@@ -23,6 +23,10 @@
     max-height: var(--height);
   }
 
+  .small-shadow {
+    box-shadow: 2px 2px 0 0 var(--fg-color) !important;
+  }
+
   .top {
     display: flex;
     flex-direction: row;
@@ -107,16 +111,19 @@
   } = $props();
   let dialog = $state();
   let pointerStart = $state();
+  let dragging = $state(false);
 
   function topPointerDown(e) {
     e.target.addEventListener("pointermove", topPointerMove);
     e.target.setPointerCapture(e.pointerId);
     pointerStart = { x: e.clientX, y: e.clientY };
+    dragging = true;
   }
 
   function topPointerUp(e) {
     e.target.removeEventListener("pointermove", topPointerMove);
     e.target.releasePointerCapture(e.pointerId);
+    dragging = false;
   }
 
   function topPointerMove(e) {
@@ -161,6 +168,7 @@
 
 <dialog
   bind:this={dialog}
+  class:small-shadow={dragging}
   style:top="{top}px"
   style:left="{left}px"
   style:--width="{width}px"
