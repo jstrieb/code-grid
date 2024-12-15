@@ -67,7 +67,6 @@
     overflow: auto;
   }
 
-  /* TODO: Add some sort of indicator for the drag handle. */
   .resize {
     position: absolute;
     width: 16px;
@@ -78,6 +77,21 @@
     background: none;
     cursor: nwse-resize;
     touch-action: none;
+  }
+
+  /* TODO: Add better indicator for the drag handle. */
+  .resize::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border: 1px solid var(--fg-color);
+  }
+
+  .resize:hover::after {
+    outline: 1px solid var(--fg-color);
   }
 </style>
 
