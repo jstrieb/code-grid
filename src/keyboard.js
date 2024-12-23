@@ -18,9 +18,88 @@ export const keybindings = {
   "Shift+^": "Go to Start of Row",
   "Shift+$": "Go to End of Row",
   "Shift+?": "Toggle Help",
+  g: "Go To",
+  "Shift+g": "Go to Bottom",
+  // Unpressable keys added just for documentation
+  "g+g": "Go to Top",
+  // TODO: Figure out how to not show keys that must be preceded by g such as
+  // gT and gt
 };
 
 export const actions = {
+  "Go To": (e, globals) => {
+    if (globals.keyQueue[globals.keyQueue.length - 1] != "g") {
+      globals.keyQueue.push("g");
+      return;
+    }
+    // Specifically for gg
+    globals.keyQueue.pop();
+    switch (globals.mode) {
+      case "normal":
+        switch (globals.selected.type) {
+          case undefined:
+          case "cell":
+            const x = globals.selected?.start?.x ?? 0;
+            globals.setSelectionStart("cell", { x, y: 0 });
+            break;
+          case "row":
+            globals.setSelectionStart("row", 0);
+            break;
+        }
+        break;
+      case "visual":
+        switch (globals.selected.type) {
+          case undefined:
+          case "cell":
+            const x = globals.selected?.start?.x ?? 0;
+            globals.setSelectionEnd("cell", { x, y: 0 });
+            break;
+          case "row":
+            globals.setSelectionEnd("row", 0);
+            break;
+        }
+        break;
+    }
+  },
+
+  "Go to Bottom": (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+        switch (globals.selected.type) {
+          case undefined:
+          case "cell":
+            const x = globals.selected?.start?.x ?? 0;
+            globals.setSelectionStart("cell", {
+              x,
+              y: globals.currentSheet.heights.length,
+            });
+            break;
+          case "row":
+            globals.setSelectionStart(
+              "row",
+              globals.currentSheet.widths.length,
+            );
+            break;
+        }
+        break;
+      case "visual":
+        switch (globals.selected.type) {
+          case undefined:
+          case "cell":
+            const x = globals.selected?.start?.x ?? 0;
+            globals.setSelectionEnd("cell", {
+              x,
+              y: globals.currentSheet.heights.length,
+            });
+            break;
+          case "row":
+            globals.setSelectionEnd("row", globals.currentSheet.heights.length);
+            break;
+        }
+        break;
+    }
+  },
+
   "Toggle Help": (e, globals) => {
     globals.helpOpen = !globals.helpOpen;
   },
@@ -29,8 +108,9 @@ export const actions = {
     switch (globals.mode) {
       case "normal":
         switch (globals.selected.type) {
+          case undefined:
           case "cell":
-            const { y } = globals.selected.start;
+            const y = globals.selected?.start?.y ?? 0;
             globals.setSelectionStart("cell", { x: 0, y });
             break;
           case "col":
@@ -40,8 +120,9 @@ export const actions = {
         break;
       case "visual":
         switch (globals.selected.type) {
+          case undefined:
           case "cell":
-            const { y } = globals.selected.start;
+            const y = globals.selected?.start?.y ?? 0;
             globals.setSelectionEnd({ x: 0, y });
             break;
           case "col":
@@ -56,8 +137,9 @@ export const actions = {
     switch (globals.mode) {
       case "normal":
         switch (globals.selected.type) {
+          case undefined:
           case "cell":
-            const { y } = globals.selected.start;
+            const y = globals.selected?.start?.y ?? 0;
             globals.setSelectionStart("cell", {
               x: globals.currentSheet.widths.length,
               y,
@@ -73,8 +155,9 @@ export const actions = {
         break;
       case "visual":
         switch (globals.selected.type) {
+          case undefined:
           case "cell":
-            const { y } = globals.selected.start;
+            const y = globals.selected?.start?.y ?? 0;
             globals.setSelectionEnd({
               x: globals.currentSheet.widths.length,
               y,
