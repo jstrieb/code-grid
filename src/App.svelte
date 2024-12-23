@@ -63,7 +63,7 @@
   import Tabs from "./Tabs.svelte";
 
   import { State, Sheet } from "./classes.svelte.js";
-  import { keyboardHandler, keybindings } from "./keyboard.svelte.js";
+  import { keyboardHandler, keybindings } from "./keyboard.js";
 
   let globals = $state(
     new State([
