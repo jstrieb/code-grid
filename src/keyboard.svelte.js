@@ -26,28 +26,64 @@ export const actions = {
   },
 
   "Go to Start of Row": (e, globals) => {
-    switch (globals.selected.type) {
-      case "cell":
-        const { y } = globals.selected.start;
-        globals.setSelectionStart("cell", { x: 0, y });
+    switch (globals.mode) {
+      case "normal":
+        switch (globals.selected.type) {
+          case "cell":
+            const { y } = globals.selected.start;
+            globals.setSelectionStart("cell", { x: 0, y });
+            break;
+          case "col":
+            globals.setSelectionStart("col", 0);
+            break;
+        }
         break;
-      case "col":
-        globals.setSelectionStart("col", 0);
+      case "visual":
+        switch (globals.selected.type) {
+          case "cell":
+            const { y } = globals.selected.start;
+            globals.setSelectionEnd({ x: 0, y });
+            break;
+          case "col":
+            globals.setSelectionEnd(0);
+            break;
+        }
         break;
     }
   },
 
   "Go to End of Row": (e, globals) => {
-    switch (globals.selected.type) {
-      case "cell":
-        const { y } = globals.selected.start;
-        globals.setSelectionStart("cell", {
-          x: globals.currentSheet.widths.length,
-          y,
-        });
+    switch (globals.mode) {
+      case "normal":
+        switch (globals.selected.type) {
+          case "cell":
+            const { y } = globals.selected.start;
+            globals.setSelectionStart("cell", {
+              x: globals.currentSheet.widths.length,
+              y,
+            });
+            break;
+          case "col":
+            globals.setSelectionStart(
+              "col",
+              globals.currentSheet.widths.length,
+            );
+            break;
+        }
         break;
-      case "col":
-        globals.setSelectionStart("col", globals.currentSheet.widths.length);
+      case "visual":
+        switch (globals.selected.type) {
+          case "cell":
+            const { y } = globals.selected.start;
+            globals.setSelectionEnd({
+              x: globals.currentSheet.widths.length,
+              y,
+            });
+            break;
+          case "col":
+            globals.setSelectionEnd(globals.currentSheet.widths.length);
+            break;
+        }
         break;
     }
   },
@@ -253,6 +289,24 @@ export function keyboardHandler(e, globals) {
           globals.mode = "normal";
           e.target?.blur();
           // TODO: Select next cell (next row? next column? next non-blank?)
+          break;
+      }
+      break;
+    case "tab":
+      switch (globals.mode) {
+        case "insert":
+          globals.mode = "normal";
+          e.target?.blur();
+          actions["Move Selection Right"]?.(e, globals);
+          break;
+      }
+      break;
+    case "Shift+tab":
+      switch (globals.mode) {
+        case "insert":
+          globals.mode = "normal";
+          e.target?.blur();
+          actions["Move Selection Left"]?.(e, globals);
           break;
       }
       break;
