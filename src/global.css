@@ -20,12 +20,12 @@
   line-height: inherit;
   touch-action: manipulation;
   appearance: none;
+  /* Prevents scrolling from triggering pull-down refresh on mobile */
+  overscroll-behavior: none;
 }
 
 *:focus {
   outline: none;
-  /* Prevents scrolling from triggering pull-down refresh on mobile */
-  overscroll-behavior: none;
 }
 
 html,
