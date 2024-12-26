@@ -81,6 +81,7 @@
     background: none;
     cursor: nwse-resize;
     touch-action: none;
+    z-index: 10;
   }
 
   /* TODO: Add better indicator for the drag handle. */
@@ -173,7 +174,6 @@
   style:left="{left}px"
   style:--width="{width}px"
   style:--height="{height}px"
-  {...rest}
 >
   <div class="top">
     <svg class="drag" onpointerdown={topPointerDown} onpointerup={topPointerUp}>
@@ -210,7 +210,7 @@
     </svg>
     <button class="x" onclick={() => (open = false)}>X</button>
   </div>
-  <div class="main">
+  <div class="main" {...rest}>
     {@render children()}
   </div>
   <button

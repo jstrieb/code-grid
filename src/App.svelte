@@ -1,6 +1,7 @@
 <style>
   /* Container element for App.svelte */
-  :global(body) {
+  :global(body),
+  .main {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -8,6 +9,8 @@
     align-items: stretch;
     gap: 0.5em;
     overflow: hidden;
+    max-height: 100%;
+    max-width: 100%;
   }
 
   .scroll {
@@ -117,7 +120,11 @@
 </div>
 
 <div class="scroll">
-  <Table bind:globals bind:table />
+  <!-- 
+    Set --width and --height default values because if Table is in a Dialog, it
+    will inherit the width and height of the dialog for table cells.
+  -->
+  <Table bind:globals bind:table --width="auto" --height="auto" />
 </div>
 
 <Dialog bind:open={globals.helpOpen}>
