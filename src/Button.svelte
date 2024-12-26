@@ -12,6 +12,8 @@
     white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: var(--width);
+    height: var(--height);
     /* Space for the shadow so it doesn't get cut off */
     margin-right: 3px;
     margin-bottom: 3px;
@@ -38,7 +40,28 @@
 </style>
 
 <script>
-  const { children, ...props } = $props();
+  const { children, square = false, ...props } = $props();
+  let width = $state("auto"),
+    height = $state("auto");
+
+  function resize(node) {
+    if (!square) {
+      return;
+    }
+    const { width: originalWidth, height: originalHeight } =
+      node.getBoundingClientRect();
+    /*
+    if (originalWidth <= 0 && originalHeight <= 0) {
+      // Happens if components are mounted in display: none containers.
+      return;
+    }
+    */
+    const max = `${Math.max(originalWidth, originalHeight)}px`;
+    width = max;
+    height = max;
+  }
 </script>
 
-<button {...props}>{@render children?.()}</button>
+<button style:--width={width} style:--height={height} use:resize {...props}
+  >{@render children?.()}</button
+>

@@ -166,6 +166,7 @@
 
 <div class="bottombar">
   <Button
+    square
     style="min-width: 1.5em;"
     onclick={() => (globals.helpOpen = !globals.helpOpen)}>?</Button
   >
