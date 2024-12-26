@@ -93,6 +93,7 @@
     width: 7px;
     height: 7px;
     border: 1px solid var(--fg-color);
+    background: var(--fg-color);
   }
 
   .resize:hover::after {
