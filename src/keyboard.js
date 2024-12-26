@@ -192,6 +192,21 @@ export const actions = {
             const { x: col, y: row } = globals.selected.end;
             globals.currentSheet.cells[row][col].editing = true;
             break;
+          // TODO: Edit first cell of row or column?
+        }
+        break;
+      case "visual":
+        switch (globals.selected.type) {
+          case "cell":
+            const { x: col, y: row } = globals.selected.start;
+            // TODO: Edit first cell of any selection?
+            if (
+              col == globals.selected.end.x &&
+              row == globals.selected.end.y
+            ) {
+              globals.currentSheet.cells[row][col].editing = true;
+            }
+            break;
         }
         break;
     }
