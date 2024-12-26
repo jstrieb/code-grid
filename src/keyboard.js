@@ -12,6 +12,7 @@ export const keybindings = {
   v: "Visual Mode",
   "Ctrl+v": "Select Column",
   "Shift+v": "Select Row",
+  "Ctrl+a": "Select All",
   enter: "Edit",
   i: "Edit",
   0: "Go to Start of Row",
@@ -27,6 +28,15 @@ export const keybindings = {
 };
 
 export const actions = {
+  "Select All": (e, globals) => {
+    globals.mode = "visual";
+    globals.setSelectionStart("cell", { x: 0, y: 0 });
+    globals.setSelectionEnd({
+      x: globals.currentSheet.widths.length - 1,
+      y: globals.currentSheet.heights.length - 1,
+    });
+  },
+
   "Go To": (e, globals) => {
     if (globals.keyQueue[globals.keyQueue.length - 1] != "g") {
       globals.keyQueue.push("g");
@@ -71,13 +81,13 @@ export const actions = {
             const x = globals.selected?.start?.x ?? 0;
             globals.setSelectionStart("cell", {
               x,
-              y: globals.currentSheet.heights.length,
+              y: globals.currentSheet.heights.length - 1,
             });
             break;
           case "row":
             globals.setSelectionStart(
               "row",
-              globals.currentSheet.widths.length,
+              globals.currentSheet.widths.length - 1,
             );
             break;
         }
@@ -89,11 +99,14 @@ export const actions = {
             const x = globals.selected?.start?.x ?? 0;
             globals.setSelectionEnd("cell", {
               x,
-              y: globals.currentSheet.heights.length,
+              y: globals.currentSheet.heights.length - 1,
             });
             break;
           case "row":
-            globals.setSelectionEnd("row", globals.currentSheet.heights.length);
+            globals.setSelectionEnd(
+              "row",
+              globals.currentSheet.heights.length - 1,
+            );
             break;
         }
         break;
@@ -141,14 +154,14 @@ export const actions = {
           case "cell":
             const y = globals.selected?.start?.y ?? 0;
             globals.setSelectionStart("cell", {
-              x: globals.currentSheet.widths.length,
+              x: globals.currentSheet.widths.length - 1,
               y,
             });
             break;
           case "col":
             globals.setSelectionStart(
               "col",
-              globals.currentSheet.widths.length,
+              globals.currentSheet.widths.length - 1,
             );
             break;
         }
@@ -159,12 +172,12 @@ export const actions = {
           case "cell":
             const y = globals.selected?.start?.y ?? 0;
             globals.setSelectionEnd({
-              x: globals.currentSheet.widths.length,
+              x: globals.currentSheet.widths.length - 1,
               y,
             });
             break;
           case "col":
-            globals.setSelectionEnd(globals.currentSheet.widths.length);
+            globals.setSelectionEnd(globals.currentSheet.widths.length - 1);
             break;
         }
         break;
