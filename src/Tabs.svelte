@@ -49,6 +49,7 @@
   button.add {
     border: 0;
     cursor: pointer;
+    min-width: 1.25em;
   }
 
   /* 
