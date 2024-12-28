@@ -42,7 +42,8 @@
     z-index: 20;
     background: none;
     /* TODO: Keep? Adjust? */
-    width: min(300px, 100vw - 2em);
+    width: 300px;
+    max-width: calc(100vw - 2em);
   }
 </style>
 
@@ -101,12 +102,12 @@
 
     for (
       menuX = e.clientX;
-      menuX + menuWidth > document.body.offsetWidth;
+      menuX + menuWidth > document.body.offsetWidth && menuX > menuWidth;
       menuX -= menuWidth
     ) {}
     for (
       menuY = e.clientY;
-      menuY + menuHeight > document.body.offsetHeight;
+      menuY + menuHeight > document.body.offsetHeight && menuY > menuHeight;
       menuY -= menuHeight
     ) {}
   }
