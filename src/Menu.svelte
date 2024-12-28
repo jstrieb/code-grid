@@ -8,17 +8,16 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: stretch;
+    /* Space to display shadow. */
+    margin-right: 4px;
+    margin-bottom: 4px;
   }
 
   button {
     border: 0;
     cursor: pointer;
     padding: 0.1em 0.2em;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
+    text-align: left;
     white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;

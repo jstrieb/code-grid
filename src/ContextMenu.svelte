@@ -40,8 +40,9 @@
     top: var(--menuY);
     left: var(--menuX);
     z-index: 20;
+    background: none;
     /* TODO: Keep? Adjust? */
-    width: min(300px, 100% - 1em);
+    width: min(300px, 100vw - 2em);
   }
 </style>
 
@@ -112,7 +113,16 @@
 </script>
 
 {#snippet menuBuilder(menuData)}
-  <Menu entries={menuData} />
+  <Menu
+    entries={menuData.map((entry) => {
+      const onclick = entry.onclick;
+      entry.onclick = (e) => {
+        onclick(e);
+        hide(e);
+      };
+      return entry;
+    })}
+  />
 {/snippet}
 
 {#if show}
