@@ -38,6 +38,10 @@
     box-shadow: 2px 2px 0 0 var(--fg-color);
   }
 
+  input[type="text"] {
+    border: 0;
+  }
+
   input[type="radio"] {
     display: none;
   }
@@ -81,6 +85,12 @@
 
   let elements = $state(new Array(tabs.length).fill());
   let scrollLeft = $state(0);
+  let editTab = $state();
+
+  function focus(node) {
+    node.focus();
+    node.select();
+  }
 </script>
 
 <div
@@ -102,6 +112,12 @@
               value = Math.min(value, globals.sheets.length - 1);
             },
           },
+          {
+            text: "Rename",
+            onclick: () => {
+              editTab = i;
+            },
+          },
         ])}
       {/snippet}
       {#snippet clickable(handler)}
@@ -109,8 +125,18 @@
           oncontextmenu={handler}
           class:selected={value == i}
           bind:this={elements[i]}
-          ><input type="radio" bind:group={value} value={i} />{tab}</label
         >
+          {#if editTab == i}
+            <input
+              type="text"
+              bind:value={globals.sheets[i].name}
+              use:focus
+              onblur={() => (editTab = undefined)}
+            />
+          {:else}
+            <input type="radio" bind:group={value} value={i} />{tab}
+          {/if}
+        </label>
       {/snippet}
     </ContextMenu>
   {/each}
