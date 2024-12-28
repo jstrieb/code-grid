@@ -17,8 +17,13 @@
   {#snippet menu(builder)}
     {@render builder([
       {
-        // TODO: Object data here
-      }
+        text: "First item",
+        onclick: (e) => alert("Foo"),
+      },
+      {
+        text: "Second item",
+        onclick: (e) => alert("Bar"),
+      },
     ])}
   {/snippet}
   {#snippet clickable(rightClickHandler)}
@@ -41,6 +46,8 @@
 </style>
 
 <script>
+  import Menu from "./Menu.svelte";
+
   import { keyEventToString } from "./keyboard.js";
 
   import { tick } from "svelte";
@@ -105,10 +112,7 @@
 </script>
 
 {#snippet menuBuilder(menuData)}
-  {#each menuData as item}
-    <!-- TODO -->
-    <p>{JSON.stringify(item)}</p>
-  {/each}
+  <Menu entries={menuData} />
 {/snippet}
 
 {#if show}
