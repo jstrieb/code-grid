@@ -74,7 +74,10 @@
 </style>
 
 <script>
-  let { tabs, value = $bindable(0) } = $props();
+  import ContextMenu from "./ContextMenu.svelte";
+
+  let { globals = $bindable(), value = $bindable() } = $props();
+  let tabs = $derived(globals.sheets.map((s) => s.name));
 
   let elements = $state(new Array(tabs.length).fill());
   let scrollLeft = $state(0);
@@ -89,9 +92,27 @@
   style:--border-cover-offset="{elements[value]?.offsetLeft - scrollLeft + 1}px"
 >
   {#each tabs as tab, i}
-    <label class:selected={value == i} bind:this={elements[i]}
-      ><input type="radio" bind:group={value} value={i} />{tab}</label
-    >
+    <ContextMenu>
+      {#snippet menu(builder)}
+        {@render builder([
+          {
+            text: `Delete "${tab}"`,
+            onclick: () => {
+              globals.sheets.splice(i, 1);
+              value = Math.min(value, globals.sheets.length - 1);
+            },
+          },
+        ])}
+      {/snippet}
+      {#snippet clickable(handler)}
+        <label
+          oncontextmenu={handler}
+          class:selected={value == i}
+          bind:this={elements[i]}
+          ><input type="radio" bind:group={value} value={i} />{tab}</label
+        >
+      {/snippet}
+    </ContextMenu>
   {/each}
   <div class="bottom-border"></div>
   <div class="bottom-border-gap"></div>

@@ -113,10 +113,7 @@
 />
 
 <div class="tabs">
-  <Tabs
-    tabs={globals.sheets.map((s) => s.name)}
-    bind:value={globals.currentSheetIndex}
-  />
+  <Tabs bind:globals bind:value={globals.currentSheetIndex} />
 </div>
 
 <div class="scroll">
