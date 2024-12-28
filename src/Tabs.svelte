@@ -46,6 +46,11 @@
     display: none;
   }
 
+  button.add {
+    border: 0;
+    cursor: pointer;
+  }
+
   /* 
     This ensures the tabs have a border, even when the table is scrolled down
     from the top. 
@@ -79,6 +84,8 @@
 
 <script>
   import ContextMenu from "./ContextMenu.svelte";
+
+  import { Sheet } from "./classes.svelte.js";
 
   let { globals = $bindable(), value = $bindable() } = $props();
   let tabs = $derived(globals.sheets.map((s) => s.name));
@@ -140,6 +147,20 @@
       {/snippet}
     </ContextMenu>
   {/each}
+  <label
+    ><button
+      class="add"
+      onclick={() =>
+        globals.sheets.push(
+          new Sheet(
+            `Sheet ${globals.sheets.length + 1}`,
+            5,
+            5,
+            () => undefined,
+          ),
+        )}>+</button
+    ></label
+  >
   <div class="bottom-border"></div>
   <div class="bottom-border-gap"></div>
 </div>
