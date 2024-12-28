@@ -1,0 +1,109 @@
+# Plan
+
+- Saturday, December 28
+- Sunday, December 29
+- Monday, December 30
+- Tuesday, December 31
+- Wednesday, January 1
+- Thursday, January 2
+- Friday, January 3
+- Saturday, January 4
+- Sunday, January 5
+- Monday, January 6
+- Tuesday, January 7
+- Wednesday, January 8
+- Thursday, January 9
+  - Submit
+
+# To Do
+
+- General
+  - Move rows and columns
+  - Store sheet in URL
+    - Compression
+  - Project title
+  - Undo/redo
+    - `window.history.{pushState,popState}`
+    - Update URL
+  - Service worker for caching
+  - Process formulas in web worker?
+  - Lazily render cells
+  - Typescript
+  - Testing
+  - Work on multiple monitors
+  - XSS and phishing disclaimer
+  - Delete buttons should delete selected rows
+- Window system
+  - Track state
+    - List of Windows
+    - Window position
+    - Per window
+      - Open/closed
+      - Minimized
+      - Title
+      - HTML contents
+      - Snapped or free
+  - Start menu to open new windows
+  - List open and minimized windows at the bottom
+  - Snap windows
+- Code editor
+  - Syntax highlighting
+  - Auto-complete quotes, parentheses, etc.
+  - Automatic indent
+- Formula processing
+  - Formula parsing
+  - Rederivable stores
+  - "symbols" in formulas
+  - References across sheets in formulas
+- Keyboard shortcuts
+  - Navigate windows/sheets
+    - gt and gT
+    - i3 type key commands
+  - I, a, and A
+  - o and O
+  - H, M, L
+  - W, E, B
+  - Ctrl+u and ctrl+d
+  - Refactor keyboard shortcuts
+  - Number + gg
+  - y and yy (and y with all motions) and p and P
+  - d and dd and c and cc and S (along with dw, de, db, cw, ce, cb, etc.)
+  - r and R
+  - x and s
+  - J
+  - u and ctrl+r
+  - Visual mode o and O
+  - >> and << and insert mode Ctrl+t and ctrl+d and visual mode > and <
+  - Ctrl+i and ctrl+o and g; and g,
+  - Searching, finding, and replacing
+  - Record macros
+- Demos
+  - Some sort of exploit dev with capstone and unicorn
+  - Custom parser (printf formula?)
+  - Charts
+  - Change overall site font and colors
+- Decorate
+  - Logo
+  - Favicon
+  - Twitter preview image
+- Documentation
+  - README
+    - Description and introduction 
+    - Screenshots and/or video
+    - API doc for formula programming
+    - How to read the code guide
+    - Acknowledgments
+  - Tutorial
+- Bugs
+  - Cannot select on mobile
+    - Is this necessary to fix?
+  - Scrolling up or left with selection doesn't work, scrolling down and right
+    only kind of works
+    - Will be fixed automatically when lazy scrolling
+  - Dialog X button is not square
+    - `<Button>` square attribute doesn't work because the button is mounted
+      with `display: none`, and therefore has zero width and height at mount
+      time
+    - Using `<Button>` has too much shadow
+  - Context menu does not activate on iOS
+    - Manually have to detect long press
