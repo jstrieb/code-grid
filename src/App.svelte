@@ -149,6 +149,7 @@
               style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center; gap: 0.25ch;"
             >
               {#each combo.split("+") as key, i}
+                <!-- TODO: Replace with snippet -->
                 <kbd>{@html prettyPrintKey(key)}</kbd
                 >{#if i < combo.split("+").length - 1}+{/if}
               {/each} &ndash; {name}

@@ -462,7 +462,7 @@ export function keyboardHandler(e, globals) {
   }
 }
 
-function keyEventToString(e) {
+export function keyEventToString(e) {
   const key = e.key.toLocaleLowerCase();
   switch (key) {
     case "control":
