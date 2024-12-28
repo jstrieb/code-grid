@@ -9,6 +9,10 @@ export const keybindings = {
   l: "Move Selection Right",
   k: "Move Selection Up",
   j: "Move Selection Down",
+  // TODO: For w, b, and e, move selections with wrapping
+  b: "Move Selection Left",
+  w: "Move Selection Right",
+  e: "Move Selection Right",
   v: "Visual Mode",
   "Ctrl+v": "Select Column",
   "Shift+v": "Select Row",
