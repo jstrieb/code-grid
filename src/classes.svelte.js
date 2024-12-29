@@ -15,6 +15,8 @@ export class State {
   mode = $state("normal");
   keyQueue = $state([]);
   helpOpen = $state(false);
+  editorOpen = $state(false);
+  formulaCode = $state("");
 
   constructor(sheets) {
     this.sheets = sheets;

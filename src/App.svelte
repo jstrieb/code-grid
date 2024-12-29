@@ -69,6 +69,7 @@
 
 <script>
   import Button from "./Button.svelte";
+  import CodeEditor from "./CodeEditor.svelte";
   import Details from "./Details.svelte";
   import Dialog from "./Dialog.svelte";
   import ShyMenu from "./ShyMenu.svelte";
@@ -92,6 +93,15 @@
   );
   let table = $state();
   let startHeight = $state(0);
+
+  // Focus the editor when the dialog is opened
+  // TODO: Is there a better place to put this?
+  let editor = $state();
+  $effect(() => {
+    if (globals.editorOpen) {
+      editor?.focus();
+    }
+  });
 
   function prettyPrintKey(key) {
     switch (key) {
@@ -134,6 +144,10 @@
   -->
   <Table bind:globals bind:table --width="auto" --height="auto" />
 </div>
+
+<Dialog bind:open={globals.editorOpen}>
+  <CodeEditor bind:editor bind:code={globals.formulaCode} />
+</Dialog>
 
 <Dialog bind:open={globals.helpOpen}>
   <div
@@ -185,6 +199,10 @@
           {
             text: "Help",
             onclick: () => (globals.helpOpen = !globals.helpOpen),
+          },
+          {
+            text: "Code Editor",
+            onclick: () => (globals.editorOpen = !globals.editorOpen),
           },
           {
             text: "Code Grid Source Code",

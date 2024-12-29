@@ -23,6 +23,7 @@ export const keybindings = {
   "Shift+^": "Go to Start of Row",
   "Shift+$": "Go to End of Row",
   "Shift+?": "Toggle Help",
+  "=": "Toggle Code Editor",
   g: "Go To",
   "Shift+g": "Go to Bottom",
   // Unpressable keys added just for documentation
@@ -32,6 +33,10 @@ export const keybindings = {
 };
 
 export const actions = {
+  "Toggle Code Editor": (e, globals) => {
+    globals.editorOpen = !globals.editorOpen;
+  },
+
   "Select All": (e, globals) => {
     globals.mode = "visual";
     globals.setSelectionStart("cell", { x: 0, y: 0 });
