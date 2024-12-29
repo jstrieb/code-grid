@@ -107,4 +107,3 @@
     - Using `<Button>` has too much shadow
   - Context menu does not activate on iOS
     - Manually have to detect long press
-  - Dialog drag dots only show up when other dialog is open

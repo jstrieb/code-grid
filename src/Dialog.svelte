@@ -115,6 +115,14 @@
   let pointerStart = $state();
   let dragging = $state(false);
 
+  // If the dots pattern is redeclared (when there are multiple <Dialog>
+  // components, for example), and the first one is inside of a `display:
+  // none` element, then they will not render. Giving each a unique ID
+  // solves this problem.
+  //
+  // TODO: Find better way to do this?
+  const dotsId = Math.floor(Math.random() * 1024 * 1024);
+
   function topPointerDown(e) {
     e.target.addEventListener("pointermove", topPointerMove);
     e.target.setPointerCapture(e.pointerId);
@@ -180,7 +188,7 @@
     <svg class="drag" onpointerdown={topPointerDown} onpointerup={topPointerUp}>
       <defs>
         <pattern
-          id="dots"
+          id="dots_{dotsId}"
           x="0"
           y="0"
           width="6"
@@ -205,7 +213,7 @@
       <rect
         width="100%"
         height="100%"
-        fill="url(#dots)"
+        fill="url(#dots_{dotsId})"
         style="stroke: var(--bg-color); stroke-width: 2px;"
       ></rect>
     </svg>
