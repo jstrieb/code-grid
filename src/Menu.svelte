@@ -16,7 +16,7 @@
   button {
     border: 0;
     cursor: pointer;
-    padding: 0.1em 0.2em;
+    padding: 0.25em;
     text-align: left;
     white-space: pre;
     overflow: hidden;
