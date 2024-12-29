@@ -44,10 +44,10 @@
 </style>
 
 <script>
-  const { entries } = $props();
+  let { entries, menu = $bindable() } = $props();
 </script>
 
-<div class="menu">
+<div class="menu" bind:this={menu}>
   {#each entries as entry}
     <button onclick={entry.onclick}>{entry.text}</button>
   {/each}

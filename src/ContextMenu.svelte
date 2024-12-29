@@ -48,96 +48,59 @@
 </style>
 
 <script>
-  import Menu from "./Menu.svelte";
-
-  import { keyEventToString } from "./keyboard.js";
+  import ShyMenu from "./ShyMenu.svelte";
 
   import { tick } from "svelte";
 
-  const { menu, clickable, children, ...rest } = $props();
+  const {
+    menu: contextMenu,
+    clickable: rightClickable,
+    children,
+    ...rest
+  } = $props();
 
-  const globalHideEvents = ["pointerdown", "keydown", "resize"];
-
-  let show = $state(false);
   let menuX = $state(),
     menuY = $state(),
     menuWidth = $state(0),
     menuHeight = $state(0),
     menuElement = $state();
 
-  function hasAncestor(node, check) {
-    if (node == null) return false;
-    if (node.parentNode == check) return true;
-    return hasAncestor(node.parentNode, check);
-  }
+  function wrap(handler) {
+    return async (e) => {
+      handler(e);
 
-  function hide(e) {
-    switch (event.type) {
-      case "keydown":
-        switch (keyEventToString(e)) {
-          case undefined:
-          case "tab":
-          case "Shift+tab":
-            // TODO: Handle focus within context menu
-            return;
-        }
-        break;
-      case "pointerdown":
-        if (hasAncestor(e.target, menuElement)) {
-          return;
-        }
-    }
-    e.preventDefault();
-    show = false;
-    globalHideEvents.forEach((type) => window.removeEventListener(type, hide));
-  }
+      // Wait for the menu to be created and populated so we can get its height
+      await tick();
 
-  async function handler(e) {
-    show = true;
-    e.preventDefault();
-    globalHideEvents.forEach((type) => window.addEventListener(type, hide));
-
-    // Wait for the menu to be created and populated so we can get its height
-    await tick();
-
-    for (
-      menuX = e.clientX;
-      menuX + menuWidth > document.body.offsetWidth && menuX > menuWidth;
-      menuX -= menuWidth
-    ) {}
-    for (
-      menuY = e.clientY;
-      menuY + menuHeight > document.body.offsetHeight && menuY > menuHeight;
-      menuY -= menuHeight
-    ) {}
+      for (
+        menuX = e.clientX;
+        menuX + menuWidth > document.body.offsetWidth && menuX > menuWidth;
+        menuX -= menuWidth
+      ) {}
+      for (
+        menuY = e.clientY;
+        menuY + menuHeight > document.body.offsetHeight && menuY > menuHeight;
+        menuY -= menuHeight
+      ) {}
+    };
   }
 </script>
 
-{#snippet menuBuilder(menuData)}
-  <Menu
-    entries={menuData.map((entry) => {
-      const onclick = entry.onclick;
-      entry.onclick = (e) => {
-        onclick(e);
-        hide(e);
-      };
-      return entry;
-    })}
-  />
-{/snippet}
-
-{#if show}
-  <div
-    bind:this={menuElement}
-    class="menu"
-    style:--menuX="{menuX}px"
-    style:--menuY="{menuY}px"
-    bind:offsetWidth={menuWidth}
-    bind:offsetHeight={menuHeight}
-    {...rest}
-  >
-    {@render menu?.(menuBuilder)}
-  </div>
-{/if}
-{@render clickable?.(handler)}
-{@render children?.()}
+<ShyMenu ...rest>
+  {#snippet menu(builder)}
+    <div
+      bind:this={menuElement}
+      class="menu"
+      style:--menuX="{menuX}px"
+      style:--menuY="{menuY}px"
+      bind:offsetWidth={menuWidth}
+      bind:offsetHeight={menuHeight}
+    >
+      {@render contextMenu?.(builder)}
+    </div>
+  {/snippet}
+  {#snippet clickable(handler)}
+    {@render rightClickable?.(wrap(handler))}
+  {/snippet}
+  {@render children?.()}
+</ShyMenu>
