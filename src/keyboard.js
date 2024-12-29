@@ -381,6 +381,15 @@ export function keyboardHandler(e, globals) {
   const key = keyEventToString(e);
   switch (key) {
     case "escape":
+      if (
+        ["input", "textarea"].includes(e.target?.tagName.toLocaleLowerCase()) ||
+        e.target.isContentEditable
+      ) {
+        globals.mode = "normal";
+        e.target?.blur();
+        globals.keyQueue = [];
+        break;
+      }
     case "Ctrl+c":
       switch (globals.mode) {
         case "normal":
