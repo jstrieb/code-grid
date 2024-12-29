@@ -1,6 +1,5 @@
 # Plan
 
-- Saturday, December 28
 - Sunday, December 29
 - Monday, December 30
 - Tuesday, December 31
@@ -33,6 +32,7 @@
   - Work on multiple monitors
   - XSS and phishing disclaimer
   - Delete buttons should delete selected rows
+  - File menu at the top
 - Window system
   - Track state
     - List of Windows
@@ -43,7 +43,6 @@
       - Title
       - HTML contents
       - Snapped or free
-  - Start menu to open new windows
   - List open and minimized windows at the bottom
   - Snap windows
 - Code editor

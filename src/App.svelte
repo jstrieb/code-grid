@@ -38,6 +38,15 @@
     justify-content: flex-start;
     align-items: center;
     gap: 1ch;
+    position: relative;
+  }
+
+  .startmenu {
+    background: none;
+    position: absolute;
+    top: calc(-1 * var(--height));
+    width: 300px;
+    max-width: 100vw - 2em;
   }
 
   .status {
@@ -62,6 +71,7 @@
   import Button from "./Button.svelte";
   import Details from "./Details.svelte";
   import Dialog from "./Dialog.svelte";
+  import ShyMenu from "./ShyMenu.svelte";
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
 
@@ -81,6 +91,7 @@
     ]),
   );
   let table = $state();
+  let startHeight = $state(0);
 
   function prettyPrintKey(key) {
     switch (key) {
@@ -163,11 +174,34 @@
 </Dialog>
 
 <div class="bottombar">
-  <Button
-    square
-    style="min-width: 1.5em;"
-    onclick={() => (globals.helpOpen = !globals.helpOpen)}>?</Button
-  >
+  <ShyMenu>
+    {#snippet menu(builder)}
+      <div
+        class="startmenu"
+        bind:offsetHeight={startHeight}
+        style:--height="{startHeight}px"
+      >
+        {@render builder([
+          {
+            text: "Help",
+            onclick: () => (globals.helpOpen = !globals.helpOpen),
+          },
+          {
+            text: "Code Grid Source Code",
+            onclick: () => {
+              Object.assign(document.createElement("a"), {
+                href: "https://github.com/jstrieb/code-grid",
+                target: "_blank",
+              }).click();
+            },
+          },
+        ])}
+      </div>
+    {/snippet}
+    {#snippet clickable(handler)}
+      <Button square onclick={handler}>=</Button>
+    {/snippet}
+  </ShyMenu>
   <div style="flex-grow: 1;"><!-- Spacer --></div>
   <div class="status">
     <span>{globals.keyQueue.join("")}</span>
