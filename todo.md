@@ -1,8 +1,5 @@
 # Plan
 
-- Sunday, December 29
-- Monday, December 30
-- Tuesday, December 31
 - Wednesday, January 1
 - Thursday, January 2
 - Friday, January 3

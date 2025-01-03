@@ -96,30 +96,31 @@
 
   // Focus the editor when the dialog is opened
   // TODO: Is there a better place to put this?
+  // TODO: If the editor is open, but the text area is defocused, focus on the
+  // text area when the equals key is pressed
   let editor = $state();
   $effect(() => {
     if (globals.editorOpen) {
       editor?.focus();
     }
   });
-
-  function prettyPrintKey(key) {
-    switch (key) {
-      case "arrowleft":
-        return "&larr;";
-      case "arrowright":
-        return "&rarr;";
-      case "arrowup":
-        return "&uarr;";
-      case "arrowdown":
-        return "&darr;";
-    }
-    if (key.length > 1) {
-      return key[0].toLocaleUpperCase() + key.slice(1);
-    }
-    return key;
-  }
 </script>
+
+{#snippet printKey(key)}
+  {#if key == "arrowleft"}
+    &larr;
+  {:else if key == "arrowright"}
+    &rarr;
+  {:else if key == "arrowup"}
+    &uarr;
+  {:else if key == "arrowdown"}
+    &darr;
+  {:else if key.length > 1}
+    {key[0].toLocaleUpperCase() + key.slice(1)}
+  {:else}
+    {key}
+  {/if}
+{/snippet}
 
 <svelte:window onkeydown={(e) => keyboardHandler(e, globals)} />
 
@@ -145,7 +146,7 @@
   <Table bind:globals bind:table --width="auto" --height="auto" />
 </div>
 
-<Dialog bind:open={globals.editorOpen}>
+<Dialog bind:open={globals.editorOpen} style="overflow: hidden;">
   <CodeEditor bind:editor bind:code={globals.formulaCode} />
 </Dialog>
 
@@ -172,7 +173,7 @@
             >
               {#each combo.split("+") as key, i}
                 <!-- TODO: Replace with snippet -->
-                <kbd>{@html prettyPrintKey(key)}</kbd
+                <kbd>{@render printKey(key)}</kbd
                 >{#if i < combo.split("+").length - 1}+{/if}
               {/each} &ndash; {name}
             </div>
