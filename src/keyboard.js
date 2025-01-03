@@ -393,7 +393,23 @@ export function keyboardHandler(e, globals) {
     case "Ctrl+c":
       switch (globals.mode) {
         case "normal":
-          globals.deselect();
+          switch (globals.selected.type) {
+            case "cell":
+              globals.deselect();
+              break;
+            case "row":
+              globals.setSelectionStart("cell", {
+                x: 0,
+                y: globals.selected.start,
+              });
+              break;
+            case "col":
+              globals.setSelectionStart("cell", {
+                x: globals.selected.start,
+                y: 0,
+              });
+              break;
+          }
           break;
         case "insert":
           globals.mode = "normal";
