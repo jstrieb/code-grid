@@ -12,7 +12,7 @@ import {
 } from "./parsers.js";
 
 class Expression {
-  eval(rows, r, c) {
+  evaluate(rows, r, c) {
     throw new Error("Not yet implemented");
   }
 }

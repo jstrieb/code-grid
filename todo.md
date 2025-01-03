@@ -1,7 +1,5 @@
 # Plan
 
-- Wednesday, January 1
-- Thursday, January 2
 - Friday, January 3
 - Saturday, January 4
 - Sunday, January 5
@@ -33,7 +31,7 @@
 - Window system
   - Track state
     - List of Windows
-    - Window position
+    - Window position (x, y)
     - Per window
       - Open/closed
       - Minimized
@@ -42,15 +40,19 @@
       - Snapped or free
   - List open and minimized windows at the bottom
   - Snap windows
+  - Focus order for z-index stacking
 - Code editor
   - Syntax highlighting
   - Auto-complete quotes, parentheses, etc.
   - Automatic indent
 - Formula processing
-  - Formula parsing
   - Rederivable stores
   - "symbols" in formulas
   - References across sheets in formulas
+- Local storage
+  - Save sheets
+  - Load sheets
+  - Display tutorial on first visit
 - Keyboard shortcuts
   - Navigate windows/sheets
     - gt and gT
