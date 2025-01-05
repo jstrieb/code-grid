@@ -81,7 +81,7 @@
 
   let globals = $state(
     new State([
-      new Sheet("Sheet 1", 18, 18, (i, j) => i * 18 + j),
+      new Sheet("Sheet 1", 18, 18, (i, j) => undefined),
       new Sheet("Other Sheet", 35, 10, (i, j) => `${i},${j}`),
       new Sheet(
         "Sheet three with a very long name",

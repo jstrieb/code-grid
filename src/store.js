@@ -45,7 +45,7 @@ export function rederivable(init_value) {
       // Calling valuePromise.then with f ensures a total ordering of the
       // updates.
       valuePromise = valuePromise
-        .then(async () => await f(values, set, update))
+        .then(() => f(values, set, update))
         .then((r) => {
           cleanup = r;
         })

@@ -1,3 +1,5 @@
+import { functions } from "./formula-functions.svelte.js";
+import { sum as arraySum, undefinedArgsToIdentity } from "./helpers.js";
 import {
   str,
   regex,
@@ -12,8 +14,25 @@ import {
 } from "./parsers.js";
 
 class Expression {
-  evaluate(rows, r, c) {
+  // Return a concrete value from an expression given the values in the other
+  // rows and columns.
+  compute(rows, r, c) {
     throw new Error("Not yet implemented");
+  }
+}
+
+class ExpressionValue {
+  thunk;
+  refs;
+  numRefArgs;
+
+  constructor(thunk, refs, numRefArgs = undefined) {
+    this.thunk = thunk;
+    this.refs = refs;
+    this.numRefArgs = numRefArgs;
+    if (this.numRefArgs == null) {
+      this.numRefArgs = arraySum(refs.map(({ numRefArgs: n }) => n));
+    }
   }
 }
 
@@ -25,6 +44,16 @@ class Function extends Expression {
     super();
     this.name = name;
     this.args = Array.from(args);
+  }
+
+  compute(rows, r, c) {
+    const name = this.name.toLocaleLowerCase();
+    const f = functions[name];
+    if (f == null) {
+      throw new Error(`"${name}" is not a function`);
+    }
+    const refs = this.args.map((a) => a.compute(rows, r, c));
+    return new ExpressionValue(f, refs);
   }
 }
 
@@ -64,6 +93,24 @@ class BinaryOperation extends Expression {
     super();
     this.ast = Array.from(ast);
   }
+
+  compute(rows, r, c) {
+    const thunk = (...args) => {
+      this.ast
+        .filter((x) => typeof x === "string")
+        .forEach((op) => {
+          const x = args.shift();
+          const y = args.shift();
+          args.unshift(BinaryOperation.operations[op](x, y));
+        });
+      const [result] = args;
+      return result;
+    };
+    const refs = this.ast
+      .filter((x) => x?.compute)
+      .map((x) => x.compute(rows, r, c));
+    return new ExpressionValue(undefinedArgsToIdentity(thunk), refs);
+  }
 }
 
 class UnaryOperation extends Expression {
@@ -77,8 +124,14 @@ class UnaryOperation extends Expression {
 
   constructor(operator, operand) {
     super();
-    this.operator = this.operations[operator];
+    this.operator = UnaryOperation.operations[operator];
     this.operand = operand;
+  }
+
+  compute(rows, r, c) {
+    const thunk = (x) => this.operator(x);
+    const refs = [this.operand.compute(rows, r, c)];
+    return new ExpressionValue(undefinedArgsToIdentity(thunk), refs);
   }
 }
 
@@ -90,6 +143,26 @@ class Ref extends Expression {
     super();
     this.r = r;
     this.c = c;
+  }
+
+  compute(rows, r, c) {
+    let row;
+    if (this.r == null) {
+      row = r;
+    } else if (this.r.relative == null) {
+      row = this.r.absolute;
+    } else {
+      row = r + this.r.relative;
+    }
+    let col;
+    if (this.c == null) {
+      col = c;
+    } else if (this.c.relative == null) {
+      col = this.c.absolute;
+    } else {
+      col = c + this.c.relative;
+    }
+    return new ExpressionValue((x) => x, [rows[row][col]], 1);
   }
 }
 
@@ -106,6 +179,48 @@ class Range extends Expression {
     this.r2 = r2;
     this.c2 = c2;
   }
+
+  compute(rows, r, c) {
+    let startRow;
+    if (this.r1 == null) {
+      startRow = r;
+    } else if (this.r1.relative == null) {
+      startRow = this.r1.absolute;
+    } else {
+      startRow = r + this.r1.relative;
+    }
+    let startCol;
+    if (this.c1 == null) {
+      startCol = c;
+    } else if (this.c1.relative == null) {
+      startCol = this.c1.absolute;
+    } else {
+      startCol = c + this.c1.relative;
+    }
+    let endRow;
+    if (this.r2 == null) {
+      endRow = r;
+    } else if (this.r2.relative == null) {
+      endRow = this.r2.absolute;
+    } else {
+      endRow = r + this.r2.relative;
+    }
+    let endCol;
+    if (this.c2 == null) {
+      endCol = c;
+    } else if (this.c2.relative == null) {
+      endCol = this.c2.absolute;
+    } else {
+      endCol = c + this.c2.relative;
+    }
+
+    const thunk = (...args) => args;
+    const refs = rows
+      .slice(startRow, endRow + 1)
+      .map((r) => r.slice(startCol, endCol + 1))
+      .flat();
+    return new ExpressionValue(thunk, refs, refs.length);
+  }
 }
 
 class Primitive extends Expression {
@@ -114,6 +229,10 @@ class Primitive extends Expression {
   constructor(n) {
     super();
     this.value = n;
+  }
+
+  compute() {
+    return new ExpressionValue(() => this.value, []);
   }
 }
 

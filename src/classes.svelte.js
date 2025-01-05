@@ -1,4 +1,8 @@
-import { writable, get } from "svelte/store";
+import { formula } from "./formula.js";
+import { ParseError } from "./parsers.js";
+import { rederivable } from "./store.js";
+
+import { get } from "svelte/store";
 
 const DEFAULT_WIDTH = 56,
   DEFAULT_HEIGHT = 24;
@@ -159,6 +163,48 @@ export class State {
   }
 }
 
+function flattenArgs(computed) {
+  if (computed?.refs == null) {
+    return computed.value;
+  }
+  return (
+    computed.refs
+      .map((r) => flattenArgs(r))
+      .flat()
+      // Hack for detecting stores instead of primitive values
+      .filter((r) => r?.subscribe != null)
+  );
+}
+
+function flattenComputedToFunction(computed) {
+  if (computed?.refs == null) {
+    return (...args) => args;
+  }
+  let thunk = computed.thunk ?? ((...args) => args);
+  let refArgsCounts = computed.refs.map((r) => r?.numRefArgs ?? 1);
+  return async (...args) => {
+    let offset = 0;
+    // Call the thunk with the correct args from the flattened list. Use `.call`
+    // and `.apply` to pass the correct `this` value.
+    return await thunk.apply(
+      this,
+      (
+        await Promise.all(
+          computed.refs.map((r, i) => {
+            const oldOffset = offset;
+            offset += refArgsCounts[i];
+            // Recurse with the relevant portion of the flattened arguments list
+            return flattenComputedToFunction.call(
+              this,
+              r,
+            )(...args.slice(oldOffset, offset));
+          }),
+        )
+      ).flat(),
+    );
+  };
+}
+
 export class Sheet {
   name = $state();
   cells = $state();
@@ -171,10 +217,83 @@ export class Sheet {
     this.cells = new Array(rows)
       .fill()
       .map((_, i) =>
-        new Array(cols).fill().map((_, j) => new Cell(initial(i, j))),
+        new Array(cols).fill().map((_, j) => this.newCell(initial(i, j), i, j)),
       );
     this.widths = new Array(cols).fill(DEFAULT_WIDTH);
     this.heights = new Array(rows).fill(DEFAULT_HEIGHT);
+  }
+
+  newCell(initialValue, row, col) {
+    const cell = new Cell(initialValue, row, col);
+
+    // Having this effect outside of the Cell.svelte file means that we can
+    // lazily render cells, and still have off-screen cell values be updated.
+    $effect(() => {
+      cell.style = "";
+      cell.errorText = undefined;
+      cell.element = undefined;
+
+      if (cell.formula == null) {
+        cell.value.rederive([], (_, set) => set(undefined));
+        return;
+      }
+
+      try {
+        const parsed = formula.parse(cell.formula);
+        const computed = parsed.compute(this.cells, row, col);
+        cell.value.rederive(
+          flattenArgs(computed),
+          (dependencyValues, set, update) => {
+            let _this = {
+              row,
+              col,
+              set,
+              style: cell.style,
+              element: undefined,
+            };
+            flattenComputedToFunction
+              .call(
+                _this,
+                computed,
+              )(...dependencyValues)
+              .then((result) => {
+                update((old) => {
+                  // TODO: Limit number of updates
+
+                  // Svelte implementation of writable stores (from which
+                  // rederivable stores inherit) does not check for approximate
+                  // floating point equality when determining if dependents
+                  // should refresh. Doing so here prevents spurious cyclic
+                  // updates as values converge.
+                  if (
+                    Number.isFinite(old) &&
+                    Number.isFinite(result) &&
+                    Math.abs(old - result) < Number.EPSILON
+                  ) {
+                    return old;
+                  }
+                  return result;
+                });
+                cell.style = _this.style;
+                cell.element = _this.element;
+                cell.errorText = _this.errorText;
+              })
+              .catch((e) => {
+                cell.errorText = `Error: ${e.message}`;
+              });
+          },
+        );
+      } catch (e) {
+        if (!(e instanceof ParseError)) {
+          cell.errorText = `Error: ${e.message}`;
+          // TODO: Remove?
+          console.warn(e);
+        }
+        cell.value.rederive([], (_, set) => set(cell.formula));
+      }
+    });
+
+    return cell;
   }
 
   addRows(n, start = this.heights.length) {
@@ -189,8 +308,10 @@ export class Sheet {
       0,
       ...new Array(n)
         .fill()
-        .map(() =>
-          new Array(this.widths.length).fill().map(() => new Cell(undefined)),
+        .map((_, i) =>
+          new Array(this.widths.length)
+            .fill()
+            .map((_, j) => newCell(undefined, i, j)),
         ),
     );
   }
@@ -207,11 +328,11 @@ export class Sheet {
       return this.deleteCols(-n, arguments[1]);
     }
     this.widths.splice(start, 0, ...new Array(n).fill(DEFAULT_WIDTH));
-    this.cells.map((row) =>
+    this.cells.map((row, i) =>
       row.splice(
         start,
         0,
-        ...new Array(n).fill().map(() => new Cell(undefined)),
+        ...new Array(n).fill().map((_, j) => newCell(undefined, i, j)),
       ),
     );
   }
@@ -244,6 +365,10 @@ export class Sheet {
 
 export class Cell {
   value = $state();
+  style = $state("");
+  errorText = $state();
+  element = $state();
+  formula = $state();
   td = $state();
   topBorder = $state(false);
   bottomBorder = $state(false);
@@ -252,7 +377,8 @@ export class Cell {
   editing = $state(false);
 
   constructor(value) {
-    this.value = writable(value);
+    this.formula = value;
+    this.value = rederivable(value);
   }
 
   get() {

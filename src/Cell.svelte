@@ -144,8 +144,12 @@
 
 <script>
   let { cell, row, col, width, height, globals = $bindable() } = $props();
-  let value = $derived(cell.value);
   let selected = $derived(globals.selected);
+  let value = $derived(cell.value);
+  // TODO: Use these variables
+  let errorText = $derived(cell.errorText);
+  let style = $derived(cell.style);
+  let element = $derived(cell.element);
 
   let innerNode = $state(undefined);
   $effect(() => {
@@ -209,7 +213,7 @@
   {#if cell.editing}
     <textarea
       use:focus
-      bind:value={$value}
+      bind:value={cell.formula}
       onblur={() => {
         cell.editing = false;
       }}

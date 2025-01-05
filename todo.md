@@ -1,6 +1,5 @@
 # Plan
 
-- Friday, January 3
 - Saturday, January 4
 - Sunday, January 5
 - Monday, January 6
@@ -46,7 +45,6 @@
   - Auto-complete quotes, parentheses, etc.
   - Automatic indent
 - Formula processing
-  - Rederivable stores
   - "symbols" in formulas
   - References across sheets in formulas
 - Local storage
