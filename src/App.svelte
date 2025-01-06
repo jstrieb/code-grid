@@ -80,16 +80,7 @@
   import { keyboardHandler, keybindings } from "./keyboard.js";
 
   let globals = $state(
-    new State([
-      new Sheet("Sheet 1", 18, 18, (i, j) => undefined),
-      new Sheet("Other Sheet", 35, 10, (i, j) => `${i},${j}`),
-      new Sheet(
-        "Sheet three with a very long name",
-        100,
-        300,
-        (i, j) => `${i},${j}`,
-      ),
-    ]),
+    new State([new Sheet("Sheet 1", 10, 10, (i, j) => undefined)]),
   );
   let table = $state();
   let startHeight = $state(0);
