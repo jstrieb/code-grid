@@ -1,7 +1,5 @@
 # Plan
 
-- Saturday, January 4
-- Sunday, January 5
 - Monday, January 6
 - Tuesday, January 7
 - Wednesday, January 8

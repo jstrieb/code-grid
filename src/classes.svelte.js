@@ -1,4 +1,5 @@
 import { formula } from "./formula.js";
+import { debounce } from "./helpers.js";
 import { ParseError } from "./parsers.js";
 import { rederivable } from "./store.js";
 
@@ -226,6 +227,9 @@ export class Sheet {
   newCell(initialValue, row, col) {
     const cell = new Cell(initialValue, row, col);
 
+    const maxUpdates = 1000;
+    let updateCount = 0;
+    const debouncedResetUpdateCount = debounce(() => (updateCount = 0), 100);
     // Having this effect outside of the Cell.svelte file means that we can
     // lazily render cells, and still have off-screen cell values be updated.
     $effect(() => {
@@ -258,7 +262,15 @@ export class Sheet {
               )(...dependencyValues)
               .then((result) => {
                 update((old) => {
-                  // TODO: Limit number of updates
+                  // TODO: Find a better trigger for resets than just waiting
+                  // after updates finish. If, for example, a self-referential
+                  // cell's async formula takes longer than the debounce time to
+                  // compute, it may run forever.
+                  debouncedResetUpdateCount();
+                  // Do a finite number of iterations if we're not converging.
+                  if (updateCount++ > maxUpdates) {
+                    return old;
+                  }
 
                   // Svelte implementation of writable stores (from which
                   // rederivable stores inherit) does not check for approximate
