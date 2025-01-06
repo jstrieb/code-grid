@@ -32,6 +32,14 @@
     text-overflow: ellipsis;
   }
 
+  td .error {
+    /* Need to subtract 1 to prevent border overflow */
+    width: calc(var(--width) - 1px);
+    min-width: calc(var(--width) - 1px);
+    max-width: calc(var(--width) - 1px);
+    border: 1px solid var(--error-color);
+  }
+
   td .element {
     display: flex;
     overflow: hidden;
@@ -146,15 +154,14 @@
   let { cell, row, col, width, height, globals = $bindable() } = $props();
   let selected = $derived(globals.selected);
   let value = $derived(cell.value);
-  // TODO: Use these variables
   let errorText = $derived(cell.errorText);
   let style = $derived(cell.style);
   let element = $derived(cell.element);
 
   let innerNode = $state(undefined);
   $effect(() => {
-    innerNode?.replaceAllChildren?.();
-    innerNode?.appendChild?.($value);
+    innerNode?.replaceChildren?.();
+    innerNode?.appendChild?.(element);
   });
 
   $effect(() => {
@@ -177,6 +184,7 @@
   class:top={cell.topBorder}
   class:bottom={cell.bottomBorder}
   class:editing={cell.editing}
+  style={cell.editing ? undefined : style}
   onfocus={() => {
     /* TODO */
   }}
@@ -225,7 +233,9 @@
       autocomplete="off"
       spellcheck="false"
     ></textarea>
-  {:else if $value instanceof Element}
+  {:else if errorText != null}
+    <div class="text error">{errorText}</div>
+  {:else if element != null}
     <div bind:this={innerNode} class="element"></div>
   {:else}
     <div class="text">{$value}</div>

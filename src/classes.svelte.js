@@ -291,7 +291,7 @@ export class Sheet {
                 cell.errorText = _this.errorText;
               })
               .catch((e) => {
-                cell.errorText = `Error: ${e.message}`;
+                cell.errorText = `Error: ${e?.message ?? e}`;
               });
           },
         );
@@ -413,12 +413,12 @@ export class Cell {
     // because cell inner elements all have their width explicitly set. Changing
     // the width and re-measuring can result in inconsistent results. That is
     // why we create new <div>s instead of measuring existing ones.
-    const cell = this.get();
+    const cell = this.errorText != null ? this.errorText : this.get();
     let width = 5,
       height = 5;
-    if (cell instanceof Element) {
-      width = cell.scrollWidth;
-      height = cell.scrollHeight;
+    if (this.element != null) {
+      width = this.element.scrollWidth;
+      height = this.element.scrollHeight;
     } else if (cell != null) {
       const div = Object.assign(document.createElement("div"), {
         // Match padding of cell in Cell.svelte
@@ -429,7 +429,8 @@ export class Cell {
                 max-width: max-content;
                 min-height: max-content;
                 height: max-content;
-                max-height: max-content;`,
+                max-height: max-content; 
+                ${this.style ?? ""}`,
         innerText: cell.toString(),
       });
       document.body.append(div);
