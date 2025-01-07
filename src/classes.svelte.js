@@ -21,7 +21,43 @@ export class State {
   keyQueue = $state([]);
   helpOpen = $state(false);
   editorOpen = $state(false);
-  formulaCode = $state("");
+  formulaCode = $state(`// Examples of user-defined formula functions
+functions.factorial = (n) => {
+  if (n == 0) return 1;
+  return n * functions.factorial(n - 1);
+};
+
+// Formula functions that modify the containing element using "this" must be
+// declared with the "function" keyword - they cannot be arrow functions.
+functions.checkbox = function (label) {
+  let value = false;
+  this.element = Object.assign(document.createElement("label"), {
+    innerText: label,
+    style: "display: flex; align-items: center; gap: 1ch; margin: 0 0.5em;",
+  });
+  this.element.appendChild(
+    Object.assign(document.createElement("input"), {
+      type: "checkbox",
+      style: "appearance: auto;",
+      oninput: (e) => this.set(e.target.checked),
+    }),
+  );
+  return value;
+};
+
+// Formula functions can be async
+functions.crypto = async (ticker) => {
+  return await fetch("https://api.gemini.com/v1/pricefeed", {
+    cache: "force-cache",
+  })
+    .then((r) => r.json())
+    .then((l) =>
+      Number(
+        l.filter((o) => o.pair === ticker.toUpperCase() + "USD")[0].price,
+      ),
+    );
+};
+`);
 
   constructor(sheets) {
     this.sheets = sheets;
