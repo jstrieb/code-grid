@@ -65,6 +65,13 @@
     align-items: center;
     font-family: monospace, monospace;
   }
+
+  pre {
+    font-family: monospace, monospace;
+    white-space: pre;
+    margin-bottom: 1em;
+    tab-size: 4ch;
+  }
 </style>
 
 <script>
@@ -77,7 +84,7 @@
   import Tabs from "./Tabs.svelte";
 
   import { State, Sheet } from "./classes.svelte.js";
-  import { evalCode } from "./formula-functions.svelte.js";
+  import { evalCode, functions } from "./formula-functions.svelte.js";
   import { keyboardHandler, keybindings } from "./keyboard.js";
 
   let globals = $state(
@@ -191,7 +198,18 @@
     </Details>
     <Details>
       {#snippet summary()}Formula functions{/snippet}
-      <p>TODO</p>
+      <ul style:list-style="none">
+        {#each Object.keys(functions).sort() as formula}
+          <li>
+            <Details>
+              {#snippet summary()}<span style:font-family="monospace, monospace"
+                  >{formula}</span
+                >{/snippet}
+              <pre>{functions[formula]?.toString()}</pre>
+            </Details>
+          </li>
+        {/each}
+      </ul>
     </Details>
   </div>
 </Dialog>

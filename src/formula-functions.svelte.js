@@ -32,15 +32,6 @@ Object.getOwnPropertyNames(Math)
   .filter((n) => typeof Math[n] === "function")
   .forEach((n) => (functions[n] = undefinedArgsToIdentity(Math[n])));
 
-// Aliases
-functions.add = functions.sum;
-functions.plus = functions.sum;
-functions.times = functions.prod;
-functions.product = functions.prod;
-functions.mult = functions.prod;
-functions.average = functions.avg;
-functions.rand = functions.random;
-
 // Core functions
 functions.sum = undefinedArgsToIdentity((...args) =>
   args.reduce((i, j) => i + j, 0),
@@ -53,6 +44,15 @@ functions.avg = undefinedArgsToIdentity(
 );
 functions.randint = (n) => Math.floor(Math.random() * n);
 functions.if = (x, yes, no) => (x ? yes : no);
+
+// Aliases
+functions.add = functions.sum;
+functions.plus = functions.sum;
+functions.times = functions.prod;
+functions.product = functions.prod;
+functions.mult = functions.prod;
+functions.average = functions.avg;
+functions.rand = functions.random;
 
 // Miscellaneous utility functions
 functions.slider = function slider(min, max, step, value) {
