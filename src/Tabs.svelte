@@ -131,6 +131,9 @@
       {#snippet clickable(handler)}
         <label
           oncontextmenu={handler}
+          ondblclick={() => {
+            editTab = i;
+          }}
           class:selected={value == i}
           bind:this={elements[i]}
         >
