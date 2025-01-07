@@ -77,6 +77,7 @@
   import Tabs from "./Tabs.svelte";
 
   import { State, Sheet } from "./classes.svelte.js";
+  import { evalCode } from "./formula-functions.svelte.js";
   import { keyboardHandler, keybindings } from "./keyboard.js";
 
   let globals = $state(
@@ -94,6 +95,13 @@
     if (globals.editorOpen) {
       editor?.focus();
     }
+  });
+
+  let codeError = $state("");
+  $effect(() => {
+    evalCode(globals.formulaCode, (result) => {
+      codeError = result ?? "";
+    });
   });
 </script>
 
@@ -137,8 +145,18 @@
   <Table bind:globals bind:table --width="auto" --height="auto" />
 </div>
 
-<Dialog bind:open={globals.editorOpen} style="overflow: hidden;">
-  <CodeEditor bind:editor bind:code={globals.formulaCode} />
+<Dialog
+  bind:open={globals.editorOpen}
+  style="display: flex; flex-direction: column; align-items: stretch; overflow: hidden; gap: 0.25em;"
+>
+  <CodeEditor
+    bind:editor
+    bind:code={globals.formulaCode}
+    style="flex-grow: 1;"
+  />
+  {#if codeError}
+    <p style="white-space: pre; overflow-x: auto;">{codeError}</p>
+  {/if}
 </Dialog>
 
 <Dialog bind:open={globals.helpOpen}>

@@ -1,6 +1,31 @@
+import { debounce } from "./helpers.js";
+
+// Import required so code that is `eval`ed can modify formula functions and
+// use parser combinators. Do not remove, even though it appears "unused."
+import * as parsers from "./parsers.js";
 import { undefinedArgsToIdentity } from "./helpers.js";
 
 export let functions = $state({});
+
+export const evalCode = debounce((code, ret) => {
+  if (code == null) {
+    return ret();
+  }
+
+  // "Use" import so tree shaking doesn't consider it dead code. This usage must
+  // occur here – the "parsers" object is unavailable in the code if this is
+  // moved elsewhere.
+  {
+    let _ = parsers;
+  }
+
+  try {
+    eval(code);
+    return ret();
+  } catch (e) {
+    return ret(`Error: ${e.message}`);
+  }
+}, 500);
 
 // All JavaScript Math functions are available as formula functions
 Object.getOwnPropertyNames(Math)
