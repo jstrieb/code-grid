@@ -1,7 +1,5 @@
 # Plan
 
-- Monday, January 6
-- Tuesday, January 7
 - Wednesday, January 8
 - Thursday, January 9
   - Submit

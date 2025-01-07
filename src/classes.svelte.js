@@ -266,79 +266,88 @@ export class Sheet {
     const maxUpdates = 1000;
     let updateCount = 0;
     const debouncedResetUpdateCount = debounce(() => (updateCount = 0), 100);
-    // Having this effect outside of the Cell.svelte file means that we can
-    // lazily render cells, and still have off-screen cell values be updated.
-    $effect(() => {
-      cell.style = "";
-      cell.errorText = undefined;
-      cell.element = undefined;
+    // Call inside $effect.root since this can sometimes be called outside of
+    // component initialization (and outside of other tracking scopes). Creating
+    // our own tracking scope means we have to destroy it when we are done. For
+    // more, see:
+    // https://www.matsimon.dev/blog/svelte-in-depth-effect-root
+    //
+    // TODO: should the effect.root resulting cleanup function be saved and run?
+    $effect.root(() => {
+      // Having this effect outside of the Cell.svelte file means that we can
+      // lazily render cells, and still have off-screen cell values be updated.
+      $effect(() => {
+        cell.style = "";
+        cell.errorText = undefined;
+        cell.element = undefined;
 
-      if (cell.formula == null) {
-        cell.value.rederive([], (_, set) => set(undefined));
-        return;
-      }
-
-      try {
-        const parsed = formula.parse(cell.formula);
-        const computed = parsed.compute(this.cells, row, col);
-        cell.value.rederive(
-          flattenArgs(computed),
-          (dependencyValues, set, update) => {
-            let _this = {
-              row,
-              col,
-              set,
-              style: cell.style,
-              element: undefined,
-            };
-            flattenComputedToFunction
-              .call(
-                _this,
-                computed,
-              )(...dependencyValues)
-              .then((result) => {
-                update((old) => {
-                  // TODO: Find a better trigger for resets than just waiting
-                  // after updates finish. If, for example, a self-referential
-                  // cell's async formula takes longer than the debounce time to
-                  // compute, it may run forever.
-                  debouncedResetUpdateCount();
-                  // Do a finite number of iterations if we're not converging.
-                  if (updateCount++ > maxUpdates) {
-                    return old;
-                  }
-
-                  // Svelte implementation of writable stores (from which
-                  // rederivable stores inherit) does not check for approximate
-                  // floating point equality when determining if dependents
-                  // should refresh. Doing so here prevents spurious cyclic
-                  // updates as values converge.
-                  if (
-                    Number.isFinite(old) &&
-                    Number.isFinite(result) &&
-                    Math.abs(old - result) < Number.EPSILON
-                  ) {
-                    return old;
-                  }
-                  return result;
-                });
-                cell.style = _this.style;
-                cell.element = _this.element;
-                cell.errorText = _this.errorText;
-              })
-              .catch((e) => {
-                cell.errorText = `Error: ${e?.message ?? e}`;
-              });
-          },
-        );
-      } catch (e) {
-        if (!(e instanceof ParseError)) {
-          cell.errorText = `Error: ${e.message}`;
-          // TODO: Remove?
-          console.warn(e);
+        if (cell.formula == null) {
+          cell.value.rederive([], (_, set) => set(undefined));
+          return;
         }
-        cell.value.rederive([], (_, set) => set(cell.formula));
-      }
+
+        try {
+          const parsed = formula.parse(cell.formula);
+          const computed = parsed.compute(this.cells, row, col);
+          cell.value.rederive(
+            flattenArgs(computed),
+            (dependencyValues, set, update) => {
+              let _this = {
+                row,
+                col,
+                set,
+                style: cell.style,
+                element: undefined,
+              };
+              flattenComputedToFunction
+                .call(
+                  _this,
+                  computed,
+                )(...dependencyValues)
+                .then((result) => {
+                  update((old) => {
+                    // TODO: Find a better trigger for resets than just waiting
+                    // after updates finish. If, for example, a self-referential
+                    // cell's async formula takes longer than the debounce time to
+                    // compute, it may run forever.
+                    debouncedResetUpdateCount();
+                    // Do a finite number of iterations if we're not converging.
+                    if (updateCount++ > maxUpdates) {
+                      return old;
+                    }
+
+                    // Svelte implementation of writable stores (from which
+                    // rederivable stores inherit) does not check for approximate
+                    // floating point equality when determining if dependents
+                    // should refresh. Doing so here prevents spurious cyclic
+                    // updates as values converge.
+                    if (
+                      Number.isFinite(old) &&
+                      Number.isFinite(result) &&
+                      Math.abs(old - result) < Number.EPSILON
+                    ) {
+                      return old;
+                    }
+                    return result;
+                  });
+                  cell.style = _this.style;
+                  cell.element = _this.element;
+                  cell.errorText = _this.errorText;
+                })
+                .catch((e) => {
+                  cell.errorText = `Error: ${e?.message ?? e}`;
+                });
+            },
+          );
+        } catch (e) {
+          if (!(e instanceof ParseError)) {
+            cell.errorText = `Error: ${e.message}`;
+            // TODO: Remove?
+            console.warn(e);
+          }
+          cell.value.rederive([], (_, set) => set(cell.formula));
+        }
+      });
     });
 
     return cell;
@@ -359,7 +368,7 @@ export class Sheet {
         .map((_, i) =>
           new Array(this.widths.length)
             .fill()
-            .map((_, j) => newCell(undefined, i, j)),
+            .map((_, j) => this.newCell(undefined, i, j)),
         ),
     );
   }
@@ -380,7 +389,7 @@ export class Sheet {
       row.splice(
         start,
         0,
-        ...new Array(n).fill().map((_, j) => newCell(undefined, i, j)),
+        ...new Array(n).fill().map((_, j) => this.newCell(undefined, i, j)),
       ),
     );
   }
