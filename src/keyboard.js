@@ -18,12 +18,14 @@ export const keybindings = {
   "Shift+v": "Select Row",
   "Ctrl+a": "Select All",
   enter: "Edit",
+  "=": "Insert Equals",
   i: "Edit",
   0: "Go to Start of Row",
   "Shift+^": "Go to Start of Row",
   "Shift+$": "Go to End of Row",
   "Shift+?": "Toggle Help",
-  "=": "Toggle Code Editor",
+  ":": "Toggle Code Editor",
+  "Shift+:": "Toggle Code Editor",
   g: "Go To",
   "Shift+g": "Go to Bottom",
   // Unpressable keys added just for documentation
@@ -33,6 +35,36 @@ export const keybindings = {
 };
 
 export const actions = {
+  "Insert Equals": (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+        switch (globals.selected.type) {
+          case "cell":
+            const { x: col, y: row } = globals.selected.end;
+            globals.currentSheet.cells[row][col].formula = "=";
+            globals.currentSheet.cells[row][col].editing = true;
+            break;
+          // TODO: Edit first cell of row or column?
+        }
+        break;
+      case "visual":
+        switch (globals.selected.type) {
+          case "cell":
+            const { x: col, y: row } = globals.selected.start;
+            // TODO: Edit first cell of any selection?
+            if (
+              col == globals.selected.end.x &&
+              row == globals.selected.end.y
+            ) {
+              globals.currentSheet.cells[row][col].formula = "=";
+              globals.currentSheet.cells[row][col].editing = true;
+            }
+            break;
+        }
+        break;
+    }
+  },
+
   "Toggle Code Editor": (e, globals) => {
     globals.editorOpen = !globals.editorOpen;
   },
