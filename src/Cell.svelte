@@ -22,6 +22,7 @@
   }
 
   td .text,
+  td .element,
   td textarea {
     padding: 0.1em 0.2em;
   }

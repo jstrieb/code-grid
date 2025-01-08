@@ -100,3 +100,4 @@
     - Using `<Button>` has too much shadow
   - Context menu does not activate on iOS
     - Manually have to detect long press
+  - The bottom border of sheet tabs do not adjust after renaming

@@ -91,7 +91,7 @@
   let { globals = $bindable(), value = $bindable() } = $props();
   let tabs = $derived(globals.sheets.map((s) => s.name));
 
-  let elements = $state(new Array(tabs.length).fill());
+  let elements = $state(new Array(globals.sheets.length).fill());
   let scrollLeft = $state(0);
   let editTab = $state();
 
