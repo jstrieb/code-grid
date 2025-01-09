@@ -85,13 +85,61 @@
 
   import { State, Sheet } from "./classes.svelte.js";
   import { evalCode, functions } from "./formula-functions.svelte.js";
+  import { debounce } from "./helpers.js";
   import { keyboardHandler, keybindings } from "./keyboard.js";
 
   let globals = $state(
-    new State([new Sheet("Sheet 1", 10, 10, (i, j) => undefined)]),
+    load(atob(window.location.hash.slice(1) ?? "")) ??
+      new State([new Sheet("Sheet 1", 10, 10, (i, j) => undefined)]),
   );
   let table = $state();
   let startHeight = $state(0);
+
+  function load(dataString) {
+    if (!dataString) {
+      return undefined;
+    }
+    let data;
+    try {
+      data = JSON.parse(dataString);
+    } catch {
+      return undefined;
+    }
+    return State.load(data);
+  }
+
+  let dontSave = $state(false);
+  const save = debounce((data) => {
+    if (dontSave) {
+      dontSave = false;
+      return;
+    }
+    // TODO: Save to local storage
+    window.history.pushState(data, "", "#" + btoa(JSON.stringify(data)));
+  }, 1000);
+  $effect(() => {
+    save({
+      sheets: [
+        // Spreads necessary for reactivity
+        ...globals.sheets.map((sheet) => ({
+          name: sheet.name,
+          widths: [...sheet.widths],
+          heights: [...sheet.heights],
+          // TODO: Transpose for better compression
+          cells: [
+            ...sheet.cells.map((row) =>
+              row.map((cell) => ({
+                formula: cell.formula,
+                // TODO: Use for self-referential formulas
+                // value: cell.get(),
+              })),
+            ),
+          ],
+        })),
+      ],
+      formulaCode: globals.formulaCode,
+    });
+  });
 
   // Focus the editor when the dialog is opened
   // TODO: Is there a better place to put this?
@@ -128,7 +176,13 @@
   {/if}
 {/snippet}
 
-<svelte:window onkeydown={(e) => keyboardHandler(e, globals)} />
+<svelte:window
+  onkeydown={(e) => keyboardHandler(e, globals)}
+  onpopstate={(e) => {
+    dontSave = true;
+    globals = State.load(e.state);
+  }}
+/>
 
 <svelte:body
   onmousedown={(e) => {

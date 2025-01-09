@@ -1,6 +1,5 @@
 # Plan
 
-- Wednesday, January 8
 - Thursday, January 9
   - Submit
 
@@ -8,12 +7,9 @@
 
 - General
   - Move rows and columns
-  - Store sheet in URL
-    - Compression
+  - Compress sheet in URL
   - Project title
   - Undo/redo
-    - `window.history.{pushState,popState}`
-    - Update URL
   - Service worker for caching
   - Process formulas in web worker?
   - Lazily render cells
@@ -48,6 +44,7 @@
   - Load sheets
   - Display tutorial on first visit
 - Keyboard shortcuts
+  - u and ctrl+z and ctrl+r and ctrl+Z and ctrl+y
   - Navigate windows/sheets
     - gt and gT
     - i3 type key commands
@@ -64,7 +61,6 @@
   - r and R
   - x and s
   - J
-  - u and ctrl+r
   - Visual mode o and O
   - >> and << and insert mode Ctrl+t and ctrl+d and visual mode > and <
   - Ctrl+i and ctrl+o and g; and g,

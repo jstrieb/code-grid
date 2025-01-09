@@ -59,6 +59,24 @@ functions.crypto = async (ticker) => {
 };
 `);
 
+  static load(data) {
+    let result = new State(
+      data.sheets.map((sheet) => {
+        let s = new Sheet(
+          sheet.name,
+          sheet.heights.length,
+          sheet.widths.length,
+          (i, j) => sheet.cells[i][j].formula,
+        );
+        s.widths = sheet.widths;
+        s.heights = sheet.heights;
+        return s;
+      }),
+    );
+    result.formulaCode = data.formulaCode;
+    return result;
+  }
+
   constructor(sheets) {
     this.sheets = sheets;
   }
