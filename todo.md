@@ -9,7 +9,6 @@
   - Move rows and columns
   - Compress sheet in URL
   - Project title
-  - Undo/redo
   - Service worker for caching
   - Process formulas in web worker?
   - Lazily render cells
@@ -44,7 +43,6 @@
   - Load sheets
   - Display tutorial on first visit
 - Keyboard shortcuts
-  - u and ctrl+z and ctrl+r and ctrl+Z and ctrl+y
   - Navigate windows/sheets
     - gt and gT
     - i3 type key commands

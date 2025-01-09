@@ -28,6 +28,13 @@ export const keybindings = {
   "Shift+:": "Toggle Code Editor",
   g: "Go To",
   "Shift+g": "Go to Bottom",
+  "Ctrl+z": "Undo",
+  "Meta+z": "Undo",
+  u: "Undo",
+  "Ctrl+Shift+z": "Redo",
+  "Ctrl+y": "Redo",
+  "Meta+y": "Redo",
+  "Ctrl+r": "Redo",
   // Unpressable keys added just for documentation
   "g+g": "Go to Top",
   // TODO: Figure out how to not show keys that must be preceded by g such as
@@ -35,6 +42,14 @@ export const keybindings = {
 };
 
 export const actions = {
+  Undo: (e, globals) => {
+    window.history.back();
+  },
+
+  Redo: (e, globals) => {
+    window.history.forward();
+  },
+
   "Insert Equals": (e, globals) => {
     switch (globals.mode) {
       case "normal":
