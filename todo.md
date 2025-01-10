@@ -20,6 +20,7 @@
   - File menu at the top
   - CSV import and export
   - GitHub Actions workflow to build and deploy
+  - Python formulas using pyodide
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -43,6 +44,7 @@
 - Formula processing
   - "symbols" in formulas
   - References across sheets in formulas
+  - Refer to entire rows or entire columns like R1:R1 or C1:C3
 - Local storage
   - Save sheets
   - Load sheets
@@ -78,15 +80,15 @@
   - Twitter preview image
 - Documentation
   - README
-    - Description and introduction 
     - Screenshots and/or video
-    - API doc for formula programming
+    - Description and introduction 
     - Examples
-    - Known Issues
-    - Disclaimer
+    - API doc for formula programming
     - How it works
       - How to read the code guide
       - Cool implementation details
+    - Disclaimer
+    - Known Issues
     - Project Status
     - Contributor guide
     - Support the project
