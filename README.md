@@ -45,6 +45,7 @@ Code Grid do whatever you want. <!-- Maybe I'm too trusting. -->
 - TODO constrained optimization and mixed-integer linear programming using SCIP
 - TODO OpenCV
 - TODO Keystone and unicorn
+- TODO QPA
 
 # API Documentation
 
@@ -61,7 +62,7 @@ TODO
 ## Cool Code Stuff
 
 - The [SVG favicon uses
-  CSS](https://github.com/jstrieb/code-grid/blob/05a1545730555a671186717950bb758148161bab/public/favicon.svg#L2)
+  CSS](https://github.com/jstrieb/code-grid/blob/05a1545730555a671186717950bb758148161bab/public/favicon.svg?short_path=04e3b01#L2)
   to invert its own colors based on user light/dark-mode preferences.
 - Spreadsheet formulas are built on a custom Svelte store that is
   "[rederivable](https://github.com/jstrieb/code-grid/blob/05a1545730555a671186717950bb758148161bab/src/store.js)."
@@ -135,5 +136,5 @@ following organizations help me, as well as the general, Internet-using public:
 Thanks to [Logan Snow](https://github.com/lsnow99) for consulting on all manner
 of web esoterica, and for testing early versions of Code Grid.
 
-Thanks to [AJ Liu](https://www.linkedin.com/in/amyjl) for feedback on early
+Thanks to [Amy Liu](https://www.linkedin.com/in/amyjl) for feedback on early
 versions of Code Grid.
