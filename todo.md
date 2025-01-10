@@ -19,6 +19,7 @@
   - Delete buttons should delete selected rows
   - File menu at the top
   - CSV import and export
+  - GitHub Actions workflow to build and deploy
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -74,8 +75,6 @@
   - Charts
   - Change overall site font and colors
 - Decorate
-  - Logo
-  - Favicon
   - Twitter preview image
 - Documentation
   - README
