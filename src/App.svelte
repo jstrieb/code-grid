@@ -190,7 +190,7 @@
 />
 
 <svelte:body
-  onmousedown={(e) => {
+  onpointerdown={(e) => {
     // Only deselect if clicking outside of the table
     if (table.contains(e.target)) {
       return;

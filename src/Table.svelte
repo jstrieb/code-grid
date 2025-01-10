@@ -253,13 +253,13 @@
                 onfocus={() => {
                   /* TODO */
                 }}
-                onmouseover={(e) => {
+                onpointerover={(e) => {
                   if (e.buttons != 1 || selected.type != "col") {
                     return;
                   }
                   globals.setSelectionEnd(i);
                 }}
-                onmousedown={(e) => {
+                onpointerdown={(e) => {
                   if (e.buttons != 1) {
                     return;
                   }
@@ -305,13 +305,13 @@
                 onfocus={() => {
                   /* TODO */
                 }}
-                onmouseover={(e) => {
+                onpointerover={(e) => {
                   if (e.buttons != 1 || selected.type != "row") {
                     return;
                   }
                   globals.setSelectionEnd(i);
                 }}
-                onmousedown={(e) => {
+                onpointerdown={(e) => {
                   if (e.buttons != 1) {
                     return;
                   }

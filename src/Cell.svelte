@@ -192,7 +192,7 @@
   onfocus={() => {
     /* TODO */
   }}
-  onmouseover={(e) => {
+  onpointerover={(e) => {
     if (e.buttons != 1) {
       return;
     }
@@ -204,7 +204,7 @@
       globals.setSelectionEnd(col);
     }
   }}
-  onmousedown={(e) => {
+  onpointerdown={(e) => {
     if (e.buttons != 1) {
       return;
     }
