@@ -180,7 +180,12 @@
   onkeydown={(e) => keyboardHandler(e, globals)}
   onpopstate={(e) => {
     dontSave = true;
-    globals = State.load(e.state);
+    globals = Object.assign(State.load(e.state), {
+      currentSheetIndex: globals.currentSheetIndex,
+      mode: globals.mode,
+      helpOpen: globals.helpOpen,
+      editorOpen: globals.editorOpen,
+    });
   }}
 />
 
