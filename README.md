@@ -8,3 +8,12 @@ Code Grid
 
 <a href="https://jstrieb.github.io/code-grid" target="_blank">Spreadsheet for programmers where XSS is a feature, not a bug.</a>
 
+<br />
+
+<div align="center">
+<a href="https://jstrieb.github.io/code-grid" target="_blank"><img src="https://github.com/jstrieb/code-grid/blob/master/public/opengraph.png?raw=true"></a>
+</div>
+
+<br />
+
+

@@ -86,6 +86,7 @@
     - Disclaimer
     - How it works
       - How to read the code guide
+      - Cool implementation details
     - Project Status
     - Contributor guide
     - Support the project
