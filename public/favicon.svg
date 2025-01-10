@@ -5,6 +5,6 @@
     <rect x="4.3289" y="4.3289" width="27.666" height="27.666" stroke="#000" stroke-width=".010417"/>
     <rect x="-.33623" y="-.33623" width="29.338" height="29.338" fill="#fff"/>
     <rect x=".5" y=".5" width="27.666" height="27.666" fill="#fff" stroke="#000"/>
-    <path d="m21.611 12.864h-14.556v-3.0525h14.556zm0 5.9911h-14.556v-3.0525h14.556z" stroke="#fff"/>
+    <path d="m21.611 12.864h-14.556v-3.0525h14.556zm0 5.9911h-14.556v-3.0525h14.556z"/>
   </g>
 </svg>

@@ -81,7 +81,14 @@
     - Description and introduction 
     - Screenshots and/or video
     - API doc for formula programming
-    - How to read the code guide
+    - Examples
+    - Known Issues
+    - Disclaimer
+    - How it works
+      - How to read the code guide
+    - Project Status
+    - Contributor guide
+    - Support the project
     - Acknowledgments
   - Tutorial
 - Bugs
