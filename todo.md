@@ -71,16 +71,11 @@
   - Ctrl+i and ctrl+o and g; and g,
   - Searching, finding, and replacing
   - Record macros
-- Decorate
-  - Twitter preview image
+  - Allow remapping
 - Documentation
   - README
     - Description and introduction 
     - Examples
-    - API doc for formula programming
-    - How it works
-      - How to read the code guide
-    - Disclaimer
     - Known Issues
   - Tutorial
 - Bugs
