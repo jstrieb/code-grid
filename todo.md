@@ -18,6 +18,10 @@
   - XSS and phishing disclaimer
   - Delete buttons should delete selected rows
   - File menu at the top
+  - CSV import and export
+- Settings window
+  - Change colors
+  - Change debounce save timeouts
 - Window system
   - Track state
     - List of Windows
