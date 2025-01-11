@@ -94,7 +94,7 @@ Registered functions will become available within formulas. In this example,
 
 ### Advanced Formula Functions
 
-Formula functions can be `async`. They will be awaited automaticallyby the Code
+Formula functions can be `async`. They will be awaited automatically by the Code
 Grid runtime. Cells that depend on async formulas will only update when the
 dependencies' promises resolve.
 
@@ -113,7 +113,7 @@ Formula functions declared using `function() { /* */ }` syntax are passed a
 
 **JavaScript arrow functions (such as `x => x + 1`) are not passed a `this`
 object!** This is inherent to JavaScript. To use `this` in formula functions,
-the functions must be decalred using `function(){}` syntax. To quote [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions):
+the functions must be declared using `function(){}` syntax. To quote [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions):
 
 > An arrow function expression is a compact alternative to a traditional
 > function expression, with some semantic differences and deliberate limitations
@@ -259,7 +259,7 @@ that those links:
 
 - Can impersonate my website
 - Can redirect to malicious pages
-- Can steal any stored data about other Code Grid spreadsheets
+- Can steal locally stored data about other Code Grid spreadsheets
 - Can make requests to other websites
 
 # Known Issues
@@ -277,13 +277,12 @@ unless attached to prior discussion or accompanied by substantial, explanatory,
 English prose. In other words, pull requests containing code without context may
 be merged after much delay, or may not be merged at all.
 
-Since Code Grid is a fully static web application with no server-side processing
-(other than serving files), it is extremely scalable, and has a very low
-maintenance burden. As such, even if something were to happen to me, and I could
-not continue to work on the project, the [public
-version](https://jstrieb.github.io/code-grid) should continue to remain
-functional and available online as long as my GitHub account is open, and
-[jstrieb.github.io](https://jstrieb.github.io) domain is active.
+Since Code Grid is a fully static web application with no server-side
+processing, it is extremely scalable, and has a very low maintenance burden. As
+such, even if something were to happen to me, and I could not continue to work
+on the project, the [public version](https://jstrieb.github.io/code-grid) should
+continue to remain functional and available online as long as my GitHub account
+is open, and [jstrieb.github.io](https://jstrieb.github.io) domain is active.
 
 ## Support the Project
 
