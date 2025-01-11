@@ -72,7 +72,12 @@ functions.slider = function slider(min, max, step, value) {
 };
 
 functions.bold = function (s) {
-  this.style = "font-weight: bold;";
+  this.style += "font-weight: bold;";
+  return s;
+};
+
+functions.center = function (s) {
+  this.style += "text-align: center;";
   return s;
 };
 
