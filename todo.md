@@ -19,8 +19,11 @@
   - Delete buttons should delete selected rows
   - File menu at the top
   - CSV import and export
-  - GitHub Actions workflow to build and deploy
   - Python formulas using pyodide
+  - New spreadsheet button
+  - Button to reset window locations
+  - Import from Google Sheets
+  - Export to Google Sheets
 - Settings window
   - Change colors
   - Change debounce save timeouts
