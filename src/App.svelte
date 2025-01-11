@@ -291,6 +291,14 @@
             onclick: () => (globals.editorOpen = !globals.editorOpen),
           },
           {
+            text: "New Spreadsheet",
+            onclick: () =>
+              Object.assign(document.createElement("a"), {
+                href: Object.assign(new URL(window.location), { hash: "" }),
+                target: "_blank",
+              }).click(),
+          },
+          {
             text: "Code Grid Source Code",
             onclick: () => {
               Object.assign(document.createElement("a"), {

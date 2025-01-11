@@ -20,7 +20,6 @@
   - File menu at the top
   - CSV import and export
   - Python formulas using pyodide
-  - New spreadsheet button
   - Button to reset window locations
   - Import from Google Sheets
   - Export to Google Sheets
