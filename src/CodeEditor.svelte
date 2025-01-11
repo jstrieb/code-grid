@@ -27,7 +27,7 @@
       case "tab":
         e.preventDefault();
         if (e.shiftKey) {
-          const lineStart = value.lastIndexOf("\n", start) + 1;
+          const lineStart = value.lastIndexOf("\n", start - 1) + 1;
           textarea.setRangeText(
             dedent(value.slice(lineStart, end)),
             lineStart,
@@ -38,7 +38,7 @@
           if (start == end) {
             textarea.setRangeText("  ", start, end, "end");
           } else {
-            const lineStart = value.lastIndexOf("\n", start) + 1;
+            const lineStart = value.lastIndexOf("\n", start - 1) + 1;
             textarea.setRangeText(
               indent(value.slice(lineStart, end)),
               lineStart,
