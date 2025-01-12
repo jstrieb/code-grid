@@ -51,6 +51,10 @@
   - Save sheets
   - Load sheets
   - Display tutorial on first visit
+- Standard library formula functions
+  - LIST
+  - PYTHON
+  - PRINTF
 - Keyboard shortcuts
   - Navigate windows/sheets
     - gt and gT
