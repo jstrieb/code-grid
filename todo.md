@@ -23,6 +23,8 @@
   - Button to reset window locations
   - Import from Google Sheets
   - Export to Google Sheets
+  - Formula draggy thing
+  - Reformat for printing and export
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -55,6 +57,9 @@
   - LIST
   - PYTHON
   - PRINTF
+  - REGEX
+  - JQ
+  - LINK/URL
 - Keyboard shortcuts
   - Navigate windows/sheets
     - gt and gT
@@ -99,3 +104,6 @@
     - Manually have to detect long press
   - The bottom border of sheet tabs do not adjust after renaming
   - If all sheets are deleted, it glitches
+  - User formulas don't work on first load
+  - Cannot use formulas in added rows or columns until after refresh
+  - Clicking a cell in insert mode switches to normal mode
