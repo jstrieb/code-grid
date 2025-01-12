@@ -12,12 +12,14 @@ export const evalCode = debounce((code, ret) => {
     return ret();
   }
 
-  // "Use" import so tree shaking doesn't consider it dead code. This usage must
-  // occur here – the "parsers" object is unavailable in the code if this is
-  // moved elsewhere.
-  {
-    let _ = parsers;
-  }
+  // No op that "uses" the parsers import so tree shaking doesn't consider it
+  // dead code. This usage must occur here – the "parsers" object is unavailable
+  // in the code if this is moved elsewhere. Lots of other no op usages of
+  // parsers are eliminated by vite, but this one seems to stay in the final
+  // build.
+  try {
+    throw parsers;
+  } catch {}
 
   try {
     eval(code);
