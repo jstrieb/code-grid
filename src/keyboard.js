@@ -476,12 +476,14 @@ export function keyboardHandler(e, globals) {
       globals.keyQueue = [];
       break;
     case "enter":
-      switch (globals.mode) {
-        case "insert":
-          globals.mode = "normal";
-          e.target?.blur();
-          // TODO: Select next cell (next row? next column? next non-blank?)
-          break;
+      if (
+        globals.mode == "insert" ||
+        e.target?.tagName.toLocaleLowerCase() == "input" ||
+        e.target.isContentEditable
+      ) {
+        globals.mode = "normal";
+        e.target?.blur();
+        // TODO: Select next cell (next row? next column? next non-blank?)
       }
       break;
     case "tab":
