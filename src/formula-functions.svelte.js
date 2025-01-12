@@ -66,7 +66,7 @@ functions.slider = function slider(min, max, step, value) {
     style: `width: 100%;
             appearance: auto;
             margin: 0 0.5ch;`,
-    oninput: (e) => this.set(e.target.value),
+    oninput: (e) => this.set(Number(e.target.value)),
   });
   return value;
 };
