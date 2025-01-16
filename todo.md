@@ -1,8 +1,3 @@
-# Plan
-
-- Thursday, January 9
-  - Submit
-
 # To Do
 
 - General

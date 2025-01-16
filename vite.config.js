@@ -12,4 +12,7 @@ export default defineConfig({
     minify: false,
     sourcemap: true,
   },
+  test: {
+    environment: "jsdom",
+  },
 });
