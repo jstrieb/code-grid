@@ -51,3 +51,10 @@ test("Add and remove cells", async () => {
   state.currentSheet.cells[0][3].formula = "=RC0 * RC1 * RC2";
   await expectSheet(state.currentSheet, [[1, 2, 3, 6]]);
 });
+
+test("Self-referential cell", async () => {
+  const state = createSheet([["1024"]]);
+  await expectSheet(state.currentSheet, [[1024]]);
+  state.currentSheet.cells[0][0].formula = "=RC / 2";
+  await expect.poll(() => state.currentSheet.cells[0][0].get()).toBeCloseTo(0);
+});
