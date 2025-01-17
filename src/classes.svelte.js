@@ -395,7 +395,7 @@ export class Sheet {
         .map((_, i) =>
           new Array(this.widths.length)
             .fill()
-            .map((_, j) => this.newCell(undefined, i, j)),
+            .map((_, j) => this.newCell(undefined, start + i, j)),
         ),
     );
   }
@@ -416,7 +416,9 @@ export class Sheet {
       row.splice(
         start,
         0,
-        ...new Array(n).fill().map((_, j) => this.newCell(undefined, i, j)),
+        ...new Array(n)
+          .fill()
+          .map((_, j) => this.newCell(undefined, i, start + j)),
       ),
     );
   }

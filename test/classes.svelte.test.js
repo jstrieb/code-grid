@@ -1,7 +1,7 @@
 import { State } from "../src/classes.svelte.js";
 import { test, expect } from "vitest";
 
-function createSheet(cells) {
+function createSheet(cells, formulaCode = "") {
   return State.load({
     sheets: [
       {
@@ -11,7 +11,7 @@ function createSheet(cells) {
         cells: cells.map((row) => row.map((s) => ({ formula: s }))),
       },
     ],
-    formulaCode: "",
+    formulaCode: formulaCode,
   });
 }
 
@@ -30,11 +30,24 @@ function expectSheet(sheet, cells) {
   );
 }
 
-test("Simple Sheet", async () => {
+test("Simple sheet with changes", async () => {
   const state = createSheet([["1", "2", "=RC0 + RC1"]]);
+  await expectSheet(state.currentSheet, [[1, 2, 3]]);
+  state.currentSheet.cells[0][2].formula = "=SUM(R[0]C0:RC[-1])";
   await expectSheet(state.currentSheet, [[1, 2, 3]]);
   state.currentSheet.cells[0][0].formula = "3";
   await expectSheet(state.currentSheet, [[3, 2, 5]]);
   state.currentSheet.cells[0][2].formula = "=RC[-2] * RC[-1] + 5";
   await expectSheet(state.currentSheet, [[3, 2, 11]]);
+});
+
+test("Add and remove cells", async () => {
+  const state = createSheet([["1", "2", "3"]]);
+  await expectSheet(state.currentSheet, [[1, 2, 3]]);
+  state.currentSheet.addCols(1);
+  await expectSheet(state.currentSheet, [[1, 2, 3, undefined]]);
+  state.currentSheet.cells[0][3].formula = "=prod(RC0:RC[-1])";
+  await expectSheet(state.currentSheet, [[1, 2, 3, 6]]);
+  state.currentSheet.cells[0][3].formula = "=RC0 * RC1 * RC2";
+  await expectSheet(state.currentSheet, [[1, 2, 3, 6]]);
 });
