@@ -100,8 +100,6 @@
     - Manually have to detect long press
   - The bottom border of sheet tabs do not adjust after renaming
   - If all sheets are deleted, it glitches
-  - User formulas don't work on first load
-  - Cannot use formulas in added rows or columns until after refresh
   - Clicking a cell in insert mode switches to normal mode
   - All lists get flattened, when only the top level should (if that)
   - Checkboxes and sliders don't keep their values when you send sheets

@@ -304,6 +304,10 @@ export class Sheet {
         cell.errorText = undefined;
         cell.element = undefined;
 
+        // Re-run this effect if rows or columns are added or removed
+        this.heights.length;
+        this.widths.length;
+
         if (cell.formula == null) {
           cell.value.rederive([], (_, set) => set(undefined));
           return;
