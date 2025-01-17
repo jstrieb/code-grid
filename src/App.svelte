@@ -84,7 +84,7 @@
   import Tabs from "./Tabs.svelte";
 
   import { State, Sheet } from "./classes.svelte.js";
-  import { evalCode, functions } from "./formula-functions.svelte.js";
+  import { evalDebounced, functions } from "./formula-functions.svelte.js";
   import { debounce } from "./helpers.js";
   import { keyboardHandler, keybindings } from "./keyboard.js";
 
@@ -154,7 +154,7 @@
 
   let codeError = $state("");
   $effect(() => {
-    evalCode(globals.formulaCode, (result) => {
+    evalDebounced(globals.formulaCode, (result) => {
       codeError = result ?? "";
     });
   });

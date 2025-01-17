@@ -2,6 +2,7 @@ import { formula } from "./formula.js";
 import { debounce } from "./helpers.js";
 import { ParseError } from "./parsers.js";
 import { rederivable } from "./store.js";
+import { evalCode } from "./formula-functions.svelte.js";
 
 import { get } from "svelte/store";
 
@@ -72,13 +73,17 @@ functions.crypto = async (ticker) => {
         s.heights = sheet.heights;
         return s;
       }),
+      data.formulaCode,
     );
-    result.formulaCode = data.formulaCode;
     return result;
   }
 
-  constructor(sheets) {
+  constructor(sheets, formulaCode) {
     this.sheets = sheets;
+    if (formulaCode != null) {
+      this.formulaCode = formulaCode;
+      evalCode(this.formulaCode);
+    }
   }
 
   getSelectedCells() {

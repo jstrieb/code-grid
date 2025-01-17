@@ -7,7 +7,7 @@ import { undefinedArgsToIdentity } from "./helpers.js";
 
 export let functions = $state({});
 
-export const evalCode = debounce((code, ret) => {
+export function evalCode(code, ret = () => {}) {
   if (code == null) {
     return ret();
   }
@@ -27,7 +27,8 @@ export const evalCode = debounce((code, ret) => {
   } catch (e) {
     return ret(`Error: ${e.message}`);
   }
-}, 500);
+}
+export const evalDebounced = debounce(evalCode, 500);
 
 // All JavaScript Math functions are available as formula functions
 Object.getOwnPropertyNames(Math)
