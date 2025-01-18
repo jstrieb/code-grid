@@ -362,3 +362,8 @@ test("Negative range indexing", async () => {
     [1, 2, 3],
   ]);
 });
+
+test("Formula functions can access `this`", async () => {
+  const state = createSheet([["=BOLD(RC[1] + 1)", "3"]]);
+  await expectSheet(state.currentSheet, [[4, 3]]);
+});

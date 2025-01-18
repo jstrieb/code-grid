@@ -46,7 +46,7 @@ class ExpressionValue {
 
 function singleton(f) {
   return async function (...args) {
-    return [await f(...args)];
+    return [await f.apply(this, args)];
   };
 }
 
