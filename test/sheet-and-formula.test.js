@@ -84,6 +84,11 @@ test("Add and remove rows", async () => {
     [1, 2, 3],
     [undefined, undefined, undefined],
   ]);
+  state.currentSheet.cells[1][0].formula = "=R0C[0]:R[-1]C";
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [[1], undefined, undefined],
+  ]);
   state.currentSheet.deleteRows(1);
   await expectSheet(state.currentSheet, [[1, 2, 3]]);
 });
@@ -133,4 +138,44 @@ test("Errors in cells", async () => {
   // Clean up
   delete functions.factorial;
   delete functions.error;
+});
+
+test("Complex math expressions in formulas", async () => {
+  const state = createSheet([
+    ["1", "2", "3"],
+    [
+      "=1 + 2 * 3 - -4 / 5 % 6 + 7 * 8 - 9 ** 2 - (10 * 3 - 5 + 2 * 0.5)",
+      "=R0C[-1] + R[-1]C * R0C[1] - 4 / 5 % 6 + 7 * 8 - 9 ** 2 - (10 * 3 - sUm(5, 2 * 0.5))",
+      undefined,
+    ],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [
+      1 + 2 * 3 - ((-4 / 5) % 6) + 7 * 8 - 9 ** 2 - (10 * 3 - 5 + 2 * 0.5),
+      1 + 2 * 3 - ((4 / 5) % 6) + 7 * 8 - 9 ** 2 - (10 * 3 - (5 + 2 * 0.5)),
+      undefined,
+    ],
+  ]);
+});
+
+test("Complex logical expressions in formulas", async () => {
+  const state = createSheet([
+    [
+      "=~0 >>> 2 ^ ~0 >> 0",
+      '=(!0 && !false && !!true || !!"true") && ""',
+      "=~0 >>> 0 << 12",
+      "=!(~0 >>> 0 & 0x1 | 0xff) || false",
+      "=if(5 < 3 || 2 > 1 && 1 == 1 || 2 != 1 && 3 <= 0x5, 2 >= 1, 10)",
+    ],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [
+      (~0 >>> 2) ^ (~0 >> 0),
+      ((!0 && !false && !!true) || !!"true") && "",
+      (~0 >>> 0) << 12,
+      !(((~0 >>> 0) & 0x1) | 0xff) || false,
+      5 < 3 || (2 > 1 && 1 == 1) || (2 != 1 && 3 <= 0x5) ? 2 >= 1 : 10,
+    ],
+  ]);
 });
