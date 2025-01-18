@@ -328,7 +328,7 @@ test("Negative cell indexing", async () => {
 test("Negative range indexing", async () => {
   const state = createSheet([
     ["=R[1]C0:R[1]C-1", undefined, undefined],
-    [1, 2, 3],
+    ["1", "2", "3"],
   ]);
   await expectSheet(state.currentSheet, [
     [[1, 2, 3], undefined, undefined],
