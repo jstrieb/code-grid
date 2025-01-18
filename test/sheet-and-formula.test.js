@@ -1,5 +1,5 @@
 import { State } from "../src/classes.svelte.js";
-import { test, expect } from "vitest";
+import { test, expect, beforeEach } from "vitest";
 import { evalCode, functions } from "../src/formula-functions.svelte.js";
 
 function createSheet(cells, formulaCode = "") {
@@ -30,6 +30,19 @@ function expectSheet(sheet, cells) {
       .flat(),
   );
 }
+
+const originalFunctions = { ...functions };
+beforeEach(() => {
+  // Restore the imported, destructively-modified, global functions object so
+  // that tests cannot influence each other
+  Object.keys(functions).forEach((k) => {
+    if (k in originalFunctions) return;
+    delete functions[k];
+  });
+  Object.keys(originalFunctions).forEach((k) => {
+    functions[k] = originalFunctions[k];
+  });
+});
 
 test("Simple sheet with changes", async () => {
   const state = createSheet([["1", "2", "=R0C0 + R0C1"]]);
@@ -115,8 +128,6 @@ test("Simple custom formula functions", async () => {
   );
   const state = createSheet([["6", "=factorial(RC0)"]]);
   await expectSheet(state.currentSheet, [[6, 720]]);
-  // Clean up
-  delete functions.factorial;
 });
 
 test("Errors in cells", async () => {
@@ -135,9 +146,6 @@ test("Errors in cells", async () => {
   await expectSheet(state.currentSheet, [[5, "=str_not_func(", 120]]);
   evalCode(`functions.error = (x) => { throw new Error(x); }`);
   await expectSheet(state.currentSheet, [[5, "=str_not_func(", 120]]);
-  // Clean up
-  delete functions.factorial;
-  delete functions.error;
 });
 
 test("Complex math expressions in formulas", async () => {
@@ -178,4 +186,28 @@ test("Complex logical expressions in formulas", async () => {
       5 < 3 || (2 > 1 && 1 == 1) || (2 != 1 && 3 <= 0x5) ? 2 >= 1 : 10,
     ],
   ]);
+});
+
+test("Evaluating bad code", () => {
+  evalCode();
+  expect(evalCode(`asdf(`, (x) => x)).toBeTypeOf("string");
+});
+
+test("Miscellaneous standard library formula functions", async () => {
+  const state = createSheet([["=IF(false, true, 1234.567)", "100"]]);
+  await expectSheet(state.currentSheet, [[1234.567, 100]]);
+  state.currentSheet.cells[0][0].formula = "=RANDINT(RC[1])";
+  await expect
+    .poll(() => state.currentSheet.cells[0][0].get())
+    .toBeGreaterThanOrEqual(0);
+  await expect
+    .poll(() => state.currentSheet.cells[0][0].get())
+    .toBeLessThan(100);
+  state.currentSheet.cells[0][1].formula = "=10";
+  await expect
+    .poll(() => state.currentSheet.cells[0][0].get())
+    .toBeGreaterThanOrEqual(0);
+  await expect
+    .poll(() => state.currentSheet.cells[0][0].get())
+    .toBeLessThan(10);
 });
