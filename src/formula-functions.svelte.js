@@ -60,7 +60,9 @@ functions.rand = functions.random;
 
 // Miscellaneous utility functions
 functions.slider = function slider(min, max, step, value) {
-  value = value ?? 0;
+  this.update((previous) => {
+    value = value ?? previous ?? 0;
+  });
   this.element = Object.assign(document.createElement("input"), {
     min,
     max,

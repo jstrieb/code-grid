@@ -131,6 +131,9 @@ The `this` object passed to formula functions when they execute contains:
 - `this.row` and `this.col` – the current row and column, respectively
 - `this.set` – a function that sets the cell's value to whatever parameter it is passed
   - Useful for updating the cell value asynchronously or in callbacks
+- `this.update` – a function that takes a callback, where the callback takes the
+  previous cell value and returns the value to set the cell to
+  - Useful for updating the cell value based on the previous one
 - `this.element` – an HTML element that will be put in the cell if defined
 - `this.style` – the style attribute passed to the cell's `<td>` element
 
@@ -153,11 +156,16 @@ functions.marquee = function(x) {
 The following advanced example adds a formula function for interactive
 checkboxes. The ouput value of the formula is the checked state of the box. Note
 the use of `this.set` in the callback to update the cell's value upon
-interaction.
+interaction, and `this.update` to set the initial value of the checkbox. Setting
+the initial value means the checkbox state is saved and loaded from the URL.
 
 ``` javascript
-functions.checkbox = function(label) {
-  let value = false;
+functions.checkbox = function (label) {
+  let value;
+  this.update((previous) => {
+    value = previous;
+    return previous;
+  });
   this.element = Object.assign(document.createElement("label"), {
     innerText: label,
     style: "display: flex; align-items: center; gap: 1ch; margin: 0 0.5em;",
@@ -166,6 +174,7 @@ functions.checkbox = function(label) {
     Object.assign(document.createElement("input"), {
       type: "checkbox",
       style: "appearance: auto;",
+      checked: value,
       oninput: (e) => this.set(e.target.checked),
     }),
   );

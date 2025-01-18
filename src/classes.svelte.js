@@ -31,7 +31,11 @@ functions.factorial = (n) => {
 // Formula functions that modify the containing element using "this" must be
 // declared with the "function" keyword - they cannot be arrow functions.
 functions.checkbox = function (label) {
-  let value = false;
+  let value;
+  this.update((previous) => {
+    value = previous;
+    return previous;
+  });
   this.element = Object.assign(document.createElement("label"), {
     innerText: label,
     style: "display: flex; align-items: center; gap: 1ch; margin: 0 0.5em;",
@@ -40,6 +44,7 @@ functions.checkbox = function (label) {
     Object.assign(document.createElement("input"), {
       type: "checkbox",
       style: "appearance: auto;",
+      checked: value,
       oninput: (e) => this.set(e.target.checked),
     }),
   );
@@ -68,6 +73,7 @@ functions.crypto = async (ticker) => {
           sheet.heights.length,
           sheet.widths.length,
           (i, j) => sheet.cells[i][j].formula,
+          (i, j) => sheet.cells[i][j].value,
         );
         s.widths = sheet.widths;
         s.heights = sheet.heights;
@@ -271,20 +277,22 @@ export class Sheet {
   widths = $state();
   heights = $state();
 
-  constructor(name, rows, cols, initial) {
+  constructor(name, rows, cols, formula, initial) {
     // TODO: Test optimizations using sparse arrays (without .fill)
     this.name = name;
     this.cells = new Array(rows)
       .fill()
       .map((_, i) =>
-        new Array(cols).fill().map((_, j) => this.newCell(initial(i, j), i, j)),
+        new Array(cols)
+          .fill()
+          .map((_, j) => this.newCell(formula(i, j), i, j, initial?.(i, j))),
       );
     this.widths = new Array(cols).fill(DEFAULT_WIDTH);
     this.heights = new Array(rows).fill(DEFAULT_HEIGHT);
   }
 
-  newCell(initialValue, row, col) {
-    const cell = new Cell(initialValue, row, col);
+  newCell(initialFormula, row, col, initialValue) {
+    const cell = new Cell(initialFormula, initialValue);
 
     const maxUpdates = 1000;
     let updateCount = 0;
@@ -323,6 +331,7 @@ export class Sheet {
                 row,
                 col,
                 set,
+                update,
                 style: cell.style,
                 element: undefined,
               };
@@ -463,9 +472,9 @@ export class Cell {
   leftBorder = $state(false);
   editing = $state(false);
 
-  constructor(value) {
-    this.formula = value;
-    this.value = rederivable(value);
+  constructor(formula, value) {
+    this.formula = formula;
+    this.value = rederivable(value ?? formula);
   }
 
   get() {

@@ -130,8 +130,7 @@
             ...sheet.cells.map((row) =>
               row.map((cell) => ({
                 formula: cell.formula,
-                // TODO: Use for self-referential formulas
-                // value: cell.get(),
+                value: cell.get(),
               })),
             ),
           ],

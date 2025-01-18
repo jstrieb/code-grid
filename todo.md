@@ -42,6 +42,7 @@
 - Formula processing
   - "symbols" in formulas
   - References across sheets in formulas
+  - Namespaced formula functions
 - Local storage
   - Save sheets
   - Load sheets
@@ -80,7 +81,6 @@
 - Testing
   - Playwright
   - Integrate Playwright coverage with vitest coverage
-  - Async formula functions
 - Documentation
   - README
     - Description and introduction 
@@ -104,6 +104,4 @@
   - The bottom border of sheet tabs do not adjust after renaming
   - If all sheets are deleted, it glitches
   - Clicking a cell in insert mode switches to normal mode
-  - All lists get flattened, when only the top level should (if that)
-  - Checkboxes and sliders don't keep their values when you send sheets
   - Turn the empty string back into `undefined`
