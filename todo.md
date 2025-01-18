@@ -56,6 +56,7 @@
   - LINK/URL
   - DEBUG?
 - Keyboard shortcuts
+  - Tab stays in insert mode
   - Navigate windows/sheets
     - gt and gT
     - i3 type key commands
@@ -104,4 +105,3 @@
   - The bottom border of sheet tabs do not adjust after renaming
   - If all sheets are deleted, it glitches
   - Clicking a cell in insert mode switches to normal mode
-  - Turn the empty string back into `undefined`

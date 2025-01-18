@@ -316,7 +316,7 @@ export class Sheet {
         this.heights.length;
         this.widths.length;
 
-        if (cell.formula == null) {
+        if (cell.formula == null || cell.formula == "") {
           cell.value.rederive([], (_, set) => set(undefined));
           return;
         }

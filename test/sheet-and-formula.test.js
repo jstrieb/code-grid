@@ -367,3 +367,10 @@ test("Formula functions can access `this`", async () => {
   const state = createSheet([["=BOLD(RC[1] + 1)", "3"]]);
   await expectSheet(state.currentSheet, [[4, 3]]);
 });
+
+test("Cells with empty formula have undefined value", async () => {
+  const state = createSheet([["", "3"]]);
+  await expectSheet(state.currentSheet, [[undefined, 3]]);
+  state.currentSheet.cells[0][1].formula = "";
+  await expectSheet(state.currentSheet, [[undefined, undefined]]);
+});
