@@ -98,6 +98,10 @@ Registered functions will become available within formulas. In this example,
 
 ### Advanced Formula Functions
 
+<details>
+
+<summary>Click to read about advanced formula functions</summary>
+
 Formula functions can be `async`. They will be awaited automatically by the Code
 Grid runtime. Cells that depend on async formulas will only update when the
 dependencies' promises resolve.
@@ -211,6 +215,8 @@ functions.time = function() {
 }
 ```
 
+</details>
+
 # How Code Grid Works
 
 ## Code Table of Contents
@@ -218,6 +224,7 @@ functions.time = function() {
 The links below are listed in the order the code should be read to understand
 the application from the highest to lowest level.
 
+- [`Makefile`](Makefile) – build and run the application locally
 - [`src/App.svelte`](src/App.svelte) – entrypoint to the main, high-level
   application
 - [`src/Table.svelte`](src/Table.svelte) and
