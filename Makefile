@@ -1,4 +1,4 @@
-.PHONY: lint dev build test pre-commit-check install-pre-commit
+.PHONY: lint dev build test watch-test pre-commit-check install-pre-commit
 
 build: lint dep-npm dep-node-modules
 	npx vite build
@@ -11,6 +11,9 @@ lint: dep-npm dep-node-modules
 
 test: dep-npm dep-node-modules
 	npx vitest run --coverage
+
+watch-test: dep-npm dep-node-modules
+	npx vitest --coverage
 
 pre-commit-check: dep-npm dep-node-modules
 	@npx prettier --check $$( \
