@@ -61,6 +61,9 @@ Formulas begin with an equals sign (`=`), and can contain:
 - Singleton references in R1C1 notation such as `R10C3` (zero-indexed) for
   absolute references, `R[-1]c[2]` for relative references, and `RC` for
   self-references
+  - Negative absolute references start from the end of a row or column, such as
+    `R-1C-1` to select the cell in the bottom right corner of the sheet, and
+    `R1C0:R1C-1` to select all of row 1
 - Ranges such as `R[-3]C:R[-1]C`
 - Function calls (case insensitive) containing expressions as arguments such as
   `sum(RC0:RC[-1])`, `sLiDeR(0, 10, 1)`, and `DOLLARS(PRODUCT(1 * 2 + 3, 4, 3,

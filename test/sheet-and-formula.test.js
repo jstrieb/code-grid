@@ -307,3 +307,58 @@ test("Async formula functions", async () => {
   const state = createSheet([["=sleep(1024, 250)"]]);
   await expectSheet(state.currentSheet, [[1024]]);
 });
+
+test("Negative cell indexing", async () => {
+  const state = createSheet([
+    ["=RC-1", "=R-1c", "2", "2", "4"],
+    ["0", "5", "6", "7", "8"],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [4, 5, 2, 2, 4],
+    [0, 5, 6, 7, 8],
+  ]);
+  state.currentSheet.cells[0][2].formula = "=RC -1";
+  state.currentSheet.cells[0][3].formula = "=RC - 1";
+  state.currentSheet.cells[1][0].formula = "=R0C2 == R0C3";
+  await expect.poll(() => state.currentSheet.cells[0][2].get()).toBeLessThan(0);
+  await expect.poll(() => state.currentSheet.cells[0][3].get()).toBeLessThan(0);
+  await expect.poll(() => state.currentSheet.cells[1][0].get()).toBe(true);
+});
+
+test("Negative range indexing", async () => {
+  const state = createSheet([
+    ["=R[1]C0:R[1]C-1", undefined, undefined],
+    [1, 2, 3],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [[1, 2, 3], undefined, undefined],
+    [1, 2, 3],
+  ]);
+  state.currentSheet.addCols(1);
+  await expectSheet(state.currentSheet, [
+    [[1, 2, 3, undefined], undefined, undefined],
+    [1, 2, 3, undefined],
+  ]);
+  state.currentSheet.cells[1][3].formula = "4";
+  await expectSheet(state.currentSheet, [
+    [[1, 2, 3, 4], undefined, undefined],
+    [1, 2, 3, 4],
+  ]);
+  state.currentSheet.deleteCols(1);
+  state.currentSheet.cells[0][0].formula = "4";
+  state.currentSheet.cells[0][1].formula = "=R0C0:R-1C0";
+  await expectSheet(state.currentSheet, [
+    [4, [4, 1], undefined],
+    [1, 2, 3],
+  ]);
+  state.currentSheet.cells[0][1].formula = "=R-1C0:R-1C-1";
+  await expectSheet(state.currentSheet, [
+    [4, [1, 2, 3], undefined],
+    [1, 2, 3],
+  ]);
+  state.currentSheet.cells[0][1].formula = "=R0C-1:R-1C-1";
+  await expectSheet(state.currentSheet, [
+    [4, [undefined, 3], undefined],
+    [1, 2, 3],
+  ]);
+});

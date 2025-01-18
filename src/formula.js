@@ -20,6 +20,7 @@ import {
 class Expression {
   // Return a concrete value from an expression given the values in the other
   // rows and columns.
+  /* v8 ignore next 3 */
   compute(rows, r, c) {
     throw new Error("Not yet implemented");
   }
@@ -163,7 +164,11 @@ class Ref extends Expression {
     if (this.r == null) {
       row = r;
     } else if (this.r.relative == null) {
-      row = this.r.absolute;
+      if (this.r.absolute < 0) {
+        row = (this.r.absolute + rows.length) % rows.length;
+      } else {
+        row = this.r.absolute;
+      }
     } else {
       row = r + this.r.relative;
     }
@@ -171,7 +176,11 @@ class Ref extends Expression {
     if (this.c == null) {
       col = c;
     } else if (this.c.relative == null) {
-      col = this.c.absolute;
+      if (this.c.absolute < 0) {
+        col = (this.c.absolute + rows[0].length) % rows[0].length;
+      } else {
+        col = this.c.absolute;
+      }
     } else {
       col = c + this.c.relative;
     }
@@ -198,7 +207,11 @@ class Range extends Expression {
     if (this.r1 == null) {
       startRow = r;
     } else if (this.r1.relative == null) {
-      startRow = this.r1.absolute;
+      if (this.r1.absolute < 0) {
+        startRow = (this.r1.absolute + rows.length) % rows.length;
+      } else {
+        startRow = this.r1.absolute;
+      }
     } else {
       startRow = r + this.r1.relative;
     }
@@ -206,7 +219,11 @@ class Range extends Expression {
     if (this.c1 == null) {
       startCol = c;
     } else if (this.c1.relative == null) {
-      startCol = this.c1.absolute;
+      if (this.c1.absolute < 0) {
+        startCol = (this.c1.absolute + rows[0].length) % rows[0].length;
+      } else {
+        startCol = this.c1.absolute;
+      }
     } else {
       startCol = c + this.c1.relative;
     }
@@ -214,7 +231,11 @@ class Range extends Expression {
     if (this.r2 == null) {
       endRow = r;
     } else if (this.r2.relative == null) {
-      endRow = this.r2.absolute;
+      if (this.r2.absolute < 0) {
+        endRow = (this.r2.absolute + rows.length) % rows.length;
+      } else {
+        endRow = this.r2.absolute;
+      }
     } else {
       endRow = r + this.r2.relative;
     }
@@ -222,7 +243,11 @@ class Range extends Expression {
     if (this.c2 == null) {
       endCol = c;
     } else if (this.c2.relative == null) {
-      endCol = this.c2.absolute;
+      if (this.c2.absolute < 0) {
+        endCol = (this.c2.absolute + rows[0].length) % rows[0].length;
+      } else {
+        endCol = this.c2.absolute;
+      }
     } else {
       endCol = c + this.c2.relative;
     }
@@ -295,11 +320,14 @@ const fun = seq(
     .skip(str(")")),
 ).map((args) => new Function(...args));
 
+const cellDigits = regex(/-?\d[_\d]*/).map((x) =>
+  parseInt(x.replaceAll("_", "")),
+);
 const relNum = str("[")
-  .then(num)
+  .then(cellDigits)
   .skip(str("]"))
   .map((n) => ({ relative: n }));
-const absNum = num.map((n) => ({ absolute: n }));
+const absNum = cellDigits.map((n) => ({ absolute: n }));
 const cellNum = relNum.or(absNum).optional();
 const r = regex(/[rR]/);
 const c = regex(/[cC]/);

@@ -42,7 +42,6 @@
 - Formula processing
   - "symbols" in formulas
   - References across sheets in formulas
-  - Refer to entire rows or entire columns like R1:R1 or C1:C3
 - Local storage
   - Save sheets
   - Load sheets
