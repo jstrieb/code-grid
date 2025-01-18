@@ -292,3 +292,18 @@ test("Function arguments and return values are not flattened", async () => {
   state.currentSheet.cells[0][0].formula = "=LENGTH(LiST())";
   await expectSheet(state.currentSheet, [[3]]);
 });
+
+test("Overriding formula functions", async () => {
+  const state = createSheet([["=LOG2(1024)"]]);
+  await expectSheet(state.currentSheet, [[10]]);
+  evalCode(`functions.log2 = () => 420;`);
+  await expectSheet(state.currentSheet, [[420]]);
+});
+
+test("Async formula functions", async () => {
+  evalCode(
+    `functions.sleep = (x, ms) => new Promise(r => setTimeout(() => r(x), ms))`,
+  );
+  const state = createSheet([["=sleep(1024, 250)"]]);
+  await expectSheet(state.currentSheet, [[1024]]);
+});
