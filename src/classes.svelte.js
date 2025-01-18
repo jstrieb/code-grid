@@ -331,7 +331,7 @@ export class Sheet {
                   _this,
                   computed,
                 )(...dependencyValues)
-                .then((result) => {
+                .then(([result]) => {
                   update((old) => {
                     // TODO: Find a better trigger for resets than just waiting
                     // after updates finish. If, for example, a self-referential
@@ -362,6 +362,7 @@ export class Sheet {
                   cell.errorText = _this.errorText;
                 })
                 .catch((e) => {
+                  set(undefined);
                   cell.errorText = `Error: ${e?.message ?? e}`;
                 });
             },

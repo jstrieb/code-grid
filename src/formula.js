@@ -1,5 +1,9 @@
 import { functions } from "./formula-functions.svelte.js";
-import { sum as arraySum, undefinedArgsToIdentity } from "./helpers.js";
+import {
+  sum as arraySum,
+  reshape,
+  undefinedArgsToIdentity,
+} from "./helpers.js";
 import {
   str,
   regex,
@@ -26,6 +30,9 @@ class ExpressionValue {
   refs;
   numRefArgs;
 
+  // Everything except for ranges should pass thunks that return a singleton
+  // array. This is to prevent accidental flattening of list arguments while the
+  // reference tree is being flattened.
   constructor(thunk, refs, numRefArgs = undefined) {
     this.thunk = thunk;
     this.refs = refs;
@@ -34,6 +41,12 @@ class ExpressionValue {
       this.numRefArgs = arraySum(refs.map(({ numRefArgs: n }) => n));
     }
   }
+}
+
+function singleton(f) {
+  return async function (...args) {
+    return [await f(...args)];
+  };
 }
 
 class Function extends Expression {
@@ -53,7 +66,7 @@ class Function extends Expression {
       throw new Error(`"${name}" is not a function`);
     }
     const refs = this.args.map((a) => a.compute(rows, r, c));
-    return new ExpressionValue(f, refs);
+    return new ExpressionValue(singleton(f), refs);
   }
 }
 
@@ -103,8 +116,8 @@ class BinaryOperation extends Expression {
           const y = args.shift();
           args.unshift(BinaryOperation.operations[op](x, y));
         });
-      const [result] = args;
-      return result;
+      // Note that args is a singleton list
+      return args;
     };
     const refs = this.ast
       .filter((x) => x?.compute)
@@ -129,7 +142,7 @@ class UnaryOperation extends Expression {
   }
 
   compute(rows, r, c) {
-    const thunk = (x) => this.operator(x);
+    const thunk = (x) => [this.operator(x)];
     const refs = [this.operand.compute(rows, r, c)];
     return new ExpressionValue(undefinedArgsToIdentity(thunk), refs);
   }
@@ -162,7 +175,7 @@ class Ref extends Expression {
     } else {
       col = c + this.c.relative;
     }
-    return new ExpressionValue((x) => x, [rows[row][col]], 1);
+    return new ExpressionValue((x) => [x], [rows[row][col]], 1);
   }
 }
 
@@ -214,7 +227,13 @@ class Range extends Expression {
       endCol = c + this.c2.relative;
     }
 
-    const thunk = (...args) => args;
+    const height = Math.abs(startRow - endRow) + 1;
+    const width = Math.abs(startCol - endCol) + 1;
+
+    // Reshape ranges that have more than one row and column
+    const thunk = (...args) => [
+      height > 1 && width > 1 ? reshape(args, height, width) : args,
+    ];
     const refs = rows
       .slice(startRow, endRow + 1)
       .map((r) => r.slice(startCol, endCol + 1))
@@ -232,7 +251,7 @@ class Primitive extends Expression {
   }
 
   compute() {
-    return new ExpressionValue(() => this.value, []);
+    return new ExpressionValue(() => [this.value], []);
   }
 }
 

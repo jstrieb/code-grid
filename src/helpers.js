@@ -23,20 +23,31 @@ export function sum(l) {
 // Wrap a function such that its args are automatically converted to additive
 // identity if undefined or null. This is zero by default, unless any of the
 // args are strings, in which case the additive identity is the empty string.
+// Args are converted recursively, so this works even if the function is passed
+// a 2D range.
 //
-// This function also takes care to make sure the resulting wrapped function has
-// the same toString representation as the original.
+// f.apply is used because f might be a formula function that needs the "this"
+// object. This function also takes care to make sure the resulting wrapped
+// function has the same toString representation as the original, because the
+// toString representation is used to display formula function code in the help
+// viewer.
 export function undefinedArgsToIdentity(f) {
   function result(...args) {
     let id = 0;
-    if (args.some((x) => typeof x === "string")) {
+    if (args.flat(Infinity).some((x) => typeof x === "string")) {
       id = "";
     }
-    return f.apply(
-      this,
-      args.map((x) => (x != null ? x : id)),
-    );
+    return f.apply(this, replaceWithId(args, id));
   }
   result.toString = () => f.toString();
   return result;
+}
+function replaceWithId(a, id) {
+  return a.map((x) => (Array.isArray(x) ? replaceWithId(x, id) : (x ?? id)));
+}
+
+export function reshape(l, rows, cols) {
+  return new Array(rows)
+    .fill()
+    .map((_, i) => new Array(cols).fill().map((_, j) => l[i * cols + j]));
 }

@@ -37,13 +37,14 @@ Object.getOwnPropertyNames(Math)
 
 // Core functions
 functions.sum = undefinedArgsToIdentity((...args) =>
-  args.reduce((i, j) => i + j, 0),
+  args.flat(Infinity).reduce((i, j) => i + j, 0),
 );
 functions.prod = undefinedArgsToIdentity((...args) =>
-  args.reduce((i, j) => i * j, 1),
+  args.flat(Infinity).reduce((i, j) => i * j, 1),
 );
 functions.avg = undefinedArgsToIdentity(
-  (...args) => args.reduce((i, j) => i + j) / args.length,
+  (...args) =>
+    args.flat(Infinity).reduce((i, j) => i + j) / args.flat(Infinity).length,
 );
 functions.randint = (n) => Math.floor(Math.random() * n);
 functions.if = (x, yes, no) => (x ? yes : no);

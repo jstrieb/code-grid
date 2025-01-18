@@ -141,11 +141,11 @@ test("Errors in cells", async () => {
   await expectSheet(state.currentSheet, [[5, "=str_not_func(", 120]]);
   evalCode(`functions.error = function(x) { throw new Error(x); }`);
   state.currentSheet.cells[0][2].formula = '=error("test")';
-  await expectSheet(state.currentSheet, [[5, "=str_not_func(", 120]]);
+  await expectSheet(state.currentSheet, [[5, "=str_not_func(", undefined]]);
   evalCode(`functions.error = async function(x) { throw new Error(x); }`);
-  await expectSheet(state.currentSheet, [[5, "=str_not_func(", 120]]);
+  await expectSheet(state.currentSheet, [[5, "=str_not_func(", undefined]]);
   evalCode(`functions.error = (x) => { throw new Error(x); }`);
-  await expectSheet(state.currentSheet, [[5, "=str_not_func(", 120]]);
+  await expectSheet(state.currentSheet, [[5, "=str_not_func(", undefined]]);
 });
 
 test("Complex math expressions in formulas", async () => {
@@ -210,4 +210,85 @@ test("Miscellaneous standard library formula functions", async () => {
   await expect
     .poll(() => state.currentSheet.cells[0][0].get())
     .toBeLessThan(10);
+});
+
+test("Ranges are not flattened", async () => {
+  const state = createSheet([
+    ["1", "2", "3"],
+    ["4", "5", "6"],
+    ["=R0C:R1C[1]", "=R[-2]C0:R[-2]C2", "=R0C0:R1C0"],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [4, 5, 6],
+    [
+      [
+        [1, 2],
+        [4, 5],
+      ],
+      [1, 2, 3],
+      [1, 4],
+    ],
+  ]);
+});
+
+test("Standard library functions on 2D ranges", async () => {
+  const state = createSheet([
+    ["1", "2", "3"],
+    ["4", "5", "6"],
+    ["=SUM(R0C:R1C[1])", "=sum(R[-2]C0:R[-2]C2)", "=Sum(R0C0:R1C0)"],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [4, 5, 6],
+    [12, 6, 5],
+  ]);
+  state.currentSheet.cells[0][0].formula = undefined;
+  await expectSheet(state.currentSheet, [
+    [undefined, 2, 3],
+    [4, 5, 6],
+    [11, 5, 4],
+  ]);
+
+  state.currentSheet.cells[0][0].formula = "1";
+  state.currentSheet.cells[2][0].formula = "=PROD(R0C:R1C[1])";
+  state.currentSheet.cells[2][1].formula = "=Prod(R[-2]C0:R[-2]C2)";
+  state.currentSheet.cells[2][2].formula = "=prod(R0C0:R1C0)";
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [4, 5, 6],
+    [40, 6, 4],
+  ]);
+  state.currentSheet.cells[0][0].formula = undefined;
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [4, 5, 6],
+    [0, 0, 0],
+  ]);
+
+  state.currentSheet.cells[0][0].formula = "1";
+  state.currentSheet.cells[2][0].formula = "=avg(R0C:R1C[1])";
+  state.currentSheet.cells[2][1].formula = "=AVG(R[-2]C0:R[-2]C2)";
+  state.currentSheet.cells[2][2].formula = "=Avg(R0C0:R1C0)";
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [4, 5, 6],
+    [3, 2, 2.5],
+  ]);
+  state.currentSheet.cells[0][0].formula = undefined;
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [4, 5, 6],
+    [11 / 4, 5 / 3, 2],
+  ]);
+});
+
+test("Function arguments and return values are not flattened", async () => {
+  evalCode(
+    `functions.length = (x) => x?.length ?? 0; functions.list = () => [1, 2, 3];`,
+  );
+  const state = createSheet([["=LIST()"]]);
+  await expectSheet(state.currentSheet, [[[1, 2, 3]]]);
+  state.currentSheet.cells[0][0].formula = "=LENGTH(LiST())";
+  await expectSheet(state.currentSheet, [[3]]);
 });

@@ -8,7 +8,6 @@
   - Process formulas in web worker?
   - Lazily render cells
   - Typescript
-  - Testing
   - Work on multiple monitors
   - XSS and phishing disclaimer
   - Delete buttons should delete selected rows
@@ -55,6 +54,7 @@
   - REGEX
   - JQ
   - LINK/URL
+  - DEBUG?
 - Keyboard shortcuts
   - Navigate windows/sheets
     - gt and gT
@@ -78,6 +78,10 @@
   - Searching, finding, and replacing
   - Record macros
   - Allow remapping
+- Testing
+  - Playwright
+  - Integrate Playwright coverage with vitest coverage
+  - Async formula functions
 - Documentation
   - README
     - Description and introduction 
@@ -103,3 +107,4 @@
   - Clicking a cell in insert mode switches to normal mode
   - All lists get flattened, when only the top level should (if that)
   - Checkboxes and sliders don't keep their values when you send sheets
+  - Turn the empty string back into `undefined`
