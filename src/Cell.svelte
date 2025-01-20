@@ -208,6 +208,9 @@
     if (e.buttons != 1) {
       return;
     }
+    if (cell.editing) {
+      return;
+    }
     if (e.shiftKey) {
       globals.mode = "visual";
       globals.setSelectionEnd({ x: col, y: row });
@@ -228,6 +231,7 @@
       bind:value={cell.formula}
       onblur={() => {
         cell.editing = false;
+        globals.mode = "normal";
       }}
       rows="1"
       wrap="off"
