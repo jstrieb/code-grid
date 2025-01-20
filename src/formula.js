@@ -82,9 +82,8 @@ class BinaryOperation extends Expression {
     "**": Math.pow,
 
     // Logical
-    "!=": (x, y) => x != y,
-    // TODO: Should this use triple equals?
-    "==": (x, y) => x == y,
+    "!=": (x, y) => x !== y,
+    "==": (x, y) => x === y,
     ">=": (x, y) => x >= y,
     ">": (x, y) => x > y,
     "<=": (x, y) => x <= y,

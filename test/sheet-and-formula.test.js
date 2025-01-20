@@ -374,3 +374,8 @@ test("Cells with empty formula have undefined value", async () => {
   state.currentSheet.cells[0][1].formula = "";
   await expectSheet(state.currentSheet, [[undefined, undefined]]);
 });
+
+test("Formulas use strict equality", async () => {
+  const state = createSheet([[`=10 == "10"`, `="1" != 1`]]);
+  await expectSheet(state.currentSheet, [[false, true]]);
+});
