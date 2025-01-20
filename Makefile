@@ -15,7 +15,7 @@ test: dep-npm dep-node-modules
 watch-test: dep-npm dep-node-modules
 	npx vitest --coverage
 
-pre-commit-check: dep-npm dep-node-modules
+pre-commit-check: test dep-npm dep-node-modules
 	@npx prettier --check $$( \
 		git diff --name-only --cached \
 	) || ( \
