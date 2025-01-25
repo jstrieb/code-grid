@@ -11,6 +11,11 @@
 
     <!-- TODO: other meta tags -->
 
+    <!--
+      Prefer rectangular opengraph photo, so use it first and last. Applications
+      may pick the square one if they prefer that resolution, but shouldn't pick
+      it based on ordering.
+    -->
     <meta
       property="og:image"
       content="https://jstrieb.github.io/code-grid/opengraph.png"
@@ -25,6 +30,13 @@
     <meta property="og:image:alt" content="Code Grid" />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
+    <meta
+      property="og:image"
+      content="https://jstrieb.github.io/code-grid/opengraph.png"
+    />
+    <meta property="og:image:alt" content="Code Grid" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <!-- 
       Favicons seem to be picked from last to first, so put the best ones last.
@@ -33,27 +45,12 @@
       rel="apple-touch-icon"
       type="image/png"
       sizes="512x512"
-      href="./public/favicon-512.png"
+      href="/favicon-512.png"
     />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="./public/favicon-32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="128x128"
-      href="./public/favicon-128.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="512x512"
-      href="./public/favicon-512.png"
-    />
-    <link rel="icon" type="image/svg+xml" href="./public/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="128x128" href="/favicon-128.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body></body>
   <script type="module">
