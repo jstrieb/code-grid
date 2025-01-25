@@ -3,6 +3,7 @@ import { debounce } from "./helpers.js";
 // Import required so code that is `eval`ed can modify formula functions and
 // use parser combinators. Do not remove, even though it appears "unused."
 import * as parsers from "./parsers.js";
+import * as classes from "./classes.svelte.js";
 import { undefinedArgsToIdentity } from "./helpers.js";
 
 export let functions = $state({});
@@ -19,6 +20,9 @@ export function evalCode(code, ret = () => {}) {
   // the final build.
   try {
     throw parsers;
+  } catch {}
+  try {
+    throw classes;
   } catch {}
 
   try {
