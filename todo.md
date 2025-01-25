@@ -19,6 +19,7 @@
   - Export to Google Sheets
   - Formula draggy thing
   - Reformat for printing and export
+  - Edit formulas in long text box at the top
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -55,6 +56,7 @@
   - JQ
   - LINK/URL
   - DEBUG?
+  - Standard way to include external scripts and wait for them to load
 - Keyboard shortcuts
   - Tab stays in insert mode
   - Navigate windows/sheets
@@ -85,7 +87,6 @@
 - Documentation
   - README
     - Description and introduction 
-    - Instructions to run using the Makefile
     - Examples
     - Known Issues
   - Tutorial

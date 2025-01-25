@@ -271,6 +271,25 @@ the application from the highest to lowest level.
 - All spreadsheet data is saved to the URL, so sheets can be shared without
   using a storage back end or database.
 
+## Running the Code
+
+[Install NodeJS](https://nodejs.org/en/download) if you do not already have it.
+Once NodeJS is installed, to run Code Grid locally, you only need to run the
+following inside the repository:
+
+``` bash
+make dev
+```
+
+To build a static version of the code to host elsewhere, run:
+
+``` bash
+make build
+```
+
+The static, compiled files for Code Grid will be generated in the `dist/`
+subdirectory.
+
 # Warning
 
 Clicking Code Grid links can be risky, because the links can run arbitrary code.
