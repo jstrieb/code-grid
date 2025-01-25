@@ -128,6 +128,9 @@ test("Simple custom formula functions", async () => {
   );
   const state = createSheet([["6", "=factorial(RC0)"]]);
   await expectSheet(state.currentSheet, [[6, 720]]);
+  evalCode(`functions.with_underscores = (n) => n * 2`);
+  state.currentSheet.cells[0][1].formula = "=with_underscores(RC0)";
+  await expectSheet(state.currentSheet, [[6, 12]]);
 });
 
 test("Errors in cells", async () => {
@@ -378,4 +381,23 @@ test("Cells with empty formula have undefined value", async () => {
 test("Formulas use strict equality", async () => {
   const state = createSheet([[`=10 == "10"`, `="1" != 1`]]);
   await expectSheet(state.currentSheet, [[false, true]]);
+});
+
+test("Formula this object has everything it's supposed to", async () => {
+  evalCode(
+    `functions.from_this = function(key) { return key in this && this[key] != null; }`,
+  );
+  const cases = [
+    `=!from_this("fake")`,
+    `=from_this("row")`,
+    `=from_this("col")`,
+    `=from_this("set")`,
+    `=from_this("update")`,
+    `=from_this("style")`,
+    `=from_this("globals")`,
+    `=!from_this("element")`,
+    `=from_this("element", DOLLARS(10))`,
+  ];
+  const state = createSheet([cases]);
+  await expectSheet(state.currentSheet, [cases.map(() => true)]);
 });

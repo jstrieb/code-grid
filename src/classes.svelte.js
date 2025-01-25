@@ -86,6 +86,9 @@ functions.crypto = async (ticker) => {
 
   constructor(sheets, formulaCode) {
     this.sheets = sheets;
+    this.sheets.forEach((sheet) => {
+      sheet.globals = this;
+    });
     if (formulaCode != null) {
       this.formulaCode = formulaCode;
       evalCode(this.formulaCode);
@@ -276,8 +279,11 @@ export class Sheet {
   cells = $state();
   widths = $state();
   heights = $state();
+  // Don't reactively update based on changes to globals to avoid risk of
+  // circular reactive references.
+  globals;
 
-  constructor(name, rows, cols, formula, initial) {
+  constructor(name, rows, cols, formula, initial, globals) {
     // TODO: Test optimizations using sparse arrays (without .fill)
     this.name = name;
     this.cells = new Array(rows)
@@ -289,6 +295,7 @@ export class Sheet {
       );
     this.widths = new Array(cols).fill(DEFAULT_WIDTH);
     this.heights = new Array(rows).fill(DEFAULT_HEIGHT);
+    this.globals = globals;
   }
 
   newCell(initialFormula, row, col, initialValue) {
@@ -334,6 +341,7 @@ export class Sheet {
                 update,
                 style: cell.style,
                 element: undefined,
+                globals: this.globals,
               };
               flattenComputedToFunction
                 .call(
@@ -379,8 +387,6 @@ export class Sheet {
         } catch (e) {
           if (!(e instanceof ParseError)) {
             cell.errorText = `Error: ${e.message}`;
-            // TODO: Remove?
-            console.warn(e);
           }
           cell.value.rederive([], (_, set) => set(cell.formula));
         }

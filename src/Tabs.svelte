@@ -161,6 +161,7 @@
             5,
             5,
             () => undefined,
+            globals,
           ),
         )}>+</button
     ></label
