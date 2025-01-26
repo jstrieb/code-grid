@@ -29,7 +29,7 @@
 
   button:disabled {
     cursor: not-allowed;
-    --fg-color: #909090;
+    --fg-color: var(--disabled-color);
     color: var(--fg-color);
     outline: none;
   }

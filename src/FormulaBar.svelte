@@ -24,9 +24,9 @@
   }
 
   textarea:disabled {
-    color: var(--selected-color);
-    box-shadow: 3px 3px 0 0 var(--selected-color);
-    border-color: var(--selected-color);
+    cursor: not-allowed;
+    --fg-color: var(--disabled-color);
+    color: var(--fg-color);
   }
 </style>
 

@@ -4,6 +4,7 @@
   --header-color: #dddddd;
   --selected-color: #aaaaaa;
   --error-color: red;
+  --disabled-color: #909090;
 }
 
 * {
