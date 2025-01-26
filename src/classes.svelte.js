@@ -330,7 +330,12 @@ export class Sheet {
 
         try {
           const parsed = formula.parse(cell.formula);
-          const computed = parsed.compute(this.cells, row, col);
+          const computed = parsed.compute(
+            this.globals,
+            this.globals.sheets.indexOf(this),
+            row,
+            col,
+          );
           cell.value.rederive(
             flattenArgs(computed),
             (dependencyValues, set, update) => {
@@ -387,8 +392,10 @@ export class Sheet {
         } catch (e) {
           if (!(e instanceof ParseError)) {
             cell.errorText = `Error: ${e.message}`;
+            cell.value.rederive([], (_, set) => set(undefined));
+          } else {
+            cell.value.rederive([], (_, set) => set(cell.formula));
           }
-          cell.value.rederive([], (_, set) => set(cell.formula));
         }
       });
     });

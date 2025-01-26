@@ -84,6 +84,7 @@
 - Testing
   - Playwright
   - Integrate Playwright coverage with vitest coverage
+  - Test parsers and classes in formulas
 - Documentation
   - README
     - Description and introduction 

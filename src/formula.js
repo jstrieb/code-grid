@@ -21,7 +21,7 @@ class Expression {
   // Return a concrete value from an expression given the values in the other
   // rows and columns.
   /* v8 ignore next 3 */
-  compute(rows, r, c) {
+  compute(globals, sheet, r, c) {
     throw new Error("Not yet implemented");
   }
 }
@@ -60,13 +60,13 @@ class Function extends Expression {
     this.args = Array.from(args);
   }
 
-  compute(rows, r, c) {
+  compute(globals, sheet, r, c) {
     const name = this.name.toLocaleLowerCase();
     const f = functions[name];
     if (f == null) {
       throw new Error(`"${name}" is not a function`);
     }
-    const refs = this.args.map((a) => a.compute(rows, r, c));
+    const refs = this.args.map((a) => a.compute(globals, sheet, r, c));
     return new ExpressionValue(singleton(f), refs);
   }
 }
@@ -107,7 +107,7 @@ class BinaryOperation extends Expression {
     this.ast = Array.from(ast);
   }
 
-  compute(rows, r, c) {
+  compute(globals, sheet, r, c) {
     const thunk = (...args) => {
       this.ast
         .filter((x) => typeof x === "string")
@@ -121,7 +121,7 @@ class BinaryOperation extends Expression {
     };
     const refs = this.ast
       .filter((x) => x?.compute)
-      .map((x) => x.compute(rows, r, c));
+      .map((x) => x.compute(globals, sheet, r, c));
     return new ExpressionValue(undefinedArgsToIdentity(thunk), refs);
   }
 }
@@ -141,24 +141,41 @@ class UnaryOperation extends Expression {
     this.operand = operand;
   }
 
-  compute(rows, r, c) {
+  compute(globals, sheet, r, c) {
     const thunk = (x) => [this.operator(x)];
-    const refs = [this.operand.compute(rows, r, c)];
+    const refs = [this.operand.compute(globals, sheet, r, c)];
     return new ExpressionValue(undefinedArgsToIdentity(thunk), refs);
   }
 }
 
 class Ref extends Expression {
+  s;
   r;
   c;
 
-  constructor(r, c) {
+  constructor(s, r, c) {
     super();
+    this.s = s;
     this.r = r;
     this.c = c;
   }
 
-  compute(rows, r, c) {
+  compute(globals, s, r, c) {
+    let sheet;
+    if (this.s == null) {
+      sheet = s;
+    } else if (this.s.relative == null) {
+      if (this.s.absolute < 0) {
+        sheet =
+          (this.s.absolute + globals.sheets.length) % globals.sheets.length;
+      } else {
+        sheet = this.s.absolute;
+      }
+    } else {
+      sheet = s + this.s.relative;
+    }
+    const rows = globals.sheets[sheet].cells;
+
     let row;
     if (this.r == null) {
       row = r;
@@ -188,20 +205,37 @@ class Ref extends Expression {
 }
 
 class Range extends Expression {
+  s;
   r1;
   c1;
   r2;
   c2;
 
-  constructor(r1, c1, r2, c2) {
+  constructor(s, r1, c1, r2, c2) {
     super();
+    this.s = s;
     this.r1 = r1;
     this.c1 = c1;
     this.r2 = r2;
     this.c2 = c2;
   }
 
-  compute(rows, r, c) {
+  compute(globals, s, r, c) {
+    let sheet;
+    if (this.s == null) {
+      sheet = s;
+    } else if (this.s.relative == null) {
+      if (this.s.absolute < 0) {
+        sheet =
+          (this.s.absolute + globals.sheets.length) % globals.sheets.length;
+      } else {
+        sheet = this.s.absolute;
+      }
+    } else {
+      sheet = s + this.s.relative;
+    }
+    const rows = globals.sheets[sheet].cells;
+
     let startRow;
     if (this.r1 == null) {
       startRow = r;
@@ -330,12 +364,16 @@ const absNum = cellDigits.map((n) => ({ absolute: n }));
 const cellNum = relNum.or(absNum).optional();
 const r = regex(/[rR]/);
 const c = regex(/[cC]/);
+const s = regex(/[sS]/);
 
-const ref = seq(r.then(cellNum), c.then(cellNum)).map(
-  (args) => new Ref(...args),
-);
+const ref = seq(
+  s.then(cellNum).skip(str("!")).optional(),
+  r.then(cellNum),
+  c.then(cellNum),
+).map((args) => new Ref(...args));
 
 const range = seq(
+  s.then(cellNum).skip(str("!")).optional(),
   r.then(cellNum),
   c.then(cellNum).skip(lex(":")),
   r.then(cellNum),

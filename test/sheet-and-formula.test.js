@@ -1,4 +1,4 @@
-import { State } from "../src/classes.svelte.js";
+import { Sheet, State } from "../src/classes.svelte.js";
 import { test, expect, beforeEach } from "vitest";
 import { evalCode, functions } from "../src/formula-functions.svelte.js";
 
@@ -400,4 +400,130 @@ test("Formula this object has everything it's supposed to", async () => {
   ];
   const state = createSheet([cases]);
   await expectSheet(state.currentSheet, [cases.map(() => true)]);
+});
+
+test("Cross-sheet formula references", async () => {
+  const state = createSheet([
+    [
+      "10",
+      "=S0!RC[-1]",
+      "=S[1]!R0C1",
+      "=S1!R2C2",
+      "=S[1]!R[99]C99",
+      "=S[-1]!R1C2",
+    ],
+  ]);
+  await expectSheet(state.sheets[0], [
+    [10, 10, undefined, undefined, undefined, undefined],
+  ]);
+
+  state.sheets.push(
+    new Sheet("Sheet 2", 3, 10, (i, j) => `${i * j}`, undefined, state),
+  );
+  await expectSheet(
+    state.sheets[1],
+    new Array(3)
+      .fill()
+      .map((_, i) => new Array(10).fill().map((_, j) => i * j)),
+  );
+  await expectSheet(state.sheets[0], [[10, 10, 0, 4, undefined, undefined]]);
+
+  state.sheets.unshift(
+    new Sheet(
+      "Sheet 0",
+      4,
+      4,
+      (i, j) => `=(${i} + 1) / (${j} + 1)`,
+      undefined,
+      state,
+    ),
+  );
+  await expectSheet(
+    state.sheets[0],
+    new Array(4)
+      .fill()
+      .map((_, i) => new Array(4).fill().map((_, j) => (i + 1) / (j + 1))),
+  );
+  await expectSheet(state.sheets[1], [[10, 1, 0, undefined, undefined, 2 / 3]]);
+
+  state.sheets[0].cells[0][0].formula = "=S-1!R2C5";
+  await expectSheet(
+    state.sheets[0],
+    new Array(4)
+      .fill()
+      .map((_, i) =>
+        new Array(4)
+          .fill()
+          .map((_, j) => (i == 0 && j == 0 ? 10 : (i + 1) / (j + 1))),
+      ),
+  );
+  await expectSheet(state.sheets[1], [
+    [10, 10, 0, undefined, undefined, 2 / 3],
+  ]);
+});
+
+test("Cross-sheet formula ranges", async () => {
+  const state = createSheet([
+    ["=s-1!R1C0:R1C-1", "=s0!R1C0:R1C-1", "=s!R1C0:R1C-1"],
+    ["1", "2", "3"],
+  ]);
+  await expectSheet(state.sheets[0], [
+    [
+      [1, 2, 3],
+      [1, 2, 3],
+      [1, 2, 3],
+    ],
+    [1, 2, 3],
+  ]);
+
+  state.sheets.unshift(
+    new Sheet("Sheet 0", 4, 4, (i, j) => `=${i} + ${j}`, undefined, state),
+  );
+  await expectSheet(
+    state.sheets[0],
+    new Array(4).fill().map((_, i) => new Array(4).fill().map((_, j) => i + j)),
+  );
+  await expectSheet(state.sheets[1], [
+    [
+      [1, 2, 3],
+      [1, 2, 3, 4],
+      [1, 2, 3],
+    ],
+    [1, 2, 3],
+  ]);
+
+  state.sheets.push(
+    new Sheet(
+      "Sheet 2",
+      4,
+      4,
+      (i, j) => `=(${i} + 1) * ${j}`,
+      undefined,
+      state,
+    ),
+  );
+  await expectSheet(
+    state.sheets[2],
+    new Array(4)
+      .fill()
+      .map((_, i) => new Array(4).fill().map((_, j) => (i + 1) * j)),
+  );
+  await expectSheet(state.sheets[1], [
+    [
+      [0, 2, 4, 6],
+      [1, 2, 3, 4],
+      [1, 2, 3],
+    ],
+    [1, 2, 3],
+  ]);
+
+  state.sheets[1].cells[0][0].formula = "=s[1]!R1C0:R1C-1";
+  await expectSheet(state.sheets[1], [
+    [
+      [0, 2, 4, 6],
+      [1, 2, 3, 4],
+      [1, 2, 3],
+    ],
+    [1, 2, 3],
+  ]);
 });
