@@ -20,6 +20,7 @@
   - Formula draggy thing
   - Reformat for printing and export
   - Edit formulas in long text box at the top
+    - Formula inline edit textarea can grow and is visible above other cells
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -42,7 +43,6 @@
   - Automatic indent
 - Formula processing
   - "symbols" in formulas
-  - References across sheets in formulas
   - Namespaced formula functions
 - Local storage
   - Save sheets

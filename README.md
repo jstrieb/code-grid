@@ -250,6 +250,7 @@ the application from the highest to lowest level.
     function object
 - [`src/global.css`](src/global.css) and [`public/*`](public/) – global
   stylesheet, favicons, etc.
+- [`test/*`](test/) – test suite and related functions
 
 ## Cool Code Highlights
 
