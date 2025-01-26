@@ -623,4 +623,12 @@ export class Selection {
   col(i) {
     return this.type == "col" && this.contains(i);
   }
+
+  isSingleton() {
+    return (
+      this.type == "cell" &&
+      this.start.x == this.end.x &&
+      this.start.y == this.end.y
+    );
+  }
 }

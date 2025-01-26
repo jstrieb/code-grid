@@ -145,7 +145,14 @@
               onblur={() => (editTab = undefined)}
             />
           {:else}
-            <input type="radio" bind:group={value} value={i} />{tab}
+            <input
+              type="radio"
+              bind:group={value}
+              value={i}
+              onclick={() => {
+                globals.deselect();
+              }}
+            />{tab}
           {/if}
         </label>
       {/snippet}

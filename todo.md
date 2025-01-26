@@ -19,8 +19,7 @@
   - Export to Google Sheets
   - Formula draggy thing
   - Reformat for printing and export
-  - Edit formulas in long text box at the top
-    - Formula inline edit textarea can grow and is visible above other cells
+  - Formula inline edit textarea can grow and is visible above other cells
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -85,6 +84,7 @@
   - Playwright
   - Integrate Playwright coverage with vitest coverage
   - Test parsers and classes in formulas
+- Push to versioned folders on Pages based on git tags
 - Documentation
   - README
     - Description and introduction 
@@ -107,3 +107,4 @@
   - The bottom border of sheet tabs do not adjust after renaming
     - Will be fixed automatically when using windows instead of tabs
   - If all sheets are deleted, it glitches
+  - Right click menu for tabs is placed incorrectly

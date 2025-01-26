@@ -79,6 +79,7 @@
   import CodeEditor from "./CodeEditor.svelte";
   import Details from "./Details.svelte";
   import Dialog from "./Dialog.svelte";
+  import FormulaBar from "./FormulaBar.svelte";
   import ShyMenu from "./ShyMenu.svelte";
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
@@ -188,21 +189,25 @@
   }}
 />
 
-<svelte:body
-  onpointerdown={(e) => {
-    // Only deselect if clicking outside of the table
-    if (table.contains(e.target)) {
-      return;
-    }
-    globals.deselect();
-  }}
-/>
+<div>
+  <FormulaBar selection={globals.selected} sheet={globals.currentSheet} />
+</div>
 
 <div class="tabs">
   <Tabs bind:globals bind:value={globals.currentSheetIndex} />
 </div>
 
-<div class="scroll">
+<div
+  class="scroll"
+  onpointerdown={(e) => {
+    // Only deselect if clicking outside of the table, and inside the scroll
+    // area
+    if (table.contains(e.target)) {
+      return;
+    }
+    globals.deselect();
+  }}
+>
   <!-- 
     Set --width and --height default values because if Table is in a Dialog, it
     will inherit the width and height of the dialog for table cells.
