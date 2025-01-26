@@ -19,7 +19,7 @@ export const keybindings = {
   "Ctrl+a": "Select All",
   enter: "Edit",
   "=": "Insert Equals",
-  i: "Edit",
+  i: "Edit in Formula Bar",
   0: "Go to Start of Row",
   "Shift+^": "Go to Start of Row",
   "Shift+$": "Go to End of Row",
@@ -234,6 +234,33 @@ export const actions = {
             break;
           case "col":
             globals.setSelectionEnd(globals.currentSheet.widths.length - 1);
+            break;
+        }
+        break;
+    }
+  },
+
+  "Edit in Formula Bar": (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+        switch (globals.selected.type) {
+          case "cell":
+            globals.elements.formulaBar.focus();
+            break;
+          // TODO: Edit first cell of row or column?
+        }
+        break;
+      case "visual":
+        switch (globals.selected.type) {
+          case "cell":
+            const { x: col, y: row } = globals.selected.start;
+            // TODO: Edit first cell of any selection?
+            if (
+              col == globals.selected.end.x &&
+              row == globals.selected.end.y
+            ) {
+              globals.elements.formulaBar.focus();
+            }
             break;
         }
         break;

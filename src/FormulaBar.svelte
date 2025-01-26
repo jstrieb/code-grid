@@ -31,10 +31,19 @@
 </style>
 
 <script>
-  let { selection, sheet } = $props();
+  let { globals, editor = $bindable() } = $props();
+  let selection = $derived(globals.selected);
+  let sheet = $derived(globals.currentSheet);
 
   let textValue = $state(),
-    placeholder = $state();
+    placeholder = $state(),
+    focused = $state();
+
+  $effect(() => {
+    if (focused) {
+      globals.mode = "insert";
+    }
+  });
 
   $effect(() => {
     switch (selection.type) {
@@ -105,6 +114,8 @@
 <label>
   {selectionToString(selection)}
   <textarea
+    bind:this={editor}
+    bind:focused
     bind:value={textValue}
     {placeholder}
     disabled={placeholder}

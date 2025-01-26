@@ -190,7 +190,7 @@
 />
 
 <div>
-  <FormulaBar selection={globals.selected} sheet={globals.currentSheet} />
+  <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
 </div>
 
 <div class="tabs">

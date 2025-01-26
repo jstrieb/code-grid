@@ -20,6 +20,7 @@ export class State {
   selected = $state(new Selection());
   mode = $state("normal");
   keyQueue = $state([]);
+  elements = $state({});
   helpOpen = $state(false);
   editorOpen = $state(false);
   formulaCode = $state(`// Examples of user-defined formula functions
