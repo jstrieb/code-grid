@@ -65,7 +65,8 @@ Formulas begin with an equals sign (`=`), and can contain:
     `R-1C-1` to select the cell in the bottom right corner of the sheet, and
     `R1C0:R1C-1` to select all of row 1
 - Ranges such as `R[-3]C:R[-1]C`
-- References and ranges across sheets like `S1!R1C1` and `S[1]!R2C2:R2C-1`
+- References and ranges across sheets like `S1!R1C1` and `S[1]!R2C2:R2C-1` and
+  `S-1R2C3` (the exclamation point is optional)
 - Function calls (case insensitive) containing expressions as arguments such as
   `sum(RC0:RC[-1])`, `sLiDeR(0, 10, 1)`, and `DOLLARS(PRODUCT(1 * 2 + 3, 4, 3,
   R[-1]C))`

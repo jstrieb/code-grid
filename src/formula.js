@@ -367,13 +367,13 @@ const c = regex(/[cC]/);
 const s = regex(/[sS]/);
 
 const ref = seq(
-  s.then(cellNum).skip(str("!")).optional(),
+  s.then(cellNum).skip(regex(/!?/)).optional(),
   r.then(cellNum),
   c.then(cellNum),
 ).map((args) => new Ref(...args));
 
 const range = seq(
-  s.then(cellNum).skip(str("!")).optional(),
+  s.then(cellNum).skip(regex(/!?/)).optional(),
   r.then(cellNum),
   c.then(cellNum).skip(lex(":")),
   r.then(cellNum),
