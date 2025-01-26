@@ -1,6 +1,6 @@
 .PHONY: lint dev build test watch-test pre-commit-check install-pre-commit
 
-build: lint dep-npm dep-node-modules
+build: dep-npm dep-node-modules
 	npx vite build
 
 dev: dep-npm dep-node-modules install-pre-commit
