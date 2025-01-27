@@ -19,6 +19,8 @@ export const keybindings = {
   "Ctrl+a": "Select All",
   backspace: "Delete",
   delete: "Delete",
+  x: "Clear Cells",
+  s: "Clear Cells and Insert",
   enter: "Edit",
   "=": "Insert Equals",
   i: "Edit in Formula Bar",
@@ -44,6 +46,40 @@ export const keybindings = {
 };
 
 export const actions = {
+  "Clear Cells and Insert": (e, globals) => {
+    const cells = globals
+      .getSelectedCells()
+      .flat(Infinity)
+      .forEach((cell) => {
+        cell.formula = "";
+      });
+    let x, y;
+    switch (globals.selected.type) {
+      case "cell":
+        x = globals.selected.min.x;
+        y = globals.selected.min.y;
+        break;
+      case "row":
+        x = 0;
+        y = globals.selected.min;
+        break;
+      case "col":
+        x = globals.selected.min;
+        y = 0;
+        break;
+    }
+    globals.setSelectionStart("cell", { x, y });
+    globals.currentSheet.cells[y][x].editing = true;
+  },
+
+  "Clear Cells": (e, globals) => {
+    const cells = globals.getSelectedCells().flat(Infinity);
+    globals.deselect();
+    cells.forEach((cell) => {
+      cell.formula = "";
+    });
+  },
+
   Delete: (e, globals) => {
     const { max, min } = globals.selected;
     switch (globals.selected.type) {

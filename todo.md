@@ -72,7 +72,6 @@
   - y and yy (and y with all motions) and p and P
   - d and dd and c and cc and S (along with dw, de, db, cw, ce, cb, etc.)
   - r and R
-  - x and s
   - J
   - Visual mode o and O
   - >> and << and insert mode Ctrl+t and ctrl+d and visual mode > and <
