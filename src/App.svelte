@@ -95,6 +95,7 @@
   );
   let table = $state();
   let startHeight = $state(0);
+  let scrollArea = $state();
 
   function load(dataString) {
     if (!dataString) {
@@ -198,11 +199,12 @@
 </div>
 
 <div
+  bind:this={scrollArea}
   class="scroll"
   onpointerdown={(e) => {
     // Only deselect if clicking outside of the table, and inside the scroll
     // area
-    if (table.contains(e.target)) {
+    if (e.target != scrollArea) {
       return;
     }
     globals.deselect();

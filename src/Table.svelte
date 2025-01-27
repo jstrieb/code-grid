@@ -164,6 +164,15 @@
   let pointerStart = $state(undefined);
   let toAdd = $state(1);
 
+  $effect(() => {
+    switch (globals.selected.type) {
+      case "row":
+      case "col":
+        const { min, max } = globals.selected;
+        toAdd = -(max - min + 1);
+    }
+  });
+
   function pointermoveX(i) {
     return (e) => {
       const dx = e.clientX - pointerStart.x;
@@ -358,16 +367,34 @@
   <div class="add columns">
     <Button
       style="width: 100%;"
-      disabled={!Number.isInteger(toAdd) || toAdd == 0}
-      onclick={() => sheet.addCols(toAdd)}
+      disabled={!Number.isInteger(toAdd) ||
+        toAdd == 0 ||
+        selected.type == "row"}
+      onclick={() => {
+        if (selected.type != "col") {
+          sheet.addCols(toAdd);
+        } else {
+          sheet.deleteCols(Math.abs(toAdd), selected.min);
+        }
+        globals.deselect();
+      }}
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} column{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
   </div>
 
   <div class="add rows">
     <Button
-      disabled={!Number.isInteger(toAdd) || toAdd == 0}
-      onclick={() => sheet.addRows(toAdd)}
+      disabled={!Number.isInteger(toAdd) ||
+        toAdd == 0 ||
+        selected.type == "col"}
+      onclick={() => {
+        if (selected.type != "row") {
+          sheet.addRows(toAdd);
+        } else {
+          sheet.deleteRows(Math.abs(toAdd), selected.min);
+        }
+        globals.deselect();
+      }}
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} row{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
   </div>
@@ -376,6 +403,7 @@
     <NumericInput
       style="width: 100%; text-align: center; max-width: 7ch;"
       bind:value={toAdd}
+      disabled={selected.type == "row" || selected.type == "col"}
       onfocus={(e) => e.target.select()}
     />
   </div>

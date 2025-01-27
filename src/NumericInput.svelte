@@ -24,6 +24,12 @@
   input[type="number"] {
     -moz-appearance: textfield;
   }
+
+  input:disabled {
+    cursor: not-allowed;
+    --fg-color: var(--disabled-color);
+    color: var(--fg-color);
+  }
 </style>
 
 <script>

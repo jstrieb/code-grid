@@ -17,6 +17,8 @@ export const keybindings = {
   "Ctrl+v": "Select Column",
   "Shift+v": "Select Row",
   "Ctrl+a": "Select All",
+  backspace: "Delete",
+  delete: "Delete",
   enter: "Edit",
   "=": "Insert Equals",
   i: "Edit in Formula Bar",
@@ -42,6 +44,27 @@ export const keybindings = {
 };
 
 export const actions = {
+  Delete: (e, globals) => {
+    const { max, min } = globals.selected;
+    switch (globals.selected.type) {
+      case "cell":
+        const cells = globals.getSelectedCells().flat(Infinity);
+        globals.deselect();
+        cells.forEach((cell) => {
+          cell.formula = "";
+        });
+        break;
+      case "row":
+        globals.deselect();
+        globals.currentSheet.deleteRows(max - min + 1, min);
+        break;
+      case "col":
+        globals.deselect();
+        globals.currentSheet.deleteCols(max - min + 1, min);
+        break;
+    }
+  },
+
   Undo: (e, globals) => {
     window.history.back();
   },
