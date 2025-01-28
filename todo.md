@@ -57,6 +57,7 @@
   - DEBUG?
   - Standard way to include external scripts and wait for them to load
 - Keyboard shortcuts
+  - Editable keybindings by importing objects and having them in scope at eval
   - Tab stays in insert mode
   - Navigate windows/sheets
     - gt and gT

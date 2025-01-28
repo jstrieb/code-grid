@@ -17,6 +17,8 @@ export const keybindings = {
   "Ctrl+v": "Select Column",
   "Shift+v": "Select Row",
   "Ctrl+a": "Select All",
+  "Shift+o": "Insert Row Above",
+  o: "Insert Row Below",
   backspace: "Delete",
   delete: "Delete",
   x: "Clear Cells",
@@ -46,6 +48,47 @@ export const keybindings = {
 };
 
 export const actions = {
+  "Insert Row Above": (e, globals) => {
+    let row;
+    switch (globals.selected.type) {
+      case "cell":
+        row = globals.selected.min.y;
+        break;
+      case "row":
+        row = globals.selected.min;
+        break;
+      case "col":
+      case undefined:
+        row = 0;
+        break;
+    }
+    globals.deselect();
+    globals.currentSheet.addRows(1, row);
+    globals.setSelectionStart("cell", { x: 0, y: row });
+    globals.currentSheet.cells[row][0].editing = true;
+  },
+
+  "Insert Row Below": (e, globals) => {
+    let row;
+    switch (globals.selected.type) {
+      case "cell":
+        row = globals.selected.max.y;
+        break;
+      case "row":
+        row = globals.selected.max;
+        break;
+      case "col":
+      case undefined:
+        row = globals.currentSheet.heights.length - 1;
+        break;
+    }
+    row += 1;
+    globals.deselect();
+    globals.currentSheet.addRows(1, row);
+    globals.setSelectionStart("cell", { x: 0, y: row });
+    globals.currentSheet.cells[row][0].editing = true;
+  },
+
   "Clear Cells and Insert": (e, globals) => {
     const cells = globals
       .getSelectedCells()
