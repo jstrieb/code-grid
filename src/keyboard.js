@@ -19,6 +19,7 @@ export const keybindings = {
   "Ctrl+a": "Select All",
   "Shift+o": "Insert Row Above",
   o: "Insert Row Below",
+  d: "Delete (Vim)",
   backspace: "Delete",
   delete: "Delete",
   x: "Clear Cells",
@@ -43,11 +44,35 @@ export const keybindings = {
   "Ctrl+r": "Redo",
   // Unpressable keys added just for documentation
   "g+g": "Go to Top",
+  "d+d": "Delete (Vim)",
   // TODO: Figure out how to not show keys that must be preceded by g such as
   // gT and gt
 };
 
 export const actions = {
+  "Delete (Vim)": (e, globals) => {
+    // TODO: Proper verbs for deleting with motions
+    if (
+      globals.selected.isSingleton() &&
+      globals.keyQueue[globals.keyQueue.length - 1] != "d"
+    ) {
+      globals.keyQueue.push("d");
+      return;
+    }
+    globals.keyQueue.pop();
+    if (globals.selected.isSingleton()) {
+      const { x, y } = globals.selected.start;
+      globals.currentSheet.deleteRows(1, y);
+      globals.deselect();
+      globals.setSelectionStart("cell", {
+        x,
+        y: Math.min(y, globals.currentSheet.heights.length - 1),
+      });
+      return;
+    }
+    actions.Delete(e, globals);
+  },
+
   "Insert Row Above": (e, globals) => {
     let row;
     switch (globals.selected.type) {
@@ -128,7 +153,6 @@ export const actions = {
     switch (globals.selected.type) {
       case "cell":
         const cells = globals.getSelectedCells().flat(Infinity);
-        globals.deselect();
         cells.forEach((cell) => {
           cell.formula = "";
         });
@@ -136,10 +160,12 @@ export const actions = {
       case "row":
         globals.deselect();
         globals.currentSheet.deleteRows(max - min + 1, min);
+        globals.setSelectionStart("cell", { x: 0, y: min });
         break;
       case "col":
         globals.deselect();
         globals.currentSheet.deleteCols(max - min + 1, min);
+        globals.setSelectionStart("cell", { y: 0, x: min });
         break;
     }
   },

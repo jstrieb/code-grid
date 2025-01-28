@@ -64,14 +64,13 @@
     - i3 type key commands
   - Vim keybindings in code editor
   - I, a, and A
-  - o and O
   - H, M, L
   - W, E, B
   - Ctrl+u and ctrl+d
   - Refactor keyboard shortcuts
   - Number + gg
   - y and yy (and y with all motions) and p and P
-  - d and dd and c and cc and S (along with dw, de, db, cw, ce, cb, etc.)
+  - d and c and cc and S (along with dw, de, db, cw, ce, cb, etc.)
   - r and R
   - J
   - Visual mode o and O
