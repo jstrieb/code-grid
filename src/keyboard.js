@@ -246,10 +246,10 @@ export const actions = {
           case undefined:
           case "cell":
             const x = globals.selected?.start?.x ?? 0;
-            globals.setSelectionEnd("cell", { x, y: 0 });
+            globals.setSelectionEnd({ x, y: 0 });
             break;
           case "row":
-            globals.setSelectionEnd("row", 0);
+            globals.setSelectionEnd(0);
             break;
         }
         break;
@@ -281,16 +281,13 @@ export const actions = {
           case undefined:
           case "cell":
             const x = globals.selected?.start?.x ?? 0;
-            globals.setSelectionEnd("cell", {
+            globals.setSelectionEnd({
               x,
               y: globals.currentSheet.heights.length - 1,
             });
             break;
           case "row":
-            globals.setSelectionEnd(
-              "row",
-              globals.currentSheet.heights.length - 1,
-            );
+            globals.setSelectionEnd(globals.currentSheet.heights.length - 1);
             break;
         }
         break;
