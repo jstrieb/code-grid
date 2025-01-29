@@ -10,7 +10,6 @@
   - Typescript
   - Work on multiple monitors
   - XSS and phishing disclaimer
-  - Delete buttons should delete selected rows
   - File menu at the top
   - CSV import and export
   - Python formulas using pyodide
@@ -40,6 +39,7 @@
   - Syntax highlighting
   - Auto-complete quotes, parentheses, etc.
   - Automatic indent
+  - Turn on manual save instead of auto save
 - Formula processing
   - "symbols" in formulas
   - Namespaced formula functions
@@ -107,3 +107,5 @@
     - Will be fixed automatically when using windows instead of tabs
   - If all sheets are deleted, it glitches
   - Right click menu for tabs is placed incorrectly
+  - Reference value changes re-run, but argument function calls to set don't
+    force re-run

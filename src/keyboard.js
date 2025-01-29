@@ -62,8 +62,8 @@ export const actions = {
     globals.keyQueue.pop();
     if (globals.selected.isSingleton()) {
       const { x, y } = globals.selected.start;
-      globals.currentSheet.deleteRows(1, y);
       globals.deselect();
+      globals.currentSheet.deleteRows(1, y);
       globals.setSelectionStart("cell", {
         x,
         y: Math.min(y, globals.currentSheet.heights.length - 1),
@@ -160,12 +160,18 @@ export const actions = {
       case "row":
         globals.deselect();
         globals.currentSheet.deleteRows(max - min + 1, min);
-        globals.setSelectionStart("cell", { x: 0, y: min });
+        globals.setSelectionStart("cell", {
+          x: 0,
+          y: Math.min(min, globals.currentSheet.heights.length - 1),
+        });
         break;
       case "col":
         globals.deselect();
         globals.currentSheet.deleteCols(max - min + 1, min);
-        globals.setSelectionStart("cell", { y: 0, x: min });
+        globals.setSelectionStart("cell", {
+          y: 0,
+          x: Math.min(min, globals.currentSheet.widths.length - 1),
+        });
         break;
     }
   },
