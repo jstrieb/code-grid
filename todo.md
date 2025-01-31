@@ -19,6 +19,9 @@
   - Formula draggy thing
   - Reformat for printing and export
   - Formula inline edit textarea can grow and is visible above other cells
+  - Separate logging system with tracebacks for formula errors
+  - Toolbar with buttons (editable)
+  - Click cell while editing formula to insert it
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -39,6 +42,7 @@
   - Syntax highlighting
   - Auto-complete quotes, parentheses, etc.
   - Automatic indent
+  - Line numbers
   - Turn on manual save instead of auto save
 - Formula processing
   - "symbols" in formulas
@@ -57,6 +61,8 @@
   - DEBUG?
   - Standard way to include external scripts and wait for them to load
 - Keyboard shortcuts
+  - Ctrl+c while highlighting text should not be a "cancel" operation
+  - Stay in insert mode when cells clicked
   - Editable keybindings by importing objects and having them in scope at eval
   - Tab stays in insert mode
   - Navigate windows/sheets
