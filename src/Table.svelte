@@ -371,12 +371,13 @@
         toAdd == 0 ||
         selected.type == "row"}
       onclick={() => {
+        const { min } = globals.selected;
+        globals.deselect();
         if (selected.type != "col") {
           sheet.addCols(toAdd);
         } else {
-          sheet.deleteCols(Math.abs(toAdd), selected.min);
+          sheet.deleteCols(Math.abs(toAdd), min);
         }
-        globals.deselect();
       }}
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} column{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
@@ -388,12 +389,13 @@
         toAdd == 0 ||
         selected.type == "col"}
       onclick={() => {
+        const { min } = globals.selected;
+        globals.deselect();
         if (selected.type != "row") {
           sheet.addRows(toAdd);
         } else {
-          sheet.deleteRows(Math.abs(toAdd), selected.min);
+          sheet.deleteRows(Math.abs(toAdd), min);
         }
-        globals.deselect();
       }}
       >{#if toAdd >= 0}Add {toAdd}{:else}Delete {-toAdd}{/if} row{#if Math.abs(toAdd) != 1}s{/if}</Button
     >
