@@ -180,6 +180,9 @@
 <svelte:window
   onkeydown={(e) => keyboardHandler(e, globals)}
   onpopstate={(e) => {
+    if (e.state == null) {
+      return;
+    }
     dontSave = true;
     globals = Object.assign(State.load(e.state), {
       currentSheetIndex: globals.currentSheetIndex,
