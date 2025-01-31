@@ -617,8 +617,13 @@ export function keyboardHandler(e, globals) {
           }
           break;
         case "insert":
-          globals.mode = "normal";
-          e.target?.blur();
+          if (
+            e.target.selectionStart != null &&
+            e.target.selectionStart == e.target.selectionEnd
+          ) {
+            globals.mode = "normal";
+            e.target?.blur();
+          }
           break;
         case "visual":
           globals.mode = "normal";

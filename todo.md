@@ -61,7 +61,6 @@
   - DEBUG?
   - Standard way to include external scripts and wait for them to load
 - Keyboard shortcuts
-  - Ctrl+c while highlighting text should not be a "cancel" operation
   - Stay in insert mode when cells clicked
   - Editable keybindings by importing objects and having them in scope at eval
   - Tab stays in insert mode
