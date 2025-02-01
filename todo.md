@@ -22,6 +22,8 @@
   - Separate logging system with tracebacks for formula errors
   - Toolbar with buttons (editable)
   - Click cell while editing formula to insert it
+  - Add conveniences for LLMs
+  - Event hooks
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -114,3 +116,5 @@
   - Right click menu for tabs is placed incorrectly
   - Reference value changes re-run, but argument function calls to set don't
     force re-run
+  - Interacting with cells on mobile scrolls
+  - Serializing values that are not serializable fails

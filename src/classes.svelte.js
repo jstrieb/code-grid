@@ -153,15 +153,17 @@ functions.crypto = async (ticker) => {
     // Scroll if highlighting at the edge of the screen
     switch (this.selected.type) {
       case "cell":
-        if (end.x > this.selected.end.x) {
-          this.currentSheet.cells[end.y]?.[end.x + 2]?.scrollIntoView();
-        } else {
-          this.currentSheet.cells[end.y]?.[end.x - 2]?.scrollIntoView();
-        }
-        if (end.y > this.selected.end.y) {
-          this.currentSheet.cells[end.y + 2]?.[end.x]?.scrollIntoView();
-        } else {
-          this.currentSheet.cells[end.y - 2]?.[end.x]?.scrollIntoView();
+        if (!this.selected.isSingleton()) {
+          if (end.x > this.selected.end.x) {
+            this.currentSheet.cells[end.y]?.[end.x + 2]?.scrollIntoView();
+          } else {
+            this.currentSheet.cells[end.y]?.[end.x - 2]?.scrollIntoView();
+          }
+          if (end.y > this.selected.end.y) {
+            this.currentSheet.cells[end.y + 2]?.[end.x]?.scrollIntoView();
+          } else {
+            this.currentSheet.cells[end.y - 2]?.[end.x]?.scrollIntoView();
+          }
         }
         break;
       case "row":
@@ -283,6 +285,17 @@ export class Sheet {
   // Don't reactively update based on changes to globals to avoid risk of
   // circular reactive references.
   globals;
+
+  fromCells(name, cells, globals) {
+    return new Sheet(
+      name,
+      cells.length,
+      cells[0].length,
+      (i, j) => cells[i][j],
+      undefined,
+      globals,
+    );
+  }
 
   constructor(name, rows, cols, formula, initial, globals) {
     // TODO: Test optimizations using sparse arrays (without .fill)
