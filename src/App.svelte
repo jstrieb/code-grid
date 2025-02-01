@@ -189,6 +189,7 @@
       mode: globals.mode,
       helpOpen: globals.helpOpen,
       editorOpen: globals.editorOpen,
+      elements: globals.elements,
     });
   }}
 />
