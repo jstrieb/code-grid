@@ -347,7 +347,16 @@ following organizations help me, as well as the general, Internet-using public:
 # Acknowledgments & Greetz
 
 Thanks to [Logan Snow](https://github.com/lsnow99) for consulting on all manner
-of web esoterica, and for testing early versions of Code Grid.
+of web esoterica, and for testing many versions of Code Grid. Check out
+[Listable](https://getlistable.app/) for a different take on achieving
+tranquility through web-based tables.
 
-Thanks to [Amy Liu](https://www.linkedin.com/in/amyjl) for feedback on early
-versions of Code Grid.
+Thanks to [Amy Liu](https://www.youtube.com/watch?v=7gJX3lvi5OY) for feedback on
+early versions of Code Grid, and for continued demonstration of great patience
+and tolerance, despite my incurable penchant for mischief.
+
+Shout out to [Ella Liu](https://www.instagram.com/ella.liu/) for doing a full
+financial model in a *very* early version of Code Grid. It's not easy for
+[Excel-loving bankers](https://www.instagram.com/ellassaddesksalads/) to use
+other spreadsheet software; her struggle drove feature development that has
+benefited us all.
