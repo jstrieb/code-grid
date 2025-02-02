@@ -124,7 +124,8 @@ Formula functions declared using `function() { /* */ }` syntax are passed a
 
 **JavaScript arrow functions (such as `x => x + 1`) are not passed a `this`
 object!** This is inherent to JavaScript. To use `this` in formula functions,
-the functions must be declared using `function(){}` syntax. To quote [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions):
+the functions must be declared using `function(){}` syntax. To quote
+[MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions):
 
 > An arrow function expression is a compact alternative to a traditional
 > function expression, with some semantic differences and deliberate limitations

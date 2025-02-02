@@ -371,9 +371,9 @@
         toAdd == 0 ||
         selected.type == "row"}
       onclick={() => {
-        const { min } = globals.selected;
+        const { min, type } = globals.selected;
         globals.deselect();
-        if (selected.type != "col") {
+        if (type != "col") {
           sheet.addCols(toAdd);
         } else {
           sheet.deleteCols(Math.abs(toAdd), min);
@@ -389,9 +389,9 @@
         toAdd == 0 ||
         selected.type == "col"}
       onclick={() => {
-        const { min } = globals.selected;
+        const { min, type } = selected;
         globals.deselect();
-        if (selected.type != "row") {
+        if (type != "row") {
           sheet.addRows(toAdd);
         } else {
           sheet.deleteRows(Math.abs(toAdd), min);
