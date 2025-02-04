@@ -313,7 +313,7 @@ export class Sheet {
   }
 
   newCell(initialFormula, row, col, initialValue) {
-    const cell = new Cell(initialFormula, initialValue);
+    const cell = new Cell(initialFormula, initialValue, row, col);
 
     const maxUpdates = 1000;
     let updateCount = 0;
@@ -347,17 +347,17 @@ export class Sheet {
           const computed = parsed.compute(
             this.globals,
             this.globals.sheets.indexOf(this),
-            row,
-            col,
+            cell.row,
+            cell.col,
           );
           cell.value.rederive(
             flattenArgs(computed),
             (dependencyValues, set, update) => {
               let _this = {
-                row,
-                col,
                 set,
                 update,
+                row: cell.row,
+                col: cell.col,
                 style: cell.style,
                 element: undefined,
                 globals: this.globals,
@@ -424,6 +424,12 @@ export class Sheet {
       return this.deleteRows(-n, arguments[1]);
     }
     this.heights.splice(start, 0, ...new Array(n).fill(DEFAULT_HEIGHT));
+    this.cells
+      .slice(start)
+      .flat(Infinity)
+      .forEach((cell) => {
+        cell.row += n;
+      });
     this.cells.splice(
       start,
       0,
@@ -440,6 +446,12 @@ export class Sheet {
   deleteRows(n, start = this.heights.length - n) {
     this.heights.splice(start, n);
     this.cells
+      .slice(start)
+      .flat(Infinity)
+      .forEach((cell) => {
+        cell.row -= n;
+      });
+    this.cells
       .splice(start, n)
       .flat(Infinity)
       .forEach((cell) => cell.cleanup());
@@ -452,6 +464,11 @@ export class Sheet {
       return this.deleteCols(-n, arguments[1]);
     }
     this.widths.splice(start, 0, ...new Array(n).fill(DEFAULT_WIDTH));
+    this.cells.forEach((row) =>
+      row.slice(start).forEach((cell) => {
+        cell.col += n;
+      }),
+    );
     this.cells.map((row, i) =>
       row.splice(
         start,
@@ -465,6 +482,11 @@ export class Sheet {
 
   deleteCols(n, start = this.widths.length - n) {
     this.widths.splice(start, n);
+    this.cells.forEach((row) =>
+      row.slice(start).forEach((cell) => {
+        cell.col -= n;
+      }),
+    );
     this.cells
       .map((row) => row.splice(start, n))
       .flat(Infinity)
@@ -499,15 +521,19 @@ export class Cell {
   element = $state();
   formula = $state();
   td = $state();
+  row = $state();
+  col = $state();
   topBorder = $state(false);
   bottomBorder = $state(false);
   rightBorder = $state(false);
   leftBorder = $state(false);
   editing = $state(false);
 
-  constructor(formula, value) {
+  constructor(formula, value, row, col) {
     this.formula = formula;
     this.value = rederivable(value ?? formula);
+    this.row = row;
+    this.col = col;
   }
 
   get() {

@@ -543,3 +543,43 @@ function crossSheetRange(withBang) {
 
 test("Cross-sheet formula ranges (with !)", crossSheetRange(true));
 test("Cross-sheet formula ranges (without !)", crossSheetRange(false));
+
+test("Delete rows in the middle of a sheet", async () => {
+  const state = createSheet([
+    ["1", "2", "3"],
+    ["4", "5", "6"],
+    ["7", "8", "9"],
+    ["=SUM(R0C:R[-1]C)", "=SUM(R0C:R[-1]C)", "=SUM(R0C:R[-1]C)"],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+    [12, 15, 18],
+  ]);
+  state.currentSheet.deleteRows(1, 1);
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3],
+    [7, 8, 9],
+    [8, 10, 12],
+  ]);
+});
+
+test("Delete columns in the middle of a sheet", async () => {
+  const state = createSheet([
+    ["1", "2", "3", "=SUM(RC0:RC[-1])"],
+    ["4", "5", "6", "=SUM(RC0:RC[-1])"],
+    ["7", "8", "9", "=SUM(RC0:RC[-1])"],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [1, 2, 3, 6],
+    [4, 5, 6, 15],
+    [7, 8, 9, 24],
+  ]);
+  state.currentSheet.deleteCols(1, 1);
+  await expectSheet(state.currentSheet, [
+    [1, 3, 4],
+    [4, 6, 10],
+    [7, 9, 16],
+  ]);
+});
