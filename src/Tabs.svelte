@@ -116,7 +116,11 @@
           {
             text: `Delete "${tab}"`,
             onclick: () => {
-              globals.sheets.splice(i, 1);
+              globals.sheets
+                .splice(i, 1)
+                .forEach(({ cells }) =>
+                  cells.flat(Infinity).forEach((cell) => cell.cleanup()),
+                );
               value = Math.min(value, globals.sheets.length - 1);
             },
           },

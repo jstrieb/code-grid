@@ -324,8 +324,8 @@ export class Sheet {
     // more, see:
     // https://www.matsimon.dev/blog/svelte-in-depth-effect-root
     //
-    // TODO: should the effect.root resulting cleanup function be saved and run?
-    $effect.root(() => {
+    // TODO: Are there places where cells are being deleted, but not cleaned up?
+    cell.cleanup = $effect.root(() => {
       // Having this effect outside of the Cell.svelte file means that we can
       // lazily render cells, and still have off-screen cell values be updated.
       $effect(() => {
@@ -439,7 +439,10 @@ export class Sheet {
 
   deleteRows(n, start = this.heights.length - n) {
     this.heights.splice(start, n);
-    this.cells.splice(start, n);
+    this.cells
+      .splice(start, n)
+      .flat(Infinity)
+      .forEach((cell) => cell.cleanup());
   }
 
   addCols(n, start = this.widths.length) {
@@ -462,7 +465,10 @@ export class Sheet {
 
   deleteCols(n, start = this.widths.length - n) {
     this.widths.splice(start, n);
-    this.cells.map((row) => row.splice(start, n));
+    this.cells
+      .map((row) => row.splice(start, n))
+      .flat(Infinity)
+      .forEach((cell) => cell.cleanup());
   }
 
   autoResizeCol(i) {
