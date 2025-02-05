@@ -24,6 +24,9 @@
   - Click cell while editing formula to insert it
   - Add conveniences for LLMs
   - Event hooks
+  - Move formula bar to bottom
+  - When keyboard up on mobile add special keys bar above keyboard
+  - Zoom out extra on mobile, but only cells and code, not UI elements
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -118,3 +121,4 @@
     force re-run
   - Interacting with cells on mobile scrolls
   - Serializing values that are not serializable fails
+  - Larger tap targets for resizing
