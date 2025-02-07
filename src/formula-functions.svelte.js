@@ -4,6 +4,7 @@ import { debounce } from "./helpers.js";
 // use parser combinators. Do not remove, even though it appears "unused."
 import * as parsers from "./parsers.js";
 import * as classes from "./classes.svelte.js";
+import * as compression from "./compress.js";
 import { undefinedArgsToIdentity } from "./helpers.js";
 
 export let functions = $state({});
@@ -23,6 +24,9 @@ export function evalCode(code, ret = () => {}) {
   } catch {}
   try {
     throw classes;
+  } catch {}
+  try {
+    throw compression;
   } catch {}
 
   try {

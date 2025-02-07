@@ -55,12 +55,24 @@
   <body></body>
   <script type="module">
     import { mount } from "svelte";
+
     import "./src/global.css";
     import App from "./src/App.svelte";
+    import { decompressText } from "./src/compress.js";
 
-    const app = mount(App, {
-      target: document.body,
-      props: {},
-    });
+    // Decompression must be async, so we wait until it's complete to initialize
+    // and mount the main component. The globals object is created when the App
+    // is initialized, and relies on the decompressed data.
+    decompressText(window.location.hash.slice(1))
+      .catch((e) => {
+        console.error(e);
+        return undefined;
+      })
+      .then((urlData) => {
+        const app = mount(App, {
+          target: document.body,
+          props: { urlData },
+        });
+      });
   </script>
 </html>

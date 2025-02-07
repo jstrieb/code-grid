@@ -85,12 +85,14 @@
   import Tabs from "./Tabs.svelte";
 
   import { State, Sheet } from "./classes.svelte.js";
+  import { compressText } from "./compress.js";
   import { evalDebounced, functions } from "./formula-functions.svelte.js";
   import { debounce } from "./helpers.js";
   import { keyboardHandler, keybindings } from "./keyboard.js";
 
+  let { urlData } = $props();
   let globals = $state(
-    load(atob(window.location.hash.slice(1) ?? "")) ??
+    load(urlData) ??
       new State([new Sheet("Sheet 1", 10, 10, (i, j) => undefined)]),
   );
   let table = $state();
@@ -98,14 +100,23 @@
   let scrollArea = $state();
 
   function load(dataString) {
-    if (!dataString) {
-      return undefined;
-    }
     let data;
-    try {
-      data = JSON.parse(dataString);
-    } catch {
+    if (!dataString && window.location.hash) {
+      // TODO: Remove
+      // Temporary compatibility measure to not break old, uncompressed links
+      try {
+        data = JSON.parse(atob(window.location.hash.slice(1)));
+      } catch (e) {
+        return undefined;
+      }
+    } else if (!dataString) {
       return undefined;
+    } else {
+      try {
+        data = JSON.parse(dataString);
+      } catch {
+        return undefined;
+      }
     }
     return State.load(data);
   }
@@ -117,7 +128,11 @@
       return;
     }
     // TODO: Save to local storage
-    window.history.pushState(data, "", "#" + btoa(JSON.stringify(data)));
+    window.history.pushState(
+      data,
+      "",
+      "#" + compressText(JSON.stringify(data)),
+    );
   }, 1000);
   $effect(() => {
     save({

@@ -2,7 +2,6 @@
 
 - General
   - Move rows and columns
-  - Compress sheet in URL
   - Project title
   - Service worker for caching
   - Process formulas in web worker?
@@ -27,6 +26,8 @@
   - Move formula bar to bottom
   - When keyboard up on mobile add special keys bar above keyboard
   - Zoom out extra on mobile, but only cells and code, not UI elements
+  - Download sheets as PNG to share
+  - Upload sheets from PNG
 - Settings window
   - Change colors
   - Change debounce save timeouts
