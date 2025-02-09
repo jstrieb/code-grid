@@ -161,7 +161,7 @@ functions.marquee = function(x) {
 ```
 
 The following advanced example adds a formula function for interactive
-checkboxes. The ouput value of the formula is the checked state of the box. Note
+checkboxes. The output value of the formula is the checked state of the box. Note
 the use of `this.set` in the callback to update the cell's value upon
 interaction, and `this.update` to set the initial value of the checkbox. Setting
 the initial value means the checkbox state is saved and loaded from the URL.
@@ -199,7 +199,7 @@ functions.center = function(x) {
 }
 ```
 
-The `set` function is useful in interactive elment callbacks, as demonstrated
+The `set` function is useful in interactive element callbacks, as demonstrated
 above. It is also useful for functions that run on a timeout or interval. For
 example:
 
@@ -279,7 +279,7 @@ the application from the highest to lowest level.
   [compressed](https://github.com/jstrieb/code-grid/blob/7f6431624c703d61e794a7dd6f83f3baba459cd3/src/compress.js#L17-L35)
   by setting `<canvas>` element pixel data to the serialized sheet bytes, and
   having the browser convert the canvas to a PNG (since pixel data is ZLIB
-  compressed in PNG files)
+  compressed in PNG files).
 
 ## Running the Code
 
