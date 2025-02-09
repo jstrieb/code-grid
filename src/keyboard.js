@@ -20,7 +20,10 @@ export const keybindings = {
   "Shift+o": "Insert Row Above",
   o: "Insert Row Below",
   d: "Delete (Vim)",
+  p: "Put After",
+  "Shift+p": "Put Before",
   backspace: "Delete",
+  y: "Yank",
   delete: "Delete",
   x: "Clear Cells",
   s: "Clear Cells and Insert",
@@ -50,18 +53,67 @@ export const keybindings = {
 };
 
 export const actions = {
+  "Put Before": (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+      case "visual":
+        globals.put(false);
+        break;
+    }
+  },
+
+  "Put After": (e, globals) => {
+    switch (globals.mode) {
+      case "normal":
+      case "visual":
+        globals.put(true);
+        break;
+    }
+  },
+
+  Yank: (e, globals) => {
+    // TODO: Proper verbs for yanking with motions
+    if (
+      globals.mode == "normal" &&
+      globals.selected.isSingleton() &&
+      globals.keyQueue[globals.keyQueue.length - 1] != "y"
+    ) {
+      globals.keyQueue.push("y");
+      return;
+    } else if (globals.keyQueue[globals.keyQueue.length - 1] == "y") {
+      globals.keyQueue.pop();
+    }
+    if (globals.mode == "normal" && globals.selected.isSingleton()) {
+      const { x, y } = globals.selected.start;
+      globals.setSelectionStart("row", y);
+      globals.yank();
+      globals.deselect();
+      globals.setSelectionStart("cell", {
+        x,
+        y: Math.min(y, globals.currentSheet.heights.length - 1),
+      });
+      return;
+    }
+    globals.yank();
+    globals.deselect();
+  },
+
   "Delete (Vim)": (e, globals) => {
     // TODO: Proper verbs for deleting with motions
     if (
+      globals.mode == "normal" &&
       globals.selected.isSingleton() &&
       globals.keyQueue[globals.keyQueue.length - 1] != "d"
     ) {
       globals.keyQueue.push("d");
       return;
+    } else if (globals.keyQueue[globals.keyQueue.length - 1] == "d") {
+      globals.keyQueue.pop();
     }
-    globals.keyQueue.pop();
-    if (globals.selected.isSingleton()) {
+    if (globals.mode == "normal" && globals.selected.isSingleton()) {
       const { x, y } = globals.selected.start;
+      globals.setSelectionStart("row", y);
+      globals.yank();
       globals.deselect();
       globals.currentSheet.deleteRows(1, y);
       globals.setSelectionStart("cell", {
@@ -70,6 +122,7 @@ export const actions = {
       });
       return;
     }
+    globals.yank();
     actions.Delete(e, globals);
   },
 
@@ -115,6 +168,7 @@ export const actions = {
   },
 
   "Clear Cells and Insert": (e, globals) => {
+    globals.yank();
     const cells = globals
       .getSelectedCells()
       .flat(Infinity)
@@ -141,6 +195,7 @@ export const actions = {
   },
 
   "Clear Cells": (e, globals) => {
+    globals.yank();
     const cells = globals.getSelectedCells().flat(Infinity);
     globals.deselect();
     cells.forEach((cell) => {
@@ -156,6 +211,7 @@ export const actions = {
         cells.forEach((cell) => {
           cell.formula = "";
         });
+        globals.setSelectionEnd(globals.selected.start);
         break;
       case "row":
         globals.deselect();
@@ -174,13 +230,18 @@ export const actions = {
         });
         break;
     }
+    globals.mode = "normal";
   },
 
   Undo: (e, globals) => {
+    // TODO: Save selection in pushed state
+    globals.deselect();
     window.history.back();
   },
 
   Redo: (e, globals) => {
+    // TODO: Save selection in pushed state
+    globals.deselect();
     window.history.forward();
   },
 

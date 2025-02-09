@@ -205,6 +205,7 @@
       helpOpen: globals.helpOpen,
       editorOpen: globals.editorOpen,
       elements: globals.elements,
+      pasteBuffer: globals.pasteBuffer,
     });
   }}
 />

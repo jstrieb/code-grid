@@ -20,6 +20,7 @@ export class State {
   selected = $state(new Selection());
   mode = $state("normal");
   keyQueue = $state([]);
+  pasteBuffer = $state(new Register());
   elements = $state({});
   helpOpen = $state(false);
   editorOpen = $state(false);
@@ -113,6 +114,152 @@ functions.crypto = async (ticker) => {
         return this.currentSheet.cells.map((row) =>
           row.slice(this.selected.min, this.selected.max + 1),
         );
+    }
+  }
+
+  yank() {
+    // TODO: Put a paste-able table into the clipboard as well
+    switch (this.selected.type) {
+      // Block scoping of case branches required for const declarations
+      case "cell": {
+        const {
+          min: { x: startX, y: startY },
+          max: { x: endX, y: endY },
+        } = this.selected;
+        this.pasteBuffer = new Register(
+          "cell",
+          this.getSelectedCells(),
+          this.currentSheet.widths.slice(startX, endX + 1),
+          this.currentSheet.heights.slice(startY, endY + 1),
+        );
+        break;
+      }
+      case "row": {
+        const { min, max } = this.selected;
+        this.pasteBuffer = new Register(
+          "row",
+          this.getSelectedCells(),
+          undefined,
+          this.currentSheet.heights.slice(min, max + 1),
+        );
+        break;
+      }
+      case "col": {
+        const { min, max } = this.selected;
+        this.pasteBuffer = new Register(
+          "col",
+          this.getSelectedCells(),
+          this.currentSheet.widths.slice(min, max + 1),
+        );
+        break;
+      }
+    }
+  }
+
+  put(after = true) {
+    switch (this.pasteBuffer.type) {
+      case "cell":
+        // TODO: Handle different selection types -- larger than paste buffer,
+        // smaller than paste buffer, etc., possibly by extrapolating formulas
+        // TODO: What does putting "before" even mean for a cell range? Before
+        // in the X direction or the Y direction? Both? Neither?
+        switch (this.selected.type) {
+          case "cell":
+            const {
+              min: { x, y },
+            } = this.selected;
+            this.pasteBuffer.data.forEach((row, i) => {
+              row.forEach((formula, j) => {
+                this.currentSheet.cells[i + y][j + x].formula = formula;
+              });
+            });
+            break;
+          case "row":
+          case "col":
+            // TODO: Handle properly
+            throw new Error("Not yet implemented");
+        }
+        break;
+      case "row":
+        let y;
+        switch (this.selected.type) {
+          case "cell":
+            if (after) {
+              y = this.selected.max.y + 1;
+            } else {
+              y = this.selected.min.y;
+            }
+            break;
+          case "row":
+            if (after) {
+              y = this.selected.max + 1;
+            } else {
+              y = this.selected.min;
+            }
+            break;
+          case "col":
+            if (after) {
+              y = this.currentSheet.heights.length;
+            } else {
+              y = 0;
+            }
+            break;
+        }
+        this.deselect();
+        const numRows = this.pasteBuffer.heights.length;
+        // Add rows, then fill them. This handles cases with rows from other
+        // sheets that are the wrong size and need to be extended or shrunk.
+        this.currentSheet.addRows(numRows, y);
+        this.pasteBuffer.heights.forEach((h, i) => {
+          this.currentSheet.heights[i + y] = h;
+        });
+        this.currentSheet.cells.slice(y, y + numRows).forEach((row, i) =>
+          row.forEach((cell, j) => {
+            cell.formula = this.pasteBuffer.data[i][j];
+          }),
+        );
+        this.setSelectionStart("cell", { x: 0, y });
+        break;
+      case "col":
+        let x;
+        switch (this.selected.type) {
+          case "cell":
+            if (after) {
+              x = this.selected.max.x + 1;
+            } else {
+              x = this.selected.min.x;
+            }
+            break;
+          case "row":
+            if (after) {
+              x = this.currentSheet.widths.length;
+            } else {
+              x = 0;
+            }
+            break;
+          case "col":
+            if (after) {
+              x = this.selected.max + 1;
+            } else {
+              x = this.selected.min;
+            }
+            break;
+        }
+        this.deselect();
+        const numCols = this.pasteBuffer.widths.length;
+        // Add cols, then fill them. This handles cases with cols from other
+        // sheets that are the wrong size and need to be extended or shrunk.
+        this.currentSheet.addCols(numCols, x);
+        this.pasteBuffer.widths.forEach((w, i) => {
+          this.currentSheet.widths[i + x] = w;
+        });
+        this.currentSheet.cells.forEach((row, i) =>
+          row.slice(x, x + numCols).forEach((cell, j) => {
+            cell.formula = this.pasteBuffer.data[i][j];
+          }),
+        );
+        this.setSelectionStart("cell", { x, y: 0 });
+        break;
     }
   }
 
@@ -676,5 +823,20 @@ export class Selection {
       this.start.x == this.end.x &&
       this.start.y == this.end.y
     );
+  }
+}
+
+// Called "registers" in Vim, they're just buffers for yanked data
+export class Register {
+  type = $state();
+  data = $state();
+  widths = $state();
+  heights = $state();
+
+  constructor(type, data, widths, heights) {
+    this.type = type;
+    this.data = data?.map((row) => row.map(({ formula }) => formula));
+    this.widths = widths;
+    this.heights = heights;
   }
 }

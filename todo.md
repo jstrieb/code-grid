@@ -28,9 +28,17 @@
   - Zoom out extra on mobile, but only cells and code, not UI elements
   - Download sheets as PNG to share
   - Upload sheets from PNG
+  - Frozen rows and columns
+  - Toggle off automatic cell updates
+  - Change default styles for all cells in code editor
+  - Highlight referenced cells when in insert mode
+- Clipboard integration
+  - Copy to clipboard as table
+  - Paste tables from clipboard
 - Settings window
   - Change colors
   - Change debounce save timeouts
+  - Change number of recalculations for self-referential cells
 - Window system
   - Track state
     - List of Windows
@@ -57,7 +65,9 @@
   - Save sheets
   - Load sheets
   - Display tutorial on first visit
+  - Tree-based revision control (use IndexDB?)
 - Standard library formula functions
+  - LOCK
   - LIST
   - PYTHON
   - PRINTF
@@ -81,6 +91,7 @@
   - Refactor keyboard shortcuts
   - Number + gg
   - y and yy (and y with all motions) and p and P
+  - Different registers for yank buffers
   - d and c and cc and S (along with dw, de, db, cw, ce, cb, etc.)
   - r and R
   - J
@@ -123,3 +134,4 @@
   - Interacting with cells on mobile scrolls
   - Serializing values that are not serializable fails
   - Larger tap targets for resizing
+  - Fix "put" behavior to copy formulas around to selection
