@@ -131,7 +131,6 @@
   - If all sheets are deleted, it glitches
   - Reference value changes re-run, but argument function calls to set don't
     force re-run
-  - Interacting with cells on mobile scrolls
   - Serializing values that are not serializable fails
   - Larger tap targets for resizing
   - Fix "put" behavior to copy formulas around to selection

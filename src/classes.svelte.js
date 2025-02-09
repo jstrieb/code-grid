@@ -297,20 +297,23 @@ functions.crypto = async (ticker) => {
       return;
     }
 
+    // Don't scroll just from tapping a cell;
+    if (this.selected.isSingleton()) {
+      return;
+    }
+
     // Scroll if highlighting at the edge of the screen
     switch (this.selected.type) {
       case "cell":
-        if (!this.selected.isSingleton()) {
-          if (end.x > this.selected.end.x) {
-            this.currentSheet.cells[end.y]?.[end.x + 2]?.scrollIntoView();
-          } else {
-            this.currentSheet.cells[end.y]?.[end.x - 2]?.scrollIntoView();
-          }
-          if (end.y > this.selected.end.y) {
-            this.currentSheet.cells[end.y + 2]?.[end.x]?.scrollIntoView();
-          } else {
-            this.currentSheet.cells[end.y - 2]?.[end.x]?.scrollIntoView();
-          }
+        if (end.x > this.selected.end.x) {
+          this.currentSheet.cells[end.y]?.[end.x + 2]?.scrollIntoView();
+        } else {
+          this.currentSheet.cells[end.y]?.[end.x - 2]?.scrollIntoView();
+        }
+        if (end.y > this.selected.end.y) {
+          this.currentSheet.cells[end.y + 2]?.[end.x]?.scrollIntoView();
+        } else {
+          this.currentSheet.cells[end.y - 2]?.[end.x]?.scrollIntoView();
         }
         break;
       case "row":
@@ -345,7 +348,6 @@ functions.crypto = async (ticker) => {
 
   setSelectionStart(type, start) {
     start = this.withinSheet(type, start);
-    this.scrollSelection(start);
     this.setSelectedBorders(false);
     this.selected.type = type;
     this.selected._start = start;
