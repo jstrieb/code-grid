@@ -11,7 +11,6 @@
   - XSS and phishing disclaimer
   - File menu at the top
   - CSV import and export
-  - Python formulas using pyodide
   - Button to reset window locations
   - Import from Google Sheets
   - Export to Google Sheets
@@ -39,6 +38,7 @@
   - Change colors
   - Change debounce save timeouts
   - Change number of recalculations for self-referential cells
+  - Zoom level (via meta viewport initial-scale)
 - Window system
   - Track state
     - List of Windows
@@ -76,6 +76,7 @@
   - LINK/URL
   - DEBUG?
   - Standard way to include external scripts and wait for them to load
+  - Python formulas using pyodide
 - Keyboard shortcuts
   - Stay in insert mode when cells clicked
   - Editable keybindings by importing objects and having them in scope at eval
@@ -128,7 +129,6 @@
   - The bottom border of sheet tabs do not adjust after renaming
     - Will be fixed automatically when using windows instead of tabs
   - If all sheets are deleted, it glitches
-  - Right click menu for tabs is placed incorrectly
   - Reference value changes re-run, but argument function calls to set don't
     force re-run
   - Interacting with cells on mobile scrolls

@@ -37,8 +37,6 @@
 <style>
   .menu {
     position: absolute;
-    top: var(--menuY);
-    left: var(--menuX);
     z-index: 20;
     background: none;
     /* TODO: Keep? Adjust? */
@@ -72,13 +70,15 @@
       // Wait for the menu to be created and populated so we can get its height
       await tick();
 
+      const { top: parentTop, left: parentLeft } =
+        e.target.offsetParent.getBoundingClientRect();
       for (
-        menuX = e.clientX;
+        menuX = e.clientX - parentLeft;
         menuX + menuWidth > document.body.offsetWidth && menuX > menuWidth;
         menuX -= menuWidth
       ) {}
       for (
-        menuY = e.clientY;
+        menuY = e.clientY - parentTop;
         menuY + menuHeight > document.body.offsetHeight && menuY > menuHeight;
         menuY -= menuHeight
       ) {}
@@ -91,8 +91,8 @@
     <div
       bind:this={menuElement}
       class="menu"
-      style:--menuX="{menuX}px"
-      style:--menuY="{menuY}px"
+      style:left="{menuX}px"
+      style:top="{menuY}px"
       bind:offsetWidth={menuWidth}
       bind:offsetHeight={menuHeight}
     >
