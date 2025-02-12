@@ -66,6 +66,8 @@
   - Load sheets
   - Display tutorial on first visit
   - Tree-based revision control (use IndexDB?)
+  - Store encrypted sheets 
+  - Personal library of formula functions
 - Standard library formula functions
   - LOCK
   - LIST
@@ -133,4 +135,6 @@
     force re-run
   - Serializing values that are not serializable fails
   - Larger tap targets for resizing
+    - Currently only half of each target works -- position sticky on the th
+      parents of the drag handles is breaking things
   - Fix "put" behavior to copy formulas around to selection
