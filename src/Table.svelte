@@ -54,8 +54,6 @@
     background: var(--header-color);
     /* Drag header to highlight instead of scrolling */
     touch-action: none;
-    /* Required for draggable handles to be positioned absolutely */
-    position: relative;
   }
 
   thead th {
@@ -131,13 +129,32 @@
     z-index: 2;
     /* Prevent mobile browsers from scrolling when trying to resize */
     touch-action: none;
+    --handle-width: 10px;
+  }
+
+  .left.handle {
+    cursor: ew-resize;
+    height: 100%;
+    width: var(--handle-width);
+    left: calc(-0.5 * var(--handle-width));
+    top: 0;
+    bottom: 0;
+  }
+
+  .top.handle {
+    cursor: ns-resize;
+    width: 100%;
+    height: var(--handle-width);
+    top: calc(-0.5 * var(--handle-width));
+    left: 0;
+    right: 0;
   }
 
   .right.handle {
     cursor: ew-resize;
     height: 100%;
-    width: 8px;
-    right: -4px;
+    width: var(--handle-width);
+    right: calc(-0.5 * var(--handle-width));
     top: 0;
     bottom: 0;
   }
@@ -145,8 +162,8 @@
   .bottom.handle {
     cursor: ns-resize;
     width: 100%;
-    height: 8px;
-    bottom: -4px;
+    height: var(--handle-width);
+    bottom: calc(-0.5 * var(--handle-width));
     left: 0;
     right: 0;
   }
@@ -251,7 +268,6 @@
       <tr>
         <th></th>
         {#each sheet.widths as width, i}
-          {@const pointermoveHandler = pointermoveX(i)}
           <th
             style:--width="{width}px"
             class:selected={selected.col(i)}
@@ -280,21 +296,42 @@
                 }}>C{i}</button
               >
             </div>
-            <button
-              onpointerdown={pointerdown(pointermoveHandler)}
-              onpointerup={pointerup(pointermoveHandler)}
-              ondblclick={() => {
-                if (selected.col(i)) {
-                  for (let j = selected.min; j <= selected.max; j++) {
-                    sheet.autoResizeCol(j);
+            {#if i > 0}
+              {@const pointermoveHandler = pointermoveX(i - 1)}
+              <button
+                onpointerdown={pointerdown(pointermoveHandler)}
+                onpointerup={pointerup(pointermoveHandler)}
+                ondblclick={() => {
+                  if (selected.col(i - 1)) {
+                    for (let j = selected.min; j <= selected.max; j++) {
+                      sheet.autoResizeCol(j);
+                    }
+                  } else {
+                    sheet.autoResizeCol(i - 1);
                   }
-                } else {
-                  sheet.autoResizeCol(i);
-                }
-              }}
-              class="right handle"
-              aria-label="Drag handle for column C{i}"
-            ></button>
+                }}
+                class="left handle"
+                aria-label="Drag handle for column C{i - 1}"
+              ></button>
+            {/if}
+            {#if i == sheet.widths.length - 1}
+              {@const pointermoveHandler = pointermoveX(i)}
+              <button
+                onpointerdown={pointerdown(pointermoveHandler)}
+                onpointerup={pointerup(pointermoveHandler)}
+                ondblclick={() => {
+                  if (selected.col(i)) {
+                    for (let j = selected.min; j <= selected.max; j++) {
+                      sheet.autoResizeCol(j);
+                    }
+                  } else {
+                    sheet.autoResizeCol(i);
+                  }
+                }}
+                class="right handle"
+                aria-label="Drag handle for column C{i}"
+              ></button>
+            {/if}
           </th>
         {/each}
       </tr>
@@ -302,7 +339,6 @@
 
     <tbody>
       {#each sheet.cells as row, i}
-        {@const pointermoveHandler = pointermoveY(i)}
         <tr>
           <th
             style:--height="{sheet.heights[i]}px"
@@ -332,21 +368,42 @@
                 }}>R{i}</button
               >
             </div>
-            <button
-              onpointerdown={pointerdown(pointermoveHandler)}
-              onpointerup={pointerup(pointermoveHandler)}
-              ondblclick={() => {
-                if (selected.row(i)) {
-                  for (let j = selected.min; j <= selected.max; j++) {
-                    sheet.autoResizeRow(j);
+            {#if i > 0}
+              {@const pointermoveHandler = pointermoveY(i - 1)}
+              <button
+                onpointerdown={pointerdown(pointermoveHandler)}
+                onpointerup={pointerup(pointermoveHandler)}
+                ondblclick={() => {
+                  if (selected.row(i - 1)) {
+                    for (let j = selected.min; j <= selected.max; j++) {
+                      sheet.autoResizeRow(j);
+                    }
+                  } else {
+                    sheet.autoResizeRow(i - 1);
                   }
-                } else {
-                  sheet.autoResizeRow(i);
-                }
-              }}
-              class="bottom handle"
-              aria-label="Drag handle for row R{i}"
-            ></button>
+                }}
+                class="top handle"
+                aria-label="Drag handle for row R{i - 1}"
+              ></button>
+            {/if}
+            {#if i == sheet.heights.length - 1}
+              {@const pointermoveHandler = pointermoveY(i)}
+              <button
+                onpointerdown={pointerdown(pointermoveHandler)}
+                onpointerup={pointerup(pointermoveHandler)}
+                ondblclick={() => {
+                  if (selected.row(i)) {
+                    for (let j = selected.min; j <= selected.max; j++) {
+                      sheet.autoResizeRow(j);
+                    }
+                  } else {
+                    sheet.autoResizeRow(i);
+                  }
+                }}
+                class="bottom handle"
+                aria-label="Drag handle for row R{i}"
+              ></button>
+            {/if}
           </th>
 
           {#each row as cell, j}

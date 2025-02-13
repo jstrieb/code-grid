@@ -134,7 +134,4 @@
   - Reference value changes re-run, but argument function calls to set don't
     force re-run
   - Serializing values that are not serializable fails
-  - Larger tap targets for resizing
-    - Currently only half of each target works -- position sticky on the th
-      parents of the drag handles is breaking things
   - Fix "put" behavior to copy formulas around to selection
