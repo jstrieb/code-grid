@@ -9,16 +9,46 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-export function compress(data) {
+function getFontHeight(text, width) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = width;
+  const context = canvas.getContext("2d");
+  let fontSize = 1;
+  for (
+    context.font = `${fontSize}px sans-serif`;
+    context.measureText(text).width < width - fontSize;
+    context.font = `${fontSize++}px sans-serif`
+  ) {}
+  return fontSize - 1;
+}
+
+export function compress(data, bottomText) {
   if (data.some((x) => x == 255)) {
     // TODO: Don't use 255 as padding
     throw new Error("Data cannot contain byte 255, which is used as padding");
   }
   const canvas = document.createElement("canvas");
-  const roundedRoot = Math.ceil(Math.sqrt(data.length / 3));
-  canvas.width = roundedRoot;
-  canvas.height = roundedRoot;
   const context = canvas.getContext("2d");
+  const roundedRoot = Math.ceil(Math.sqrt(data.length / 3));
+  if (bottomText) {
+    canvas.width = Math.max(roundedRoot, 5 * bottomText.length);
+    const textHeight = getFontHeight(bottomText, canvas.width);
+    canvas.height = Math.ceil(data.length / 3 / canvas.width) + textHeight + 5;
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "black";
+    context.font = `${textHeight}px sans-serif`;
+    context.fillText(
+      bottomText,
+      Math.abs(canvas.width - context.measureText(bottomText).width) / 2,
+      canvas.height - 4,
+    );
+  } else {
+    canvas.width = roundedRoot;
+    canvas.height = roundedRoot;
+  }
+
   const image = context.getImageData(0, 0, canvas.width, canvas.height);
   let offset = 0;
   data.forEach((b) => {
@@ -27,9 +57,6 @@ export function compress(data) {
     if (offset % 4 == 3) image.data[offset++] = 255;
     image.data[offset++] = b;
   });
-  for (; offset < image.data.length; offset++) {
-    image.data[offset] = 255;
-  }
   context.putImageData(image, 0, 0);
   const url = canvas.toDataURL("image/png");
   return url.match(/,(.*)/)[1];
@@ -40,7 +67,7 @@ export function decompress(url) {
   // wait for the image load before using its pixels
   return new Promise((resolve, reject) => {
     const img = document.createElement("img");
-    img.onerror = (e) => reject(e);
+    img.onerror = (e) => reject(new Error("Could not decompress URL"));
     img.onload = () => {
       try {
         const canvas = document.createElement("canvas");
@@ -48,10 +75,17 @@ export function decompress(url) {
         canvas.height = img.naturalHeight;
         const context = canvas.getContext("2d");
         context.drawImage(img, 0, 0);
+        const raw = context.getImageData(
+          0,
+          0,
+          img.naturalWidth,
+          img.naturalHeight,
+        ).data;
+        const dataEnd = raw.findIndex(
+          (v, i) => v == 255 && (raw[i + 1] ?? 255) == 255,
+        );
         resolve(
-          context
-            .getImageData(0, 0, img.naturalWidth, img.naturalHeight)
-            .data.filter((b, i) => b != 255 /* && i % 4 != 3 */),
+          raw.slice(0, dataEnd).filter((b, i) => b != 255 /* && i % 4 != 3 */),
         );
       } catch (e) {
         reject(e);
