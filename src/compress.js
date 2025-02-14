@@ -31,6 +31,7 @@ export function compress(data, bottomText) {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   const roundedRoot = Math.ceil(Math.sqrt(data.length / 3));
+
   if (bottomText) {
     canvas.width = Math.max(roundedRoot, 5 * bottomText.length);
     const textHeight = getFontHeight(bottomText, canvas.width);
@@ -67,7 +68,7 @@ export function decompress(url) {
   // wait for the image load before using its pixels
   return new Promise((resolve, reject) => {
     const img = document.createElement("img");
-    img.onerror = (e) => reject(new Error("Could not decompress URL"));
+    img.onerror = (e) => reject(new Error("Could not extract image data"));
     img.onload = () => {
       try {
         const canvas = document.createElement("canvas");
@@ -95,8 +96,8 @@ export function decompress(url) {
   });
 }
 
-export function compressText(s) {
-  return compress(encoder.encode(s));
+export function compressText(s, bottomText) {
+  return compress(encoder.encode(s), bottomText);
 }
 
 export async function decompressText(data) {

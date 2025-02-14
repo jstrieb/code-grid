@@ -14,6 +14,7 @@
     text-overflow: ellipsis;
     width: var(--width);
     height: var(--height);
+    min-width: max-content;
     /* Space for the shadow so it doesn't get cut off */
     margin-right: 3px;
     margin-bottom: 3px;
@@ -40,14 +41,21 @@
 </style>
 
 <script>
+  import { tick } from "svelte";
+
   const { children, square = false, ...props } = $props();
   let width = $state("auto"),
     height = $state("auto");
 
-  function resize(node) {
+  async function resize(node) {
     if (!square) {
       return;
     }
+
+    // Tick necessary since this is sometimes called before everything is
+    // mounted
+    await tick();
+
     const { width: originalWidth, height: originalHeight } =
       node.getBoundingClientRect();
     /*

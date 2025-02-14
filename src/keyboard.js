@@ -36,6 +36,8 @@ export const keybindings = {
   "Shift+?": "Toggle Help",
   ":": "Toggle Code Editor",
   "Shift+:": "Toggle Code Editor",
+  "Ctrl+s": "Toggle Save and Load",
+  "Super+s": "Toggle Save and Load",
   g: "Go To",
   "Shift+g": "Go to Bottom",
   "Ctrl+z": "Undo",
@@ -53,6 +55,10 @@ export const keybindings = {
 };
 
 export const actions = {
+  "Toggle Save and Load": (e, globals) => {
+    globals.imageOpen = !globals.imageOpen;
+  },
+
   "Put Before": (e, globals) => {
     switch (globals.mode) {
       case "normal":

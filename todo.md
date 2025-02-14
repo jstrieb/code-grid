@@ -25,8 +25,6 @@
   - Move formula bar to bottom
   - When keyboard up on mobile add special keys bar above keyboard
   - Zoom out extra on mobile, but only cells and code, not UI elements
-  - Download sheets as PNG to share
-  - Upload sheets from PNG
   - Frozen rows and columns
   - Toggle off automatic cell updates
   - Change default styles for all cells in code editor
@@ -58,6 +56,13 @@
   - Automatic indent
   - Line numbers
   - Turn on manual save instead of auto save
+- Save/load window
+  - Add share buttons using `navigator.share`
+  - Add download button
+  - Register Code Grid to open PNG files as PWA
+  - Preview before loading
+  - Load button
+  - Display load errors
 - Formula processing
   - "symbols" in formulas
   - Namespaced formula functions

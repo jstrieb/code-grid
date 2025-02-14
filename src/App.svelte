@@ -80,6 +80,7 @@
   import Details from "./Details.svelte";
   import Dialog from "./Dialog.svelte";
   import FormulaBar from "./FormulaBar.svelte";
+  import SaveLoad from "./SaveLoad.svelte";
   import ShyMenu from "./ShyMenu.svelte";
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
@@ -98,6 +99,7 @@
   let table = $state();
   let startHeight = $state(0);
   let scrollArea = $state();
+  let imageData = $state();
 
   function load(dataString) {
     let data;
@@ -123,6 +125,7 @@
 
   let dontSave = $state(false);
   const save = debounce((data) => {
+    imageData = JSON.stringify(data);
     if (dontSave) {
       dontSave = false;
       return;
@@ -204,6 +207,7 @@
       mode: globals.mode,
       helpOpen: globals.helpOpen,
       editorOpen: globals.editorOpen,
+      imageOpen: globals.imageOpen,
       elements: globals.elements,
       pasteBuffer: globals.pasteBuffer,
     });
@@ -249,6 +253,14 @@
   {#if codeError}
     <p style="white-space: pre; overflow-x: auto;">{codeError}</p>
   {/if}
+</Dialog>
+
+<Dialog bind:open={globals.imageOpen}>
+  <div
+    style="display: flex; flex-direction: column; gap: 0.5em; padding: 0.5em;"
+  >
+    <SaveLoad bind:globals {imageData} />
+  </div>
 </Dialog>
 
 <Dialog bind:open={globals.helpOpen}>
@@ -311,6 +323,10 @@
           {
             text: "Help",
             onclick: () => (globals.helpOpen = !globals.helpOpen),
+          },
+          {
+            text: "Save and Load Spreadsheet as Image",
+            onclick: () => (globals.imageOpen = !globals.imageOpen),
           },
           {
             text: "Code Editor",
