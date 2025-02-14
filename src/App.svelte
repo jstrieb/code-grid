@@ -353,7 +353,7 @@
       </div>
     {/snippet}
     {#snippet clickable(handler)}
-      <Button square onclick={handler}>=</Button>
+      <Button square onclick={handler} style="height: 1.5em;">=</Button>
     {/snippet}
   </ShyMenu>
   <div style="flex-grow: 1;"><!-- Spacer --></div>

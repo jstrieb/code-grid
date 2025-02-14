@@ -126,11 +126,6 @@
   - Scrolling up or left with selection doesn't work, scrolling down and right
     only kind of works
     - Will be fixed automatically when lazy scrolling
-  - Dialog X button is not square
-    - `<Button>` square attribute doesn't work because the button is mounted
-      with `display: none`, and therefore has zero width and height at mount
-      time
-    - Using `<Button>` has too much shadow
   - Context menu does not activate on iOS
     - Manually have to detect long press
   - The bottom border of sheet tabs do not adjust after renaming

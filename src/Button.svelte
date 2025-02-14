@@ -4,7 +4,7 @@
     -webkit-user-select: none;
     cursor: pointer;
     border: 1px solid var(--fg-color);
-    box-shadow: 3px 3px 0 0 var(--fg-color);
+    box-shadow: var(--shadow, 3px) var(--shadow, 3px) 0 0 var(--fg-color);
     padding: 0.1em 0.2em;
     display: flex;
     justify-content: center;
@@ -12,12 +12,10 @@
     white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: var(--width);
-    height: var(--height);
     min-width: max-content;
     /* Space for the shadow so it doesn't get cut off */
-    margin-right: 3px;
-    margin-bottom: 3px;
+    margin-right: var(--shadow, 3px);
+    margin-bottom: var(--shadow, 3px);
   }
 
   button:hover {
@@ -25,7 +23,8 @@
   }
 
   button:active {
-    box-shadow: 2px 2px 0 0 var(--fg-color);
+    box-shadow: calc(var(--shadow, 3px) * 2 / 3)
+      calc(var(--shadow, 3px) * 2 / 3) 0 0 var(--fg-color);
   }
 
   button:disabled {
@@ -36,40 +35,18 @@
   }
 
   button:active:disabled {
-    box-shadow: 3px 3px 0 0 var(--fg-color);
+    box-shadow: var(--shadow, 3px) var(--shadow, 3px) 0 0 var(--fg-color);
+  }
+
+  .square {
+    aspect-ratio: 1 / 1;
   }
 </style>
 
 <script>
-  import { tick } from "svelte";
-
-  const { children, square = false, ...props } = $props();
-  let width = $state("auto"),
-    height = $state("auto");
-
-  async function resize(node) {
-    if (!square) {
-      return;
-    }
-
-    // Tick necessary since this is sometimes called before everything is
-    // mounted
-    await tick();
-
-    const { width: originalWidth, height: originalHeight } =
-      node.getBoundingClientRect();
-    /*
-    if (originalWidth <= 0 && originalHeight <= 0) {
-      // Happens if components are mounted in display: none containers.
-      return;
-    }
-    */
-    const max = `${Math.max(originalWidth, originalHeight)}px`;
-    width = max;
-    height = max;
-  }
+  const { children, shadow = "3px", square = false, ...props } = $props();
 </script>
 
-<button style:--width={width} style:--height={height} use:resize {...props}
+<button class:square style:--shadow={shadow} {...props}
   >{@render children?.()}</button
 >

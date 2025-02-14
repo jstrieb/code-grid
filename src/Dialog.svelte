@@ -48,24 +48,6 @@
     cursor: grabbing;
   }
 
-  button.x {
-    cursor: pointer;
-    font-family: monospace, monospace;
-    width: 1.5em;
-    height: 1.5em;
-    border: 1px solid var(--fg-color);
-    box-shadow: 2px 2px 0 0 var(--fg-color);
-    margin-right: 2px;
-  }
-
-  button.x:hover {
-    outline: 1px solid var(--fg-color);
-  }
-
-  button.x:active {
-    box-shadow: 1px 1px 0 0 var(--fg-color);
-  }
-
   .main {
     flex-grow: 1;
     overflow: auto;
@@ -102,6 +84,8 @@
 </style>
 
 <script>
+  import Button from "./Button.svelte";
+
   let {
     children,
     open = $bindable(false),
@@ -217,7 +201,12 @@
         style="stroke: var(--bg-color); stroke-width: 2px;"
       ></rect>
     </svg>
-    <button class="x" onclick={() => (open = false)}>X</button>
+    <Button
+      square
+      shadow="2px"
+      style="height: 1.5em"
+      onclick={() => (open = false)}>X</Button
+    >
   </div>
   <div class="main" {...rest}>
     {@render children()}
