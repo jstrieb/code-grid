@@ -101,7 +101,9 @@ export const actions = {
       return;
     }
     globals.yank();
-    globals.deselect();
+    const { type, end } = globals.selected;
+    globals.setSelectionStart(type, end);
+    globals.mode = "normal";
   },
 
   "Delete (Vim)": (e, globals) => {
@@ -203,10 +205,13 @@ export const actions = {
   "Clear Cells": (e, globals) => {
     globals.yank();
     const cells = globals.getSelectedCells().flat(Infinity);
+    const { start, type } = globals.selected;
     globals.deselect();
     cells.forEach((cell) => {
       cell.formula = "";
     });
+    globals.setSelectionStart(type, start);
+    globals.mode = "normal";
   },
 
   Delete: (e, globals) => {
