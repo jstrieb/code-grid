@@ -48,6 +48,8 @@ export function compress(data, bottomText) {
   } else {
     canvas.width = roundedRoot;
     canvas.height = roundedRoot;
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
   }
 
   const image = context.getImageData(0, 0, canvas.width, canvas.height);
