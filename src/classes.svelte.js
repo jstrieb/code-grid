@@ -494,9 +494,10 @@ export class Sheet {
 
         try {
           const parsed = formula.parse(cell.formula);
+          const sheetIndex = this.globals.sheets.indexOf(this);
           const computed = parsed.compute(
             this.globals,
-            this.globals.sheets.indexOf(this),
+            sheetIndex,
             cell.row,
             cell.col,
           );
@@ -506,8 +507,11 @@ export class Sheet {
               let _this = {
                 set,
                 update,
+                sheet: sheetIndex,
                 row: cell.row,
                 col: cell.col,
+                width: this.widths[cell.col],
+                height: this.heights[cell.row],
                 style: cell.style,
                 element: undefined,
                 globals: this.globals,
