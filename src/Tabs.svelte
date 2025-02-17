@@ -171,7 +171,7 @@
             `Sheet ${globals.sheets.length + 1}`,
             5,
             5,
-            () => undefined,
+            undefined,
             undefined,
             globals,
           ),

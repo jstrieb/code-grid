@@ -17,7 +17,7 @@
   }
 
   function hide(e) {
-    switch (event.type) {
+    switch (e.type) {
       case "keydown":
         switch (keyEventToString(e)) {
           case undefined:
@@ -37,7 +37,7 @@
     globalHideEvents.forEach((type) => window.removeEventListener(type, hide));
   }
 
-  async function handler(e) {
+  function handler(e) {
     show = true;
     e.preventDefault();
     globalHideEvents.forEach((type) => window.addEventListener(type, hide));

@@ -30,20 +30,24 @@ export function compress(data, bottomText) {
   }
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
-  const roundedRoot = Math.ceil(Math.sqrt(data.length / 3));
+  const numPixels = data.length / 3;
+  const roundedRoot = Math.ceil(Math.sqrt(numPixels));
 
   if (bottomText) {
-    canvas.width = Math.max(roundedRoot, 5 * bottomText.length);
+    const minCharWidth = 5;
+    const padding = 5;
+    canvas.width = Math.max(roundedRoot, minCharWidth * bottomText.length);
     const textHeight = getFontHeight(bottomText, canvas.width);
-    canvas.height = Math.ceil(data.length / 3 / canvas.width) + textHeight + 5;
+    canvas.height =
+      Math.ceil(numPixels / canvas.width) + textHeight + padding * 1.5;
     context.fillStyle = "white";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.fillStyle = "black";
     context.font = `${textHeight}px sans-serif`;
     context.fillText(
       bottomText,
-      Math.abs(canvas.width - context.measureText(bottomText).width) / 2,
-      canvas.height - 4,
+      (canvas.width - context.measureText(bottomText).width) / 2,
+      canvas.height - padding,
     );
   } else {
     canvas.width = roundedRoot;
@@ -84,9 +88,12 @@ export function decompress(url) {
           img.naturalWidth,
           img.naturalHeight,
         ).data;
-        const dataEnd = raw.findIndex(
-          (v, i) => v == 255 && (raw[i + 1] ?? 255) == 255,
-        );
+        // The addition and modulus operations change a possible -1 value to
+        // raw.length - 1. Other values will be unchanged.
+        const dataEnd =
+          (raw.findIndex((v, i) => v == 255 && raw[i + 1] == 255) +
+            raw.length) %
+          raw.length;
         resolve(
           raw.slice(0, dataEnd).filter((b, i) => b != 255 /* && i % 4 != 3 */),
         );

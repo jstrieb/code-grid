@@ -455,7 +455,7 @@ export class Sheet {
       .map((_, i) =>
         new Array(cols)
           .fill()
-          .map((_, j) => this.newCell(formula(i, j), i, j, initial?.(i, j))),
+          .map((_, j) => this.newCell(formula?.(i, j), i, j, initial?.(i, j))),
       );
     this.widths = new Array(cols).fill(DEFAULT_WIDTH);
     this.heights = new Array(rows).fill(DEFAULT_HEIGHT);
@@ -494,10 +494,9 @@ export class Sheet {
 
         try {
           const parsed = formula.parse(cell.formula);
-          const sheetIndex = this.globals.sheets.indexOf(this);
           const computed = parsed.compute(
             this.globals,
-            sheetIndex,
+            this.globals.sheets.indexOf(this),
             cell.row,
             cell.col,
           );
@@ -507,7 +506,9 @@ export class Sheet {
               let _this = {
                 set,
                 update,
-                sheet: sheetIndex,
+                // Recompute the sheet index in case it's changed between the
+                // parsed.compute call above and when this callback is called
+                sheet: this.globals.sheets.indexOf(this),
                 row: cell.row,
                 col: cell.col,
                 width: this.widths[cell.col],

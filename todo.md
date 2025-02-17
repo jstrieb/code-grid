@@ -114,6 +114,9 @@
   - Integrate Playwright coverage with vitest coverage
   - Test parsers and classes in formulas
 - Push to versioned folders on Pages based on git tags
+- Refactor
+  - State.addSheet (and removeSheet?) methods as per Logan's code review
+    feedback
 - Documentation
   - README
     - Description and introduction 

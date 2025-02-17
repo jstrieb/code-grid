@@ -93,8 +93,7 @@
 
   let { urlData } = $props();
   let globals = $state(
-    load(urlData) ??
-      new State([new Sheet("Sheet 1", 10, 10, (i, j) => undefined)]),
+    load(urlData) ?? new State([new Sheet("Sheet 1", 10, 10)]),
   );
   let table = $state();
   let startHeight = $state(0);
