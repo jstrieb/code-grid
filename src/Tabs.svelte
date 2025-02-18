@@ -116,8 +116,8 @@
           {
             text: `Delete "${tab}"`,
             onclick: () => {
-              globals.sheets
-                .splice(i, 1)
+              globals
+                .deleteSheets(1, i)
                 .forEach(({ cells }) =>
                   cells.flat(Infinity).forEach((cell) => cell.cleanup()),
                 );
@@ -166,15 +166,12 @@
     ><button
       class="add"
       onclick={() =>
-        globals.sheets.push(
-          new Sheet(
-            `Sheet ${globals.sheets.length + 1}`,
-            5,
-            5,
-            undefined,
-            undefined,
-            globals,
-          ),
+        globals.addSheet(
+          `Sheet ${globals.sheets.length + 1}`,
+          5,
+          5,
+          undefined,
+          undefined,
         )}>+</button
     ></label
   >

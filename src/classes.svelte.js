@@ -383,6 +383,16 @@ functions.crypto = async (ticker) => {
     this.setSelectionStart(undefined, undefined);
     this.mode = "normal";
   }
+
+  addSheet(name, rows, cols, formula, initial, start = this.sheets.length) {
+    const sheet = new Sheet(name, rows, cols, formula, initial);
+    sheet.globals = this;
+    this.sheets.splice(start, 0, sheet);
+  }
+
+  deleteSheets(n, start = this.sheets.length - n) {
+    return this.sheets.splice(start, n);
+  }
 }
 
 function flattenArgs(computed) {
@@ -436,18 +446,7 @@ export class Sheet {
   // circular reactive references.
   globals;
 
-  fromCells(name, cells, globals) {
-    return new Sheet(
-      name,
-      cells.length,
-      cells[0].length,
-      (i, j) => cells[i][j],
-      undefined,
-      globals,
-    );
-  }
-
-  constructor(name, rows, cols, formula, initial, globals) {
+  constructor(name, rows, cols, formula, initial) {
     // TODO: Test optimizations using sparse arrays (without .fill)
     this.name = name;
     this.cells = new Array(rows)
@@ -459,7 +458,6 @@ export class Sheet {
       );
     this.widths = new Array(cols).fill(DEFAULT_WIDTH);
     this.heights = new Array(rows).fill(DEFAULT_HEIGHT);
-    this.globals = globals;
   }
 
   newCell(initialFormula, row, col, initialValue) {

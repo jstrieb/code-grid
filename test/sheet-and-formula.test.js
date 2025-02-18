@@ -419,9 +419,7 @@ function crossSheetRef(withBang) {
       [10, 10, undefined, undefined, undefined, undefined],
     ]);
 
-    state.sheets.push(
-      new Sheet("Sheet 2", 3, 10, (i, j) => `${i * j}`, undefined, state),
-    );
+    state.addSheet("Sheet 2", 3, 10, (i, j) => `${i * j}`, undefined);
     await expectSheet(
       state.sheets[1],
       new Array(3)
@@ -430,15 +428,13 @@ function crossSheetRef(withBang) {
     );
     await expectSheet(state.sheets[0], [[10, 10, 0, 4, undefined, undefined]]);
 
-    state.sheets.unshift(
-      new Sheet(
-        "Sheet 0",
-        4,
-        4,
-        (i, j) => `=(${i} + 1) / (${j} + 1)`,
-        undefined,
-        state,
-      ),
+    state.addSheet(
+      "Sheet 0",
+      4,
+      4,
+      (i, j) => `=(${i} + 1) / (${j} + 1)`,
+      undefined,
+      0,
     );
     await expectSheet(
       state.sheets[0],
@@ -486,9 +482,7 @@ function crossSheetRange(withBang) {
       [1, 2, 3],
     ]);
 
-    state.sheets.unshift(
-      new Sheet("Sheet 0", 4, 4, (i, j) => `=${i} + ${j}`, undefined, state),
-    );
+    state.addSheet("Sheet 0", 4, 4, (i, j) => `=${i} + ${j}`, undefined, 0);
     await expectSheet(
       state.sheets[0],
       new Array(4)
@@ -504,16 +498,7 @@ function crossSheetRange(withBang) {
       [1, 2, 3],
     ]);
 
-    state.sheets.push(
-      new Sheet(
-        "Sheet 2",
-        4,
-        4,
-        (i, j) => `=(${i} + 1) * ${j}`,
-        undefined,
-        state,
-      ),
-    );
+    state.addSheet("Sheet 2", 4, 4, (i, j) => `=(${i} + 1) * ${j}`, undefined);
     await expectSheet(
       state.sheets[2],
       new Array(4)
