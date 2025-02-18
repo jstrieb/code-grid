@@ -229,8 +229,8 @@ The links below are listed in the order the code should be read to understand
 the application from the highest to lowest level.
 
 - [`Makefile`](Makefile) – build and run the application locally
-- [`src/App.svelte`](src/App.svelte) – entrypoint to the main, high-level
-  application
+- [`index.html`](index.html) and [`src/App.svelte`](src/App.svelte) – entrypoint
+  to the main, high-level application (the index page mounts the App)
 - [`src/Table.svelte`](src/Table.svelte) and
   [`src/Cell.svelte`](src/Cell.svelte) – interactive spreadsheet UI code
 - [`src/classes.svelte.js`](src/classes.svelte.js) – classes that manage state
