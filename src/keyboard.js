@@ -20,13 +20,13 @@ export const keybindings = {
   "Shift+o": "Insert Row Above",
   o: "Insert Row Below",
   d: "Delete (Vim)",
+  "Ctrl+c": "Copy",
+  "Ctrl+v": "Paste",
+  "Ctrl+Shift+v": "Paste values",
   p: "Put After",
-  "Ctrl+v": "Put After",
-  "Ctrl+Shift+v": "Put After",
   "Shift+p": "Put Before",
   backspace: "Delete",
   y: "Yank",
-  "Ctrl+c": "Yank",
   delete: "Delete",
   x: "Clear Cells",
   s: "Clear Cells and Insert",
@@ -58,6 +58,58 @@ export const keybindings = {
 };
 
 export const actions = {
+  Copy: async (e, globals) => {
+    const cells = globals.getSelectedCells();
+    if (cells == null) {
+      return;
+    }
+    const plain = cells
+      .map((row) =>
+        row
+          .map((cell) => {
+            const value = cell.get().toString().replace('"', '""');
+            return `"${value}"`;
+          })
+          .join(","),
+      )
+      .join("\r\n");
+
+    const table = document.createElement("table");
+    cells.forEach((row) => {
+      const tr = document.createElement("tr");
+      row.forEach((cell) => {
+        const td = document.createElement("td");
+        td.dataset.formula = cell.formula;
+        td.innerText = cell.get();
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+    });
+    const html = table.outerHTML;
+
+    const clipboard = {};
+    if (ClipboardItem.supports("text/plain")) {
+      clipboard["text/plain"] = new Blob([plain], { type: "text/plain" });
+    }
+    if (ClipboardItem.supports("text/html")) {
+      clipboard["text/html"] = new Blob([html], { type: "text/html" });
+    }
+    await navigator.clipboard.write([new ClipboardItem(clipboard)]);
+
+    globals.yank();
+    const { type, end } = globals.selected;
+    globals.setSelectionStart(type, end);
+    globals.mode = "normal";
+  },
+
+  Paste: (e, globals) => {
+    // TODO
+  },
+
+  "Paste values": (e, globals) => {
+    // TODO
+  },
+
   "Toggle Save and Load": (e, globals) => {
     globals.imageOpen = !globals.imageOpen;
   },
