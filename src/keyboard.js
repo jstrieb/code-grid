@@ -21,9 +21,12 @@ export const keybindings = {
   o: "Insert Row Below",
   d: "Delete (Vim)",
   p: "Put After",
+  "Ctrl+v": "Put After",
+  "Ctrl+Shift+v": "Put After",
   "Shift+p": "Put Before",
   backspace: "Delete",
   y: "Yank",
+  "Ctrl+c": "Yank",
   delete: "Delete",
   x: "Clear Cells",
   s: "Clear Cells and Insert",
@@ -667,7 +670,6 @@ export function keyboardHandler(e, globals) {
         globals.keyQueue = [];
         break;
       }
-    case "Ctrl+c":
       switch (globals.mode) {
         case "normal":
           switch (globals.selected.type) {
