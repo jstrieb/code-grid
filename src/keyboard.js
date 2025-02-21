@@ -66,16 +66,22 @@ export const actions = {
     if (cells == null) {
       return;
     }
+
+    // CSV format
+    // const plain = cells
+    //   .map((row) =>
+    //     row
+    //       .map((cell) => {
+    //         const value = cell.get().toString().replace('"', '""');
+    //         return `"${value}"`;
+    //       })
+    //       .join(","),
+    //   )
+    //   .join("\r\n");
+
     const plain = cells
-      .map((row) =>
-        row
-          .map((cell) => {
-            const value = cell.get().toString().replace('"', '""');
-            return `"${value}"`;
-          })
-          .join(","),
-      )
-      .join("\r\n");
+      .map((row) => row.map((cell) => cell.get()?.toString() ?? "").join("\t"))
+      .join("\n");
 
     const table = document.createElement("table");
     cells.forEach((row) => {
@@ -83,7 +89,7 @@ export const actions = {
       row.forEach((cell) => {
         const td = document.createElement("td");
         td.dataset.formula = cell.formula;
-        td.innerText = cell.get();
+        td.innerText = cell.get()?.toString() ?? "";
         tr.appendChild(td);
       });
       table.appendChild(tr);
