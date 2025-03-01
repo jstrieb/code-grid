@@ -110,5 +110,6 @@ export function compressText(s, bottomText) {
 }
 
 export async function decompressText(data) {
+  if (!data) return undefined;
   return decoder.decode(await decompress(data));
 }
