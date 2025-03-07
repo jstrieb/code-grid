@@ -254,7 +254,7 @@
   {/if}
 </Dialog>
 
-<Dialog bind:open={globals.imageOpen}>
+<Dialog top={150} left={150} bind:open={globals.imageOpen}>
   <div
     style="display: flex; flex-direction: column; gap: 0.5em; padding: 0.5em;"
   >
@@ -262,7 +262,7 @@
   </div>
 </Dialog>
 
-<Dialog bind:open={globals.helpOpen}>
+<Dialog top={100} left={100} bind:open={globals.helpOpen}>
   <div
     style="display: flex; flex-direction: column; gap: 0.5em; padding: 0.5em;"
   >
