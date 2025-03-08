@@ -51,3 +51,11 @@ export function reshape(l, rows, cols) {
     .fill()
     .map((_, i) => new Array(cols).fill().map((_, j) => l[i * cols + j]));
 }
+
+export function randomId(length) {
+  const result = new Uint8Array(length);
+  crypto.getRandomValues(result);
+  return Array.from(result)
+    .map((b) => b.toString(36))
+    .join("");
+}

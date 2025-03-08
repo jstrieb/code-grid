@@ -31,8 +31,7 @@
   - Highlight referenced cells when in insert mode
   - Cells can run functions in a destructor
 - Clipboard integration
-  - Copy to clipboard as table
-  - Paste tables from clipboard
+  - Cut
 - Settings window
   - Change colors
   - Change debounce save timeouts

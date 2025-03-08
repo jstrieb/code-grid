@@ -85,6 +85,7 @@
 
 <script>
   import Button from "./Button.svelte";
+  import { randomId } from "./helpers.js";
 
   let {
     children,
@@ -103,7 +104,7 @@
   // components, for example), and the first one is inside of a `display:
   // none` element, then they will not render. Giving each a unique ID
   // solves this problem.
-  const dotsId = crypto.randomUUID();
+  const dotsId = randomId();
 
   function topPointerDown(e) {
     e.target.addEventListener("pointermove", topPointerMove);

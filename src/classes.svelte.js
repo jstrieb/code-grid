@@ -1,5 +1,5 @@
 import { formula } from "./formula.js";
-import { debounce } from "./helpers.js";
+import { debounce, randomId } from "./helpers.js";
 import { ParseError } from "./parsers.js";
 import { rederivable } from "./store.js";
 import { evalCode } from "./formula-functions.svelte.js";
@@ -853,6 +853,6 @@ export class Register {
     );
     this.widths = widths;
     this.heights = heights;
-    this.id = crypto.randomUUID();
+    this.id = randomId();
   }
 }

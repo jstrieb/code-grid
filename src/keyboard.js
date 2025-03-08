@@ -200,13 +200,18 @@ export const actions = {
     const html = table.outerHTML;
 
     const clipboard = {};
+    if (!("ClipboardItem" in window && "clipboard" in navigator)) {
+      // TODO: Fallback
+      throw new Error("Cannot copy in non-secure contexts (TODO)");
+      return;
+    }
     if (ClipboardItem.supports("text/plain")) {
       clipboard["text/plain"] = new Blob([plain], { type: "text/plain" });
     }
     if (ClipboardItem.supports("text/html")) {
       clipboard["text/html"] = new Blob([html], { type: "text/html" });
     }
-    await navigator.clipboard.write([new ClipboardItem(clipboard)]);
+    await navigator.clipboard?.write([new ClipboardItem(clipboard)]);
   },
 
   Paste: async (e, globals) => {
