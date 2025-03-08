@@ -22,9 +22,12 @@ class Parser {
   }
 
   map(f) {
+    const memo = {};
     return new Parser((i) => {
+      if (i in memo) return memo[i];
       const { parsed, rest } = this.p(i);
-      return new ParseResult(f(parsed), rest);
+      memo[i] = new ParseResult(f(parsed), rest);
+      return memo[i];
     });
   }
 
@@ -33,44 +36,59 @@ class Parser {
   }
 
   combine(f) {
+    const memo = {};
     return new Parser((i) => {
+      if (i in memo) return memo[i];
       const { parsed, rest } = this.p(i);
-      return new ParseResult(f(...parsed), rest);
+      memo[i] = new ParseResult(f(...parsed), rest);
+      return memo[i];
     });
   }
 
   and(parser) {
+    const memo = {};
     return new Parser((i) => {
+      if (i in memo) return memo[i];
       const { parsed, rest } = this.p(i);
       const { parsed: parsed2, rest: rest2 } = parser.p(rest);
-      return new ParseResult([parsed, parsed2], rest2);
+      memo[i] = new ParseResult([parsed, parsed2], rest2);
+      return memo[i];
     });
   }
 
   or(parser) {
+    const memo = {};
     return new Parser((i) => {
+      if (i in memo) return memo[i];
       try {
-        return this.p(i);
+        memo[i] = this.p(i);
       } catch (e) {
         if (!(e instanceof ParseError)) throw e;
-        return parser.p(i);
+        memo[i] = parser.p(i);
       }
+      return memo[i];
     });
   }
 
   then(parser) {
+    const memo = {};
     return new Parser((i) => {
+      if (i in memo) return memo[i];
       let { parsed, rest } = this.p(i);
       ({ parsed, rest } = parser.p(rest));
-      return new ParseResult(parsed, rest);
+      memo[i] = new ParseResult(parsed, rest);
+      return memo[i];
     });
   }
 
   skip(parser) {
+    const memo = {};
     return new Parser((i) => {
+      if (i in memo) return memo[i];
       let { parsed, rest } = this.p(i);
       ({ rest } = parser.p(rest));
-      return new ParseResult(parsed, rest);
+      memo[i] = new ParseResult(parsed, rest);
+      return memo[i];
     });
   }
 
@@ -163,7 +181,9 @@ export function regex(r) {
 }
 
 export function seq(...parsers) {
+  const memo = {};
   return new Parser((inString) => {
+    if (inString in memo) return memo[inString];
     let parsed,
       rest = inString,
       result = [];
@@ -171,16 +191,20 @@ export function seq(...parsers) {
       ({ parsed, rest } = parsers[i].p(rest));
       result.push(parsed);
     }
-    return new ParseResult(result, rest);
+    memo[inString] = new ParseResult(result, rest);
+    return memo[inString];
   });
 }
 
 export function alt(...parsers) {
+  const memo = {};
   return new Parser((inString) => {
+    if (inString in memo) return memo[inString];
     let lastError;
     for (let i = 0; i < parsers.length; i++) {
       try {
-        return parsers[i].p(inString);
+        memo[inString] = parsers[i].p(inString);
+        return memo[inString];
       } catch (e) {
         if (!(e instanceof ParseError)) throw e;
         lastError = e;

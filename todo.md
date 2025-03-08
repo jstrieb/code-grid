@@ -68,7 +68,6 @@
   - "symbols" in formulas
   - Namespaced formula functions
   - Make parsing faster
-    - Memoization
     - Hand-written recursive descent
 - Local storage
   - Save sheets
