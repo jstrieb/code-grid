@@ -6,7 +6,7 @@ import { evalCode } from "./formula-functions.svelte.js";
 
 import { get } from "svelte/store";
 
-const DEFAULT_WIDTH = 56,
+export const DEFAULT_WIDTH = 56,
   DEFAULT_HEIGHT = 24;
 
 function minmax(min, x, max) {
@@ -157,7 +157,7 @@ functions.crypto = async (ticker) => {
     }
   }
 
-  put(after = true) {
+  put(after = true, values = false) {
     switch (this.pasteBuffer.type) {
       case "cell":
         // TODO: Handle different selection types -- larger than paste buffer,
@@ -170,8 +170,12 @@ functions.crypto = async (ticker) => {
               min: { x, y },
             } = this.selected;
             this.pasteBuffer.data.forEach((row, i) => {
-              row.forEach((formula, j) => {
-                this.currentSheet.cells[i + y][j + x].formula = formula;
+              row.forEach(({ value, formula }, j) => {
+                // TODO: Handle sheet overflow (e.g., pasting 3x3 cells on the
+                // last row of a sheet raises an index error)
+                this.currentSheet.cells[i + y][j + x].formula = values
+                  ? value
+                  : formula;
               });
             });
             break;
@@ -216,7 +220,8 @@ functions.crypto = async (ticker) => {
         });
         this.currentSheet.cells.slice(y, y + numRows).forEach((row, i) =>
           row.forEach((cell, j) => {
-            cell.formula = this.pasteBuffer.data[i][j];
+            cell.formula =
+              this.pasteBuffer.data[i][j][values ? "value" : "formula"];
           }),
         );
         this.setSelectionStart("cell", { x: 0, y });
@@ -838,11 +843,16 @@ export class Register {
   data = $state();
   widths = $state();
   heights = $state();
+  // Used to correlate clipboard data with paste buffer data
+  id = $state();
 
   constructor(type, data, widths, heights) {
     this.type = type;
-    this.data = data?.map((row) => row.map(({ formula }) => formula));
+    this.data = data?.map((row) =>
+      row.map((cell) => ({ formula: cell.formula, value: cell.get() })),
+    );
     this.widths = widths;
     this.heights = heights;
+    this.id = crypto.randomUUID();
   }
 }

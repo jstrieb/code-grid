@@ -29,6 +29,7 @@
   - Toggle off automatic cell updates
   - Change default styles for all cells in code editor
   - Highlight referenced cells when in insert mode
+  - Cells can run functions in a destructor
 - Clipboard integration
   - Copy to clipboard as table
   - Paste tables from clipboard
@@ -66,6 +67,9 @@
 - Formula processing
   - "symbols" in formulas
   - Namespaced formula functions
+  - Make parsing faster
+    - Memoization
+    - Hand-written recursive descent
 - Local storage
   - Save sheets
   - Load sheets

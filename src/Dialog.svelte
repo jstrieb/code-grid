@@ -103,9 +103,7 @@
   // components, for example), and the first one is inside of a `display:
   // none` element, then they will not render. Giving each a unique ID
   // solves this problem.
-  //
-  // TODO: Find better way to do this?
-  const dotsId = Math.floor(Math.random() * 1024 * 1024);
+  const dotsId = crypto.randomUUID();
 
   function topPointerDown(e) {
     e.target.addEventListener("pointermove", topPointerMove);

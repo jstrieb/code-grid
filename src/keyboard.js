@@ -1,3 +1,5 @@
+import { Register, DEFAULT_WIDTH, DEFAULT_HEIGHT } from "./classes.svelte";
+
 export const keybindings = {
   "Shift+tab": "Move Selection Left",
   tab: "Move Selection Right",
@@ -60,12 +62,109 @@ export const keybindings = {
   // gT and gt
 };
 
+async function getClipboard() {
+  let clipboard = await navigator.clipboard.read();
+  const types = {};
+  for (const item of clipboard) {
+    for (const type of item.types) {
+      if (type in types || !type.startsWith("text/")) continue;
+      const blob = await item.getType(type);
+      types[type] = await blob.text();
+    }
+  }
+  return types;
+}
+
+// For parsing tables from the paste buffer
+const domParser = new DOMParser();
+function setPasteBufferFromClipboard(globals, clipboard) {
+  if (clipboard["text/html"]) {
+    const doc = domParser.parseFromString(clipboard["text/html"], "text/html");
+    // TODO: Handle rich text with no table
+    const table = doc.querySelector("table");
+    if (table.id == globals.pasteBuffer.id) {
+      // The table is already in the paste buffer
+      return;
+    }
+    // TODO: Handle tables with inconsistent numbers of <td> elements per row
+    const widths = Array.from(table.querySelectorAll("tr:first-child td")).map(
+      (element) =>
+        Number(
+          // element.width could be undefined, the empty string, or zero
+          element.width || DEFAULT_WIDTH,
+        ),
+    );
+    const heights = Array.from(table.querySelectorAll("tr td:first-child")).map(
+      (element) =>
+        Number(
+          // element.height could be undefined, the empty string, or zero
+          element.height || DEFAULT_HEIGHT,
+        ),
+    );
+    if (widths.length > globals.currentSheet.widths.length) {
+      throw new Error("Not yet implemented");
+    }
+    if (heights.length > globals.currentSheet.heights.length) {
+      throw new Error("Not yet implemented");
+    }
+    let type = "cell";
+    if (widths.length == globals.currentSheet.widths.length) {
+      type = "row";
+    } else if (heights.length == globals.currentSheet.heights.length) {
+      type = "col";
+    }
+    globals.pasteBuffer = new Register(
+      type,
+      Array.from(table.querySelectorAll("tr")).map((row) =>
+        Array.from(row.querySelectorAll("td")).map(
+          ({ dataset: { formula }, innerText: value }) => ({
+            formula,
+            get: () => value,
+          }),
+        ),
+      ),
+      widths,
+      heights,
+    );
+  } else if (clipboard["text/plain"]) {
+    const data = clipboard["text/plain"]
+      .split("\n")
+      .map((row) =>
+        row.split("\t").map((formula) => ({ formula, get: () => formula })),
+      );
+    if (!data) return;
+    if (data[0].length > globals.currentSheet.widths.length) {
+      throw new Error("Not yet implemented");
+    }
+    if (data.length > globals.currentSheet.heights.length) {
+      throw new Error("Not yet implemented");
+    }
+    let type = "cell";
+    if (data[0].length == globals.currentSheet.widths.length) {
+      type = "row";
+    } else if (data.length == globals.currentSheet.heights.length) {
+      type = "col";
+    }
+    globals.pasteBuffer = new Register(
+      type,
+      data,
+      new Array(data[0].length).fill(DEFAULT_WIDTH),
+      new Array(data.length).fill(DEFAULT_HEIGHT),
+    );
+  }
+}
+
 export const actions = {
   Copy: async (e, globals) => {
     const cells = globals.getSelectedCells();
     if (cells == null) {
       return;
     }
+
+    globals.yank();
+    const { type, end } = globals.selected;
+    globals.setSelectionStart(type, end);
+    globals.mode = "normal";
 
     // CSV format
     // const plain = cells
@@ -84,12 +183,16 @@ export const actions = {
       .join("\n");
 
     const table = document.createElement("table");
-    cells.forEach((row) => {
+    // Get ID from paste buffer for correlation upon paste
+    table.id = globals.pasteBuffer.id;
+    table.dataset.origin = "https://jstrieb.github.io/code-grid";
+    cells.forEach((row, i) => {
       const tr = document.createElement("tr");
-      row.forEach((cell) => {
+      row.forEach((cell, j) => {
         const td = document.createElement("td");
         td.dataset.formula = cell.formula;
         td.innerText = cell.get()?.toString() ?? "";
+        // TODO: Set width and height
         tr.appendChild(td);
       });
       table.appendChild(tr);
@@ -104,19 +207,23 @@ export const actions = {
       clipboard["text/html"] = new Blob([html], { type: "text/html" });
     }
     await navigator.clipboard.write([new ClipboardItem(clipboard)]);
-
-    globals.yank();
-    const { type, end } = globals.selected;
-    globals.setSelectionStart(type, end);
-    globals.mode = "normal";
   },
 
-  Paste: (e, globals) => {
-    // TODO
+  Paste: async (e, globals) => {
+    // TODO: Notify the user of paste error
+    setPasteBufferFromClipboard(globals, await getClipboard());
+    return actions["Put After"](e, globals);
   },
 
-  "Paste values": (e, globals) => {
-    // TODO
+  "Paste values": async (e, globals) => {
+    // TODO: Notify the user of paste error
+    setPasteBufferFromClipboard(globals, await getClipboard());
+    switch (globals.mode) {
+      case "normal":
+      case "visual":
+        globals.put(true, true);
+        break;
+    }
   },
 
   "Toggle Save and Load": (e, globals) => {
