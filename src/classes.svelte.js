@@ -26,6 +26,7 @@ export class State {
   editorOpen = $state(false);
   imageOpen = $state(false);
   formulaCode = $state(`// Examples of user-defined formula functions
+
 functions.factorial = (n) => {
   if (n == 0) return 1;
   return n * functions.factorial(n - 1);

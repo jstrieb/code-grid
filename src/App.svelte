@@ -100,6 +100,12 @@
   let scrollArea = $state();
   let imageData = $state();
 
+  // svelte-ignore state_referenced_locally
+  if (!urlData) {
+    globals.helpOpen = true;
+    globals.editorOpen = true;
+  }
+
   function load(dataString) {
     let data;
     if (!dataString && window.location.hash) {
@@ -264,16 +270,22 @@
 
 <Dialog top={100} left={100} bind:open={globals.helpOpen}>
   <div
-    style="display: flex; flex-direction: column; gap: 0.5em; padding: 0.5em;"
+    style="display: flex; flex-direction: column; gap: 1.5em; padding: 0.5em;"
   >
     <p>
       Code Grid is a spreadsheet built for programmers. You can extend it with
       your own formula functions that execute in the browser. Formula functions
       can create HTML elements.
     </p>
-    <Details>
+    <Details open>
       {#snippet summary()}Tutorial{/snippet}
-      TODO
+      <p>Tutorial TODO</p>
+      <p>
+        For now, go to <a
+          href="https://github.com/jstrieb/code-grid#api-documentation"
+          target="_blank">the GitHub README</a
+        > for an introduction.
+      </p>
     </Details>
     <Details>
       {#snippet summary()}Keybindings{/snippet}
