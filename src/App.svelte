@@ -281,10 +281,16 @@
       {#snippet summary()}Tutorial{/snippet}
       <p>Tutorial TODO</p>
       <p>
-        For now, go to <a
+        Go to <a
           href="https://github.com/jstrieb/code-grid#api-documentation"
           target="_blank">the GitHub README</a
         > for an introduction.
+      </p>
+      <p>
+        In the README, there are also several <a
+          href="https://github.com/jstrieb/code-grid#examples"
+          target="_blank">example spreadsheets</a
+        > showcasing some of Code Grid's unique capabilities.
       </p>
     </Details>
     <Details>
