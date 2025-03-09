@@ -52,7 +52,7 @@ export function reshape(l, rows, cols) {
     .map((_, i) => new Array(cols).fill().map((_, j) => l[i * cols + j]));
 }
 
-export function randomId(length) {
+export function randomId(length = 16) {
   const result = new Uint8Array(length);
   crypto.getRandomValues(result);
   return Array.from(result)
