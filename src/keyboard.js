@@ -82,7 +82,6 @@ const domParser = new DOMParser();
 function setPasteBufferFromClipboard(globals, clipboard) {
   pasteHtml: if (clipboard["text/html"]) {
     const doc = domParser.parseFromString(clipboard["text/html"], "text/html");
-    // TODO: Handle rich text with no table
     const table = doc.querySelector("table");
     if (table == null) {
       break pasteHtml;
@@ -106,12 +105,6 @@ function setPasteBufferFromClipboard(globals, clipboard) {
           element.height || DEFAULT_HEIGHT,
         ),
     );
-    if (widths.length > globals.currentSheet.widths.length) {
-      throw new Error("Not yet implemented");
-    }
-    if (heights.length > globals.currentSheet.heights.length) {
-      throw new Error("Not yet implemented");
-    }
     let type = "cell";
     if (widths.length == globals.currentSheet.widths.length) {
       type = "row";
@@ -123,8 +116,8 @@ function setPasteBufferFromClipboard(globals, clipboard) {
       Array.from(table.querySelectorAll("tr")).map((row) =>
         Array.from(row.querySelectorAll("td")).map(
           ({ dataset: { formula }, innerText: value }) => ({
-            formula,
-            get: () => value,
+            formula: formula == "undefined" ? undefined : formula,
+            get: () => (value == "undefined" ? undefined : value),
           }),
         ),
       ),
