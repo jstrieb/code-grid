@@ -16,7 +16,8 @@ export const keybindings = {
   w: "Move Selection Right",
   e: "Move Selection Right",
   v: "Visual Mode",
-  "Ctrl+v": "Select Column",
+  // TODO: Find a keyboard shortcut for this if Ctrl+v is paste
+  // "Ctrl+v": "Select Column",
   "Shift+v": "Select Row",
   "Ctrl+a": "Select All",
   "Shift+o": "Insert Row Above",
@@ -58,6 +59,7 @@ export const keybindings = {
   // Unpressable keys added just for documentation
   "g+g": "Go to Top",
   "d+d": "Delete (Vim)",
+  "y+y": "Yank",
   // TODO: Figure out how to not show keys that must be preceded by g such as
   // gT and gt
 };
