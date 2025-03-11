@@ -30,6 +30,7 @@
   - Change default styles for all cells in code editor
   - Highlight referenced cells when in insert mode
   - Cells can run functions in a destructor
+  - Context menu as last child of body, gets moved by right click
 - Clipboard integration
   - Cut
 - Settings window
@@ -37,6 +38,8 @@
   - Change debounce save timeouts
   - Change number of recalculations for self-referential cells
   - Zoom level (via meta viewport initial-scale)
+  - Whether Ctrl+c cancels or copies
+  - Whether Ctrl+v vertically selects or pastes
 - Window system
   - Track state
     - List of Windows

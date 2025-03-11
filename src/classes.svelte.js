@@ -170,6 +170,24 @@ functions.crypto = async (ticker) => {
             const {
               min: { x, y },
             } = this.selected;
+            if (
+              this.currentSheet.widths.length - x <
+              this.pasteBuffer.widths.length
+            ) {
+              this.currentSheet.addCols(
+                this.pasteBuffer.widths.length -
+                  (this.currentSheet.widths.length - x),
+              );
+            }
+            if (
+              this.currentSheet.heights.length - y <
+              this.pasteBuffer.heights.length
+            ) {
+              this.currentSheet.addRows(
+                this.pasteBuffer.heights.length -
+                  (this.currentSheet.heights.length - y),
+              );
+            }
             this.pasteBuffer.data.forEach((row, i) => {
               row.forEach(({ value, formula }, j) => {
                 // TODO: Handle sheet overflow (e.g., pasting 3x3 cells on the
