@@ -109,7 +109,7 @@
   - r and R
   - J
   - Visual mode o and O
-  - >> and << and insert mode Ctrl+t and ctrl+d and visual mode > and <
+  - `>>` and `<<` and insert mode Ctrl+t and ctrl+d and visual mode > and <
   - Ctrl+i and ctrl+o and g; and g,
   - Searching, finding, and replacing
   - Record macros
@@ -140,3 +140,5 @@
     force re-run
   - Serializing values that are not serializable fails
   - Fix "put" behavior to copy formulas around to selection
+  - For very long text, the formula bar text is fully blocked by the scroll bar
+    on Windows

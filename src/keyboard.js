@@ -80,10 +80,13 @@ async function getClipboard() {
 // For parsing tables from the paste buffer
 const domParser = new DOMParser();
 function setPasteBufferFromClipboard(globals, clipboard) {
-  if (clipboard["text/html"]) {
+  pasteHtml: if (clipboard["text/html"]) {
     const doc = domParser.parseFromString(clipboard["text/html"], "text/html");
     // TODO: Handle rich text with no table
     const table = doc.querySelector("table");
+    if (table == null) {
+      break pasteHtml;
+    }
     if (table.id == globals.pasteBuffer.id) {
       // The table is already in the paste buffer
       return;
@@ -128,7 +131,10 @@ function setPasteBufferFromClipboard(globals, clipboard) {
       widths,
       heights,
     );
-  } else if (clipboard["text/plain"]) {
+    return;
+  }
+
+  if (clipboard["text/plain"]) {
     const data = clipboard["text/plain"]
       .split("\n")
       .map((row) =>
