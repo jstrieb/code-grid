@@ -59,3 +59,18 @@ export function randomId(length = 16) {
     .map((b) => b.toString(36))
     .join("");
 }
+
+export function replaceValues(k, v) {
+  if (k == "formula" && v == "") {
+    // Keep the URL shorter by not storing empty formulas
+    return undefined;
+  }
+  if (k != "value") {
+    return v;
+  }
+  if (v == "") {
+    return undefined;
+  }
+  // TODO: Do other things to make the data URL smaller
+  return v;
+}

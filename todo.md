@@ -138,7 +138,7 @@
   - If all sheets are deleted, it glitches
   - Reference value changes re-run, but argument function calls to set don't
     force re-run
-  - Serializing values that are not serializable fails
+  - history.pushstate with non-cloneable values fails
   - Fix "put" behavior to copy formulas around to selection
   - For very long text, the formula bar text is fully blocked by the scroll bar
     on Windows

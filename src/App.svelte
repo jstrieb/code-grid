@@ -88,7 +88,7 @@
   import { State, Sheet } from "./classes.svelte.js";
   import { compressText } from "./compress.js";
   import { evalDebounced, functions } from "./formula-functions.svelte.js";
-  import { debounce } from "./helpers.js";
+  import { debounce, replaceValues } from "./helpers.js";
   import { keyboardHandler, keybindings } from "./keyboard.js";
 
   let { urlData } = $props();
@@ -130,17 +130,20 @@
 
   let dontSave = $state(false);
   const save = debounce((data) => {
-    imageData = JSON.stringify(data);
+    imageData = JSON.stringify(data, replaceValues);
     if (dontSave) {
       dontSave = false;
       return;
     }
     // TODO: Save to local storage
-    window.history.pushState(
-      data,
-      "",
-      "#" + compressText(JSON.stringify(data)),
-    );
+    const compressed = compressText(imageData);
+    try {
+      window.history.pushState(data, "", "#" + compressed);
+    } catch {
+      // TODO: Figure out a way to push state where values are unclonable (e.g.,
+      // HTMLElements)
+      window.history.pushState(undefined, "", "#" + compressed);
+    }
   }, 1000);
   $effect(() => {
     save({
