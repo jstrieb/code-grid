@@ -733,13 +733,10 @@ export class Cell {
     // because cell inner elements all have their width explicitly set. Changing
     // the width and re-measuring can result in inconsistent results. That is
     // why we create new <div>s instead of measuring existing ones.
-    const cell = this.errorText != null ? this.errorText : this.get();
+    const value = this.errorText != null ? this.errorText : this.get();
     let width = 5,
       height = 5;
-    if (this.element != null) {
-      width = this.element.scrollWidth;
-      height = this.element.scrollHeight;
-    } else if (cell != null) {
+    if (value != null) {
       const div = Object.assign(document.createElement("div"), {
         // Match padding of cell in Cell.svelte
         style: `padding: 0.1em 0.2em; 
@@ -751,8 +748,12 @@ export class Cell {
                 height: max-content;
                 max-height: max-content; 
                 ${this.style ?? ""}`,
-        innerText: cell.toString(),
       });
+      if (this.element != null) {
+        div.appendChild(this.element.cloneNode(true));
+      } else {
+        div.innerText = value.toString();
+      }
       document.body.append(div);
       width = div.scrollWidth;
       height = div.scrollHeight;
