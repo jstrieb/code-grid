@@ -33,6 +33,7 @@
   - Context menu as last child of body, gets moved by right click
 - Clipboard integration
   - Cut
+  - Fix "put" behavior to copy formulas around to selection
 - Settings window
   - Change colors
   - Change debounce save timeouts
@@ -139,6 +140,6 @@
   - Reference value changes re-run, but argument function calls to set don't
     force re-run
   - history.pushstate with non-cloneable values fails
-  - Fix "put" behavior to copy formulas around to selection
   - For very long text, the formula bar text is fully blocked by the scroll bar
     on Windows
+  - Copy/paste does not always work
