@@ -116,8 +116,8 @@ function setPasteBufferFromClipboard(globals, clipboard) {
       Array.from(table.querySelectorAll("tr")).map((row) =>
         Array.from(row.querySelectorAll("td")).map(
           ({ dataset: { formula }, innerText: value }) => ({
-            formula: formula == "undefined" ? undefined : formula,
-            get: () => (value == "undefined" ? undefined : value),
+            formula: formula != "" ? formula : undefined,
+            get: () => (value != "" ? value : undefined),
           }),
         ),
       ),
@@ -191,7 +191,7 @@ export const actions = {
       const tr = document.createElement("tr");
       row.forEach((cell, j) => {
         const td = document.createElement("td");
-        td.dataset.formula = cell.formula;
+        td.dataset.formula = cell.formula ?? "";
         td.innerText = cell.get()?.toString() ?? "";
         // TODO: Set width and height
         tr.appendChild(td);
@@ -212,7 +212,7 @@ export const actions = {
     if (ClipboardItem.supports("text/html")) {
       clipboard["text/html"] = new Blob([html], { type: "text/html" });
     }
-    await navigator.clipboard?.write([new ClipboardItem(clipboard)]);
+    await navigator.clipboard.write([new ClipboardItem(clipboard)]);
   },
 
   Paste: async (e, globals) => {
