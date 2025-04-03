@@ -87,13 +87,15 @@
   import Button from "./Button.svelte";
   import { randomId } from "./helpers.js";
 
+  const minDimension = Math.min(window.innerWidth, window.innerHeight);
+
   let {
     children,
     open = $bindable(false),
     top = $bindable(50),
     left = $bindable(50),
-    width = $bindable(300),
-    height = $bindable(300),
+    width = $bindable(minDimension > 800 ? 600 : 300),
+    height = $bindable(minDimension > 800 ? 600 : 300),
     ...rest
   } = $props();
   let dialog = $state();
