@@ -280,7 +280,8 @@ functions.crypto = async (ticker) => {
         });
         this.currentSheet.cells.forEach((row, i) =>
           row.slice(x, x + numCols).forEach((cell, j) => {
-            cell.formula = this.pasteBuffer.data[i][j];
+            cell.formula =
+              this.pasteBuffer.data[i][j][values ? "value" : "formula"];
           }),
         );
         this.setSelectionStart("cell", { x, y: 0 });
