@@ -91,7 +91,6 @@
   - Standard way to include external scripts and wait for them to load
   - Python formulas using pyodide
 - Keyboard shortcuts
-  - Shift + arrow keys
   - Cmd + arrow keys
   - Stay in insert mode when cells clicked
   - Editable keybindings by importing objects and having them in scope at eval

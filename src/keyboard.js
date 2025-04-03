@@ -7,6 +7,10 @@ export const keybindings = {
   arrowright: "Move Selection Right",
   arrowup: "Move Selection Up",
   arrowdown: "Move Selection Down",
+  "Shift+arrowleft": "Move Visual Selection Left",
+  "Shift+arrowright": "Move Visual Selection Right",
+  "Shift+arrowup": "Move Visual Selection Up",
+  "Shift+arrowdown": "Move Visual Selection Down",
   h: "Move Selection Left",
   l: "Move Selection Right",
   k: "Move Selection Up",
@@ -735,6 +739,23 @@ export const actions = {
         globals.setSelectionStart("col", 0);
         break;
     }
+  },
+
+  "Move Visual Selection Left": (e, globals) => {
+    globals.mode = "visual";
+    return actions["Move Selection Left"](e, globals);
+  },
+  "Move Visual Selection Right": (e, globals) => {
+    globals.mode = "visual";
+    return actions["Move Selection Right"](e, globals);
+  },
+  "Move Visual Selection Up": (e, globals) => {
+    globals.mode = "visual";
+    return actions["Move Selection Up"](e, globals);
+  },
+  "Move Visual Selection Down": (e, globals) => {
+    globals.mode = "visual";
+    return actions["Move Selection Down"](e, globals);
   },
 
   "Move Selection Up": (e, globals) => {
