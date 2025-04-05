@@ -31,6 +31,7 @@
   - Highlight referenced cells when in insert mode
   - Cells can run functions in a destructor
   - Context menu as last child of body, gets moved by right click
+  - Render tables to images to save and share screenshots
 - Clipboard integration
   - Cut
   - Fix "put" behavior to copy formulas around to selection
@@ -58,7 +59,6 @@
   - Syntax highlighting
   - Auto-complete quotes, parentheses, etc.
   - Automatic indent
-  - Line numbers
   - Turn on manual save instead of auto save
 - Save/load window
   - Add share buttons using `navigator.share`
@@ -144,3 +144,4 @@
   - For very long text, the formula bar text is fully blocked by the scroll bar
     on Windows
   - Copy/paste does not always work
+  - Line numbers have small lag on scroll

@@ -253,13 +253,11 @@
   bind:open={globals.editorOpen}
   style="display: flex; flex-direction: column; align-items: stretch; overflow: hidden; gap: 0.25em;"
 >
-  <CodeEditor
-    bind:editor
-    bind:code={globals.formulaCode}
-    style="flex-grow: 1;"
-  />
+  <CodeEditor bind:editor bind:code={globals.formulaCode} />
   {#if codeError}
-    <p style="white-space: pre; overflow-x: auto;">{codeError}</p>
+    <p style="white-space: pre; overflow-x: auto; flex-shrink: 0;">
+      {codeError}
+    </p>
   {/if}
 </Dialog>
 

@@ -1,4 +1,22 @@
 <style>
+  .container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .numbers {
+    font-family: monospace, monospace;
+    padding: calc(0.25em + 1px);
+    text-align: right;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+  }
+
   textarea {
     resize: none;
     border: 1px solid var(--fg-color);
@@ -6,11 +24,13 @@
     font-family: monospace, monospace;
     white-space: pre;
     overflow: auto;
+    flex-grow: 1;
   }
 </style>
 
 <script>
   let { editor = $bindable(), code = $bindable(""), ...rest } = $props();
+  let lineNumbers = $state();
 
   function indent(s) {
     return "  " + s.split("\n").join("\n  ");
@@ -50,16 +70,30 @@
         break;
     }
   }
+
+  function syncScroll(e) {
+    if (lineNumbers == null) return;
+    lineNumbers.scrollTop = e.target.scrollTop;
+  }
 </script>
 
-<textarea
-  bind:this={editor}
-  bind:value={code}
-  onkeydown={keydown}
-  wrap="off"
-  autocorrect="off"
-  autocapitalize="none"
-  autocomplete="off"
-  spellcheck="false"
-  {...rest}
-></textarea>
+<div class="container">
+  <div class="numbers" bind:this={lineNumbers}>
+    {#each code.split("\n") as _, i}
+      <div>{i + 1}</div>
+    {/each}
+    <div style="min-height: 5em"></div>
+  </div>
+  <textarea
+    bind:this={editor}
+    bind:value={code}
+    onkeydown={keydown}
+    onscroll={syncScroll}
+    wrap="off"
+    autocorrect="off"
+    autocapitalize="none"
+    autocomplete="off"
+    spellcheck="false"
+    {...rest}
+  ></textarea>
+</div>
