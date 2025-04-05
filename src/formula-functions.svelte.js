@@ -111,3 +111,24 @@ functions.sparkbars = (...args) => {
   const bucketSize = (max - min) / (lines.length - 1);
   return args.map((x) => lines[Math.floor((x - min) / bucketSize)]).join("");
 };
+
+functions.checkbox = function (label) {
+  let value;
+  this.update((previous) => {
+    value = previous;
+    return previous;
+  });
+  this.element = Object.assign(document.createElement("label"), {
+    innerText: label,
+    style: "display: flex; align-items: center; gap: 1ch; margin: 0 0.5em;",
+  });
+  this.element.appendChild(
+    Object.assign(document.createElement("input"), {
+      type: "checkbox",
+      style: "appearance: auto;",
+      checked: value,
+      oninput: (e) => this.set(e.target.checked),
+    }),
+  );
+  return value;
+};

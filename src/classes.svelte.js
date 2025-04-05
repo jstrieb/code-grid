@@ -2,7 +2,7 @@ import { formula } from "./formula.js";
 import { debounce, randomId } from "./helpers.js";
 import { ParseError } from "./parsers.js";
 import { rederivable } from "./store.js";
-import { evalCode } from "./formula-functions.svelte.js";
+import { functions, evalCode } from "./formula-functions.svelte.js";
 
 import { get } from "svelte/store";
 
@@ -34,26 +34,7 @@ functions.factorial = (n) => {
 
 // Formula functions that modify the containing element using "this" must be
 // declared with the "function" keyword - they cannot be arrow functions.
-functions.checkbox = function (label) {
-  let value;
-  this.update((previous) => {
-    value = previous;
-    return previous;
-  });
-  this.element = Object.assign(document.createElement("label"), {
-    innerText: label,
-    style: "display: flex; align-items: center; gap: 1ch; margin: 0 0.5em;",
-  });
-  this.element.appendChild(
-    Object.assign(document.createElement("input"), {
-      type: "checkbox",
-      style: "appearance: auto;",
-      checked: value,
-      oninput: (e) => this.set(e.target.checked),
-    }),
-  );
-  return value;
-};
+functions.checkbox = ${functions.checkbox.toString().replace(/\t/g, "  ").replace(/\n\n/g, "\n")}
 
 // Formula functions can be async
 functions.crypto = async (ticker) => {
