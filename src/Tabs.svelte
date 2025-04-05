@@ -116,6 +116,7 @@
           {
             text: `Delete "${tab}"`,
             onclick: () => {
+              if (globals.sheets.length <= 1) return;
               globals
                 .deleteSheets(1, i)
                 .forEach(({ cells }) =>

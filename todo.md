@@ -137,7 +137,6 @@
     - Manually have to detect long press
   - The bottom border of sheet tabs do not adjust after renaming
     - Will be fixed automatically when using windows instead of tabs
-  - If all sheets are deleted, it glitches
   - Reference value changes re-run, but argument function calls to set don't
     force re-run
   - history.pushstate with non-cloneable values fails
