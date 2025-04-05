@@ -28,6 +28,17 @@
     --fg-color: var(--disabled-color);
     color: var(--fg-color);
   }
+
+  /* No scrollbar for text area */
+  textarea {
+    overflow: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  textarea::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 </style>
 
 <script>

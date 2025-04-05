@@ -141,7 +141,5 @@
   - Reference value changes re-run, but argument function calls to set don't
     force re-run
   - history.pushstate with non-cloneable values fails
-  - For very long text, the formula bar text is fully blocked by the scroll bar
-    on Windows
   - Copy/paste does not always work
   - Line numbers have small lag on scroll
