@@ -31,11 +31,9 @@ Code Grid is a web-based spreadsheet that is designed to be easy to extend.
 - Build small applications that are easy to share and modify
 - Never send data to a back end – Code Grid runs fully client-side
 
-Cross-Site Scripting (XSS) is a class of web security vulnerabilities in which
-users can execute their own (potentially malicious) code on someone else's
-website. Usually it is considered a very big problem for the website owner. In
-this case, I am deliberately letting you execute your code on my website to make
-Code Grid do whatever you want. <!-- Maybe I'm too trusting. -->
+<div align="center">
+<img src="https://github.com/jstrieb/code-grid/blob/master/public/line.svg?raw=true">
+</div>
 
 # Examples
 
@@ -304,6 +302,12 @@ subdirectory.
 
 # Warning
 
+Cross-Site Scripting (XSS) is a class of web security vulnerabilities in which
+users can execute their own (potentially malicious) code on someone else's
+website. Usually it is caused by a mistake made by the website owner. In this
+case, I am deliberately letting you execute your code on my website to make Code
+Grid do whatever you want.
+
 Clicking Code Grid links can be risky, because the links can run arbitrary code.
 Only click links from those you trust. Links running code in your browser means
 that those links:
@@ -311,7 +315,7 @@ that those links:
 - Can impersonate my website
 - Can redirect to malicious pages
 - Can steal locally stored data about other Code Grid spreadsheets
-- Can make requests to other websites
+- Can make requests to other websites to upload or download data
 
 # Known Issues
 
