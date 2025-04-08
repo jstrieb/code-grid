@@ -70,7 +70,7 @@
   </summary>
 
   <div>
-    {@render children()}
+    {@render children?.()}
   </div>
 
   <button
