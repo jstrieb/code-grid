@@ -20,8 +20,9 @@ export const keybindings = {
   w: "Move Selection Right",
   e: "Move Selection Right",
   v: "Visual Mode",
-  // TODO: Find a keyboard shortcut for this if Ctrl+v is paste
-  // "Ctrl+v": "Select Column",
+  // TODO: Find a better keyboard shortcut for this? Or allow users to switch
+  // ctrl+v paste off in settings so ctrl+v can select the column
+  "Alt+v": "Select Column",
   "Shift+v": "Select Row",
   "Ctrl+a": "Select All",
   "Shift+o": "Insert Row Above",
