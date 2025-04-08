@@ -48,8 +48,12 @@ export const keybindings = {
   home: "Go to Start of Row",
   "Shift+^": "Go to Start of Row",
   "Shift+$": "Go to End of Row",
+  "Shift+Meta+arrowleft": "Highlight to Start of Row",
+  "Shift+home": "Highlight to Start of Row",
   "Meta+arrowright": "Go to End of Row",
   end: "Go to End of Row",
+  "Shift+Meta+arrowright": "Highlight to End of Row",
+  "Shift+end": "Highlight to End of Row",
   "Shift+?": "Toggle Help",
   ":": "Toggle Code Editor",
   "Shift+:": "Toggle Code Editor",
@@ -561,6 +565,11 @@ export const actions = {
     globals.helpOpen = !globals.helpOpen;
   },
 
+  "Highlight to Start of Row": (e, globals) => {
+    globals.mode = "visual";
+    return actions["Go to Start of Row"](e, globals);
+  },
+
   "Go to Start of Row": (e, globals) => {
     switch (globals.mode) {
       case "normal":
@@ -588,6 +597,11 @@ export const actions = {
         }
         break;
     }
+  },
+
+  "Highlight to End of Row": (e, globals) => {
+    globals.mode = "visual";
+    return actions["Go to End of Row"](e, globals);
   },
 
   "Go to End of Row": (e, globals) => {
