@@ -315,7 +315,7 @@ that those links:
 
 # Known Issues
 
-See the list of bugs at the bottom of [`todo.md`](todo.md).
+See the list of bugs at the bottom of [`TODO.md`](TODO.md).
 
 # Project Status & Contributing
 
