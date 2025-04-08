@@ -369,3 +369,8 @@ financial model in a *very* early version of Code Grid. It's not easy for
 [Excel-loving bankers](https://www.instagram.com/ellassaddesksalads/) to use
 other spreadsheet software; her struggle drove feature development that has
 benefited us all.
+
+Shout out to [Chris Cherian](https://twitter.com/chrischerian) for being a
+suspiciously enthusiastic early adopter, and for consistently providing
+invaluable user feedback based on real use cases (which were more helpful than
+my imagined ones).
