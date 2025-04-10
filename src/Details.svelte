@@ -26,6 +26,20 @@
     margin-bottom: 0.25em;
   }
 
+  /* Cover left details border near summary */
+  /*
+  details[open] summary::before {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 1.5em;
+    position: absolute;
+    left: -1px;
+    background: var(--bg-color);
+    z-index: 1;
+  }
+  */
+
   button {
     position: absolute;
     top: 0;
@@ -43,7 +57,7 @@
 
   button div {
     width: 0;
-    border-left: 1px solid var(--fg-color);
+    border-left: 1px dashed var(--fg-color);
   }
 
   button:hover div {
