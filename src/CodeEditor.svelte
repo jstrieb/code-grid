@@ -52,7 +52,7 @@
             dedent(value.slice(lineStart, end)),
             lineStart,
             end,
-            "preserve",
+            start == end ? "end" : "preserve",
           );
         } else {
           if (start == end) {
@@ -67,6 +67,20 @@
             );
           }
         }
+        break;
+      case "enter":
+        const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+        const numTabs =
+          (value
+            .slice(lineStart)
+            .replace(/\t/g, "  ")
+            .match(/^(  )*/g) || [""])[0].length / 2;
+        textarea.setRangeText("\n" + "  ".repeat(numTabs), start, end, "end");
+        e.preventDefault();
+        // setRangeText doesn't cause Svelte to automatically update bind:value
+        // for textareas, so the following line is required to force update the
+        // code variable (and thereby set the correct line numbering).
+        code = textarea.value;
         break;
     }
   }

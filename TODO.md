@@ -58,7 +58,7 @@
 - Code editor
   - Syntax highlighting
   - Auto-complete quotes, parentheses, etc.
-  - Automatic indent
+  - Indent extra between quotes, parentheses, etc.
   - Turn on manual save instead of auto save
 - Save/load window
   - Add share buttons using `navigator.share`
