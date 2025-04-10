@@ -61,14 +61,14 @@ export function randomId(length = 16) {
 }
 
 export function replaceValues(k, v) {
-  if (k == "formula" && v == "") {
+  if (k == "formula" && v === "") {
     // Keep the URL shorter by not storing empty formulas
     return undefined;
   }
   if (k != "value") {
     return v;
   }
-  if (v == "") {
+  if (v === "") {
     return undefined;
   }
   // TODO: Do other things to make the data URL smaller

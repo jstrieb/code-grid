@@ -115,8 +115,8 @@ functions.sparkbars = (...args) => {
 functions.checkbox = function (label) {
   let value;
   this.update((previous) => {
-    value = previous;
-    return previous;
+    value = !!previous;
+    return !!previous;
   });
   this.element = Object.assign(document.createElement("label"), {
     innerText: label,
