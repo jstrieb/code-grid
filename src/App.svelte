@@ -81,6 +81,7 @@
   import Dialog from "./Dialog.svelte";
   import FormulaBar from "./FormulaBar.svelte";
   import SaveLoad from "./SaveLoad.svelte";
+  import Settings from "./Settings.svelte";
   import ShyMenu from "./ShyMenu.svelte";
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
@@ -168,10 +169,22 @@
     });
   });
 
+  Object.entries(window.localStorage)
+    .filter(([k, _]) => k.startsWith("settings."))
+    .map(([k, v]) => [k.replace(/^settings\./, ""), JSON.parse(v)])
+    .forEach(([k, v]) => {
+      globals.settings[k] = v;
+    });
+  $effect(() => {
+    Object.entries(globals.settings).forEach(([k, v]) => {
+      window.localStorage.setItem(`settings.${k}`, JSON.stringify(v));
+    });
+  });
+
   // Focus the editor when the dialog is opened
   // TODO: Is there a better place to put this?
   // TODO: If the editor is open, but the text area is defocused, focus on the
-  // text area when the equals key is pressed
+  // text area when the shortcut key is pressed
   let editor = $state();
   $effect(() => {
     if (globals.editorOpen) {
@@ -325,6 +338,10 @@
           </li>
         {/each}
       </ul>
+    </Details>
+    <Details>
+      {#snippet summary()}Settings{/snippet}
+      <Settings bind:globals />
     </Details>
   </div>
 </Dialog>

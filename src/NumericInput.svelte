@@ -36,4 +36,11 @@
   let { value = $bindable(), ...props } = $props();
 </script>
 
-<input type="number" bind:value {...props} />
+<input
+  type="number"
+  bind:value
+  onfocus={(e) => {
+    e.target.select();
+  }}
+  {...props}
+/>

@@ -39,7 +39,6 @@
   - Change colors
   - Change debounce save timeouts
   - Change number of recalculations for self-referential cells
-  - Zoom level (via meta viewport initial-scale)
   - Whether Ctrl+c cancels or copies
   - Whether Ctrl+v vertically selects or pastes
 - Window system
