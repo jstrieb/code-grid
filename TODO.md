@@ -32,6 +32,7 @@
   - Cells can run functions in a destructor
   - Context menu as last child of body, gets moved by right click
   - Render tables to images to save and share screenshots
+  - Settings input with numeric input and buttons on either side
 - Clipboard integration
   - Cut
   - Fix "put" behavior to copy formulas around to selection

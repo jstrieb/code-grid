@@ -513,7 +513,7 @@ export const actions = {
         switch (globals.selected.type) {
           case undefined:
           case "cell":
-            const x = globals.selected?.start?.x ?? 0;
+            const x = globals.selected?.end?.x ?? 0;
             globals.setSelectionEnd({ x, y: 0 });
             break;
           case "row":
@@ -548,7 +548,7 @@ export const actions = {
         switch (globals.selected.type) {
           case undefined:
           case "cell":
-            const x = globals.selected?.start?.x ?? 0;
+            const x = globals.selected?.end?.x ?? 0;
             globals.setSelectionEnd({
               x,
               y: globals.currentSheet.heights.length - 1,
@@ -589,7 +589,7 @@ export const actions = {
         switch (globals.selected.type) {
           case undefined:
           case "cell":
-            const y = globals.selected?.start?.y ?? 0;
+            const y = globals.selected?.end?.y ?? 0;
             globals.setSelectionEnd({ x: 0, y });
             break;
           case "col":
@@ -629,7 +629,7 @@ export const actions = {
         switch (globals.selected.type) {
           case undefined:
           case "cell":
-            const y = globals.selected?.start?.y ?? 0;
+            const y = globals.selected?.end?.y ?? 0;
             globals.setSelectionEnd({
               x: globals.currentSheet.widths.length - 1,
               y,
