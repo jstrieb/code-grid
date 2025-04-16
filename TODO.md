@@ -142,5 +142,6 @@
   - Copy/paste does not always work
   - Line numbers have small lag on scroll
   - Special keys bar has bad placement on Chrome on Android
-  - Special keys bar bar buttons cause active element blur when double tapped on
+  - Special keys bar buttons cause active element blur when double tapped on
     iOS
+  - Side-scrolling special keys bar on iOS inserts on pointer up
