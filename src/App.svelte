@@ -356,7 +356,7 @@
       >
         {@render builder([
           {
-            text: "Help",
+            text: "Help & Settings",
             onclick: () => (globals.helpOpen = !globals.helpOpen),
           },
           {

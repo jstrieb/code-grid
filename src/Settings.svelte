@@ -1,4 +1,13 @@
+<style>
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 1ch;
+  }
+</style>
+
 <script>
+  import Button from "./Button.svelte";
   import NumericInput from "./NumericInput.svelte";
 
   let { globals = $bindable() } = $props();
@@ -8,21 +17,34 @@
       .querySelector(`meta[name="viewport"]`)
       .setAttribute(
         "content",
-        `width=device-width, initial-scale=${globals.settings.mobileZoom}`,
+        `width=device-width, initial-scale=${globals.settings.mobileZoom / 100}`,
       );
   });
 </script>
 
-<ul>
-  <li>
-    <label
-      >Mobile Zoom <NumericInput
-        bind:value={globals.settings.mobileZoom}
-        min="0"
-        max="10"
-        step="0.05"
-        style="width: 10ch;"
-      /></label
+<div>
+  Mobile Zoom
+  <div class="row">
+    <Button
+      square
+      style="width: 1.5em; flex-shrink: 0;"
+      onclick={() => {
+        globals.settings.mobileZoom -= 5;
+      }}>-</Button
     >
-  </li>
-</ul>
+    <NumericInput
+      bind:value={globals.settings.mobileZoom}
+      min="0"
+      max="100"
+      step="5"
+      style="width: 10ch; text-align: center;"
+    />
+    <Button
+      square
+      style="width: 1.5em; flex-shrink: 0;"
+      onclick={() => {
+        globals.settings.mobileZoom += 5;
+      }}>+</Button
+    >
+  </div>
+</div>

@@ -50,7 +50,7 @@ functions.crypto = async (ticker) => {
 };
 `);
   settings = $state({
-    mobileZoom: 1.0,
+    mobileZoom: 100,
   });
 
   static load(data) {
