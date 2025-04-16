@@ -152,6 +152,8 @@
 </style>
 
 <script>
+  import { handleButtonInsertBlur } from "./helpers.js";
+
   let { cell, row, col, width, height, globals = $bindable() } = $props();
   let selected = $derived(globals.selected);
   let value = $derived(cell.value);
@@ -229,9 +231,13 @@
     <textarea
       use:focus
       bind:value={cell.formula}
-      onblur={() => {
-        cell.editing = false;
-        globals.mode = "normal";
+      onblur={(e) => {
+        if (handleButtonInsertBlur(e)) {
+          cell.formula = e.target.value;
+        } else {
+          cell.editing = false;
+          globals.mode = "normal";
+        }
       }}
       rows="1"
       wrap="off"

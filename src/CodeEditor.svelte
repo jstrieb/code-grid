@@ -29,6 +29,8 @@
 </style>
 
 <script>
+  import { handleButtonInsertBlur } from "./helpers.js";
+
   let { editor = $bindable(), code = $bindable(""), ...rest } = $props();
   let lineNumbers = $state();
 
@@ -103,6 +105,7 @@
     bind:value={code}
     onkeydown={keydown}
     onscroll={syncScroll}
+    onblur={handleButtonInsertBlur}
     wrap="off"
     autocorrect="off"
     autocapitalize="none"

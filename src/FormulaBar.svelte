@@ -42,6 +42,8 @@
 </style>
 
 <script>
+  import { handleButtonInsertBlur } from "./helpers.js";
+
   let { globals, editor = $bindable() } = $props();
   let selection = $derived(globals.selected);
   let sheet = $derived(globals.currentSheet);
@@ -128,6 +130,7 @@
     bind:this={editor}
     bind:focused
     bind:value={textValue}
+    onblur={handleButtonInsertBlur}
     {placeholder}
     disabled={placeholder}
     rows="1"
