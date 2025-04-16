@@ -29,8 +29,6 @@
 </style>
 
 <script>
-  import { handleButtonInsertBlur } from "./helpers.js";
-
   let { editor = $bindable(), code = $bindable(""), ...rest } = $props();
   let lineNumbers = $state();
 
@@ -105,7 +103,11 @@
     bind:value={code}
     onkeydown={keydown}
     onscroll={syncScroll}
-    onblur={handleButtonInsertBlur}
+    onreactiveupdate={(e) => {
+      // Custom event is necessary because bound values do not update when
+      // setRangeText is run on textarea elements
+      cell.formula = e.target.value;
+    }}
     wrap="off"
     autocorrect="off"
     autocapitalize="none"

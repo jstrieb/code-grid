@@ -23,7 +23,6 @@
   - Add conveniences for LLMs
   - Event hooks
   - Move formula bar to bottom
-  - When keyboard up on mobile add special keys bar above keyboard
   - Zoom out extra on mobile, but only cells and code, not UI elements
   - Frozen rows and columns
   - Toggle off automatic cell updates
@@ -142,3 +141,6 @@
   - history.pushstate with non-cloneable values fails
   - Copy/paste does not always work
   - Line numbers have small lag on scroll
+  - Special keys bar has bad placement on Chrome on Android
+  - Special keys bar bar buttons cause active element blur when double tapped on
+    iOS

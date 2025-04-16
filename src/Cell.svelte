@@ -152,8 +152,6 @@
 </style>
 
 <script>
-  import { handleButtonInsertBlur } from "./helpers.js";
-
   let { cell, row, col, width, height, globals = $bindable() } = $props();
   let selected = $derived(globals.selected);
   let value = $derived(cell.value);
@@ -178,6 +176,7 @@
 
   function focus(e) {
     e.focus();
+    e.select();
   }
 </script>
 
@@ -231,13 +230,14 @@
     <textarea
       use:focus
       bind:value={cell.formula}
-      onblur={(e) => {
-        if (handleButtonInsertBlur(e)) {
-          cell.formula = e.target.value;
-        } else {
-          cell.editing = false;
-          globals.mode = "normal";
-        }
+      onblur={() => {
+        cell.editing = false;
+        globals.mode = "normal";
+      }}
+      onreactiveupdate={(e) => {
+        // Custom event is necessary because bound values do not update when
+        // setRangeText is run on textarea elements
+        cell.formula = e.target.value;
       }}
       rows="1"
       wrap="off"

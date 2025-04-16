@@ -27,6 +27,23 @@
     position: relative;
   }
 
+  .keyboardbar {
+    margin: 0 -0.5em;
+    padding: 0.25em;
+    border-top: 1px solid var(--fg-color);
+    min-height: max-content;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5ch;
+    width: 100%;
+    position: absolute;
+    z-index: 19;
+    overflow-x: auto;
+  }
+
   .bottombar {
     margin: -0.5em;
     padding: 0.25em;
@@ -198,6 +215,16 @@
       codeError = result ?? "";
     });
   });
+
+  let innerHeight = $state(window.innerHeight);
+  let visualBottom = $state(window.visualViewport.height);
+  window.visualViewport.addEventListener("resize", () => {
+    visualBottom = window.visualViewport.height;
+  });
+
+  function insertText(s) {
+    return;
+  }
 </script>
 
 {#snippet printKey(key)}
@@ -233,6 +260,7 @@
       pasteBuffer: globals.pasteBuffer,
     });
   }}
+  bind:innerHeight
 />
 
 <div>
@@ -345,6 +373,55 @@
     </Details>
   </div>
 </Dialog>
+
+{#snippet insertTextButton(text)}
+  <Button
+    onpointerdown={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    }}
+    onpointerup={(e) => {
+      const textarea = document.activeElement;
+      textarea?.setRangeText?.(
+        text,
+        textarea.selectionStart,
+        textarea.selectionEnd,
+        "end",
+      );
+      // Custom event is necessary because bound values do not update when
+      // setRangeText is run on textarea elements
+      textarea.dispatchEvent(new Event("reactiveupdate"));
+    }}
+    square
+    style="height: 2em;"
+    shadow="2px">{text}</Button
+  >
+{/snippet}
+{#if innerHeight > visualBottom}
+  <div
+    class="keyboardbar"
+    style:top="calc({visualBottom}px - 2em - 2 * 0.25em - 2px)"
+  >
+    {@render insertTextButton("=")}
+    {@render insertTextButton("(")}
+    {@render insertTextButton(")")}
+    {@render insertTextButton("[")}
+    {@render insertTextButton("]")}
+    {@render insertTextButton("+")}
+    {@render insertTextButton("-")}
+    {@render insertTextButton("*")}
+    {@render insertTextButton("/")}
+    {@render insertTextButton('"')}
+    {@render insertTextButton("{")}
+    {@render insertTextButton("}")}
+    {@render insertTextButton(";")}
+    {@render insertTextButton(">")}
+    {@render insertTextButton("<")}
+    {@render insertTextButton(":")}
+    {@render insertTextButton("?")}
+  </div>
+{/if}
 
 <div class="bottombar">
   <ShyMenu>

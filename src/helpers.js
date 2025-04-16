@@ -74,24 +74,3 @@ export function replaceValues(k, v) {
   // TODO: Do other things to make the data URL smaller
   return v;
 }
-
-export function handleButtonInsertBlur(e) {
-  const insert = e.relatedTarget?.dataset?.insert;
-  if (insert != null) {
-    const textarea = e.target;
-    textarea.setRangeText(
-      insert,
-      textarea.selectionStart,
-      textarea.selectionEnd,
-      "end",
-    );
-    // The blur event is not cancelable :(
-    const { selectionStart: start, selectionEnd: end } = textarea;
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start, end);
-    }, 1);
-    return true;
-  }
-  return false;
-}
