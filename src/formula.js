@@ -114,7 +114,15 @@ class BinaryOperation extends Expression {
         .forEach((op) => {
           const x = args.shift();
           const y = args.shift();
-          args.unshift(BinaryOperation.operations[op](x, y));
+          if (typeof x[op] === "function") {
+            args.unshift(x[op](y));
+          } else if (typeof x[op]?.forward === "function") {
+            args.unshift(x[op].forward(y));
+          } else if (typeof y[op]?.reverse === "function") {
+            args.unshift(y[op].reverse(x));
+          } else {
+            args.unshift(BinaryOperation.operations[op](x, y));
+          }
         });
       // Note that args is a singleton list
       return args;
@@ -137,12 +145,18 @@ class UnaryOperation extends Expression {
 
   constructor(operator, operand) {
     super();
-    this.operator = UnaryOperation.operations[operator];
+    this.operator = operator;
     this.operand = operand;
   }
 
   compute(globals, sheet, r, c) {
-    const thunk = (x) => [this.operator(x)];
+    const thunk = (x) => {
+      if (typeof x[this.operator] === "function") {
+        return [x[this.operator]()];
+      } else {
+        return [UnaryOperation.operations[this.operator](x)];
+      }
+    };
     const refs = [this.operand.compute(globals, sheet, r, c)];
     return new ExpressionValue(undefinedArgsToIdentity(thunk), refs);
   }

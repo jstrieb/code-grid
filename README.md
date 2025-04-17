@@ -221,6 +221,95 @@ functions.time = function() {
 
 </details>
 
+### Operator Overloading
+
+<details>
+
+<summary>Click to read about operator overloading</summary>
+
+In Code Grid formulas, infix operators (such as `+`) are compatible with the
+same types as the corresponding JavaScript operator. For example, it is equally
+valid to do `"x" + "y"` or `3 + 2` in formulas, since addition works on both
+strings and numbers in JavaScript. Using the same infix operator (`+`) for
+different operations on different types is called "operator overloading."
+
+Code Grid allows users to extend infix operations to work on more complex types
+through advanced operator overloading. To make a type use a custom operation for
+an infix operator, define a method with the same name as that operator. That's
+it. For binary operations, the implementing method should take one argument. For
+unary operations, the method should take no arguments.
+
+For example, we could implement vectors that support element-wise addition:
+
+``` javascript
+class Vector {
+  constructor(a) {
+    this.elements = a;
+  }
+  
+  toString() {
+    return "<" + this.elements.join(", ") + ">";
+  }
+  
+  ["+"](v) {
+    return new Vector(this.elements.map((x, i) => x + v.elements[i]));
+  }
+}
+
+functions.v = (...a) => new Vector(a);
+```
+
+Then, the following would be a valid Code Grid formula that would evaluate to
+`<1, 2, 3>`, even though adding vector objects in JavaScript would throw an
+error:
+
+```
+=v(0, 3, 1) + v(1, -1, 2)
+```
+
+We could also implement overloading of the unary `~` operator to switch the sign
+of all vector elements by adding the following method to the `Vector` class:
+
+``` javascript
+class Vector {
+  // ...
+
+  // ~<1, -1, 3> => <-1, 1, -3>
+  ["~"]() {
+    return new Vector(this.elements.map(x => -x));
+  };
+
+  // ...
+}
+```
+
+Consider operations between different types. For example, if we want to
+implement vector-scalar subtraction, we will need to handle `<vector> - scalar`
+as well as `scalar - <vector>`. 
+
+When evaluating an infix operation `x op y`, Code Grid first tries `x.op(y)`,
+then `x.op.forward(y)`, then `y.op.reverse(x)`, finally falling back on the
+default operator implementation if nothing else works. In this example, we will
+implement `<vector> - scalar` in the `forward` method, and `scalar - <vector>`
+in the `reverse` method:
+
+``` javascript
+class Vector {
+  // ...
+
+  ["-"] = {
+    // <v> - s
+    forward: (s) => new Vector(this.elements.map(x => x - s));
+    // s - <v>
+    reverse: (s) => new Vector(this.elements.map(x => s - x));
+  };  // The trailing semicolon is important!
+
+  // ...
+}
+```
+
+</details>
+
 # How Code Grid Works
 
 ## Code Table of Contents

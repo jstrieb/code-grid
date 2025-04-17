@@ -568,3 +568,79 @@ test("Delete columns in the middle of a sheet", async () => {
     [7, 9, 16],
   ]);
 });
+
+test("Operator overloading", async () => {
+  evalCode(`
+    class Vector {
+      constructor(a) {
+        this.elements = a;
+      }
+      
+      toString() {
+        return "<" + this.elements.join(", ") + ">";
+      }
+      
+      ["*"](v) {
+        return this.elements
+          .map((x, i) => x * v.elements[i])
+          .reduce((a, x) => a + x, 0);
+      }
+      
+      ["+"] = {
+        forward: (s) => new Vector(this.elements.map(x => x + s)),
+        reverse: (s) => new Vector(this.elements.map(x => x + s)),
+      };
+      
+      ["-"] = {
+        forward: (s) => new Vector(this.elements.map(x => x - s)),
+        reverse: (s) => new Vector(this.elements.map(x => s - x)),
+      };
+    }
+
+    functions.v = (...a) => new Vector(a);
+  `);
+  const state = createSheet([
+    ["=V(1, 2, 3)", "=v(4, 5, 7)", "=RC0 * RC1"],
+    ["=5 + R[-1]C + -2", "=R[-1]C - 5 - -1", "=2 - v(1, 1, 1)"],
+  ]);
+  let expected = [
+    ["<1, 2, 3>", "<4, 5, 7>", "35"],
+    ["<4, 5, 6>", "<0, 1, 3>", "<1, 1, 1>"],
+  ];
+  await Promise.all(
+    expected
+      .map((row, i) =>
+        row.map((cell, j) =>
+          expect
+            .poll(() => state.currentSheet.cells[i][j].get()?.toString())
+            .toEqual(cell),
+        ),
+      )
+      .flat(),
+  );
+});
+
+test("Operator overloading with monkeypatching", async () => {
+  evalCode(`
+    String.prototype["*"] = function(n) {
+      return this.repeat(n);
+    }
+
+    Number.prototype["*"] = function(s) {
+      return s?.repeat?.(this);
+    }
+
+    String.prototype["~"] = function() {
+      return this
+        .split("")
+        .map(x => x == x.toLocaleUpperCase() 
+          ? x.toLocaleLowerCase() 
+          : x.toLocaleUpperCase()
+        ).join("");
+    }
+  `);
+  const state = createSheet([[`="test " * 3`, `=3 * RC[-1]`, `=~~~"TeSt"`]]);
+  await expectSheet(state.currentSheet, [
+    ["test ".repeat(3), "test ".repeat(9), "tEsT"],
+  ]);
+});
