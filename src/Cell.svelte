@@ -156,6 +156,7 @@
   let selected = $derived(globals.selected);
   let value = $derived(cell.value);
   let errorText = $derived(cell.errorText);
+  let errorStack = $derived(cell.errorStack);
   let style = $derived(cell.style);
   let element = $derived(cell.element);
 
@@ -243,7 +244,7 @@
       spellcheck="false"
     ></textarea>
   {:else if errorText != null}
-    <div class="text error">{errorText}</div>
+    <div class="text error" title={errorStack}>{errorText}</div>
   {:else if element != null}
     <div bind:this={innerNode} class="element"></div>
   {:else}

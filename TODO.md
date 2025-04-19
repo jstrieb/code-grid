@@ -147,3 +147,5 @@
   - Special keys bar buttons cause active element blur when double tapped on
     iOS
   - Side-scrolling special keys bar on iOS inserts on pointer up
+  - Accidentally typing "RC" while typing another formula can cause everything
+    to hang

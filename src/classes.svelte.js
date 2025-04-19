@@ -488,6 +488,7 @@ export class Sheet {
       $effect(() => {
         cell.style = "";
         cell.errorText = undefined;
+        cell.errorStack = undefined;
         cell.element = undefined;
 
         // Re-run this effect if rows or columns are added or removed
@@ -562,12 +563,14 @@ export class Sheet {
                 .catch((e) => {
                   set(undefined);
                   cell.errorText = `Error: ${e?.message ?? e}`;
+                  cell.errorStack = e?.stack;
                 });
             },
           );
         } catch (e) {
           if (!(e instanceof ParseError)) {
             cell.errorText = `Error: ${e.message}`;
+            cell.errorStack = e?.stack;
             cell.value.rederive([], (_, set) => set(undefined));
           } else {
             cell.value.rederive([], (_, set) => set(cell.formula));
@@ -680,6 +683,7 @@ export class Cell {
   value = $state();
   style = $state("");
   errorText = $state();
+  errorStack = $state();
   element = $state();
   formula = $state();
   td = $state();
