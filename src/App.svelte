@@ -389,9 +389,9 @@
         textarea.selectionEnd,
         "end",
       );
-      // Custom event is necessary because bound values do not update when
-      // setRangeText is run on textarea elements
-      textarea.dispatchEvent(new Event("reactiveupdate"));
+      // Event (with bubbling) is necessary for Svelte reactive variables to
+      // update to match the textarea value
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
     }}
     square
     style="height: 2em;"

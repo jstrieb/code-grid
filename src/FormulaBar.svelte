@@ -128,11 +128,6 @@
     bind:this={editor}
     bind:focused
     bind:value={textValue}
-    onreactiveupdate={(e) => {
-      // Custom event is necessary because bound values do not update when
-      // setRangeText is run on textarea elements
-      cell.formula = e.target.value;
-    }}
     {placeholder}
     disabled={placeholder}
     rows="1"
