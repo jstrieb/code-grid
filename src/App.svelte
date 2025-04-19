@@ -211,8 +211,12 @@
 
   let codeError = $state("");
   $effect(() => {
-    evalDebounced(globals.formulaCode, (result) => {
-      codeError = result ?? "";
+    evalDebounced(globals.formulaCode, (err) => {
+      codeError = "";
+      if (err != null) {
+        codeError = `Error: ${err.message}`;
+        // TODO: Show stack trace or line nubmer of problematic code
+      }
     });
   });
 
@@ -398,7 +402,7 @@
     shadow="2px">{text}</Button
   >
 {/snippet}
-{#if innerHeight > visualBottom}
+{#if Math.abs(innerHeight - visualBottom) > 5}
   <div
     class="keyboardbar"
     style:top="calc({visualBottom}px - 2em - 2 * 0.25em - 2px)"

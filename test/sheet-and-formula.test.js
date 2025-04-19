@@ -193,7 +193,7 @@ test("Complex logical expressions in formulas", async () => {
 
 test("Evaluating bad code", () => {
   evalCode();
-  expect(evalCode(`asdf(`, (x) => x)).toBeTypeOf("string");
+  expect(evalCode(`asdf(`, (x) => x)).toBeInstanceOf(Error);
 });
 
 test("Miscellaneous standard library formula functions", async () => {

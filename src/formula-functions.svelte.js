@@ -30,10 +30,14 @@ export function evalCode(code, ret = () => {}) {
   } catch {}
 
   try {
-    eval(code);
+    eval(
+      code +
+        // Allows user code to show up in the devtools debugger as "user-code.js"
+        "\n//# sourceURL=user-code.js",
+    );
     return ret();
   } catch (e) {
-    return ret(`Error: ${e.message}`);
+    return ret(e);
   }
 }
 export const evalDebounced = debounce(evalCode, 500);
