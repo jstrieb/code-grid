@@ -59,7 +59,7 @@ export const keybindings = {
   ":": "Toggle Code Editor",
   "Shift+:": "Toggle Code Editor",
   "Ctrl+s": "Toggle Save and Load",
-  "Super+s": "Toggle Save and Load",
+  "Meta+s": "Toggle Save and Load",
   g: "Go To",
   "Shift+g": "Go to Bottom",
   "Ctrl+z": "Undo",
