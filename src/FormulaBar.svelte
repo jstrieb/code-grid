@@ -42,7 +42,7 @@
 </style>
 
 <script>
-  let { globals, editor = $bindable() } = $props();
+  let { globals, editor = $bindable(), ...rest } = $props();
   let selection = $derived(globals.selected);
   let sheet = $derived(globals.currentSheet);
 
@@ -137,5 +137,6 @@
     autocapitalization="none"
     autocomplete="off"
     spellcheck="false"
+    {...rest}
   ></textarea>
 </label>

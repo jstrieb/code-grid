@@ -233,10 +233,19 @@
   window.visualViewport.addEventListener("resize", () => {
     visualBottom = window.visualViewport.height;
   });
-
-  function insertText(s) {
-    return;
-  }
+  let showInputButtons = $derived(
+    navigator.maxTouchPoints > 1 && Math.abs(innerHeight - visualBottom) > 5,
+  );
+  $effect(() => {
+    // iOS scrolls the formula bar to the middle on focus, this counteracts that
+    // (if it happens to run after the keyboard is up - inconsistent)
+    if (showInputButtons) {
+      window.scrollTo({
+        top: 0,
+        behavior: "instant",
+      });
+    }
+  });
 </script>
 
 {#snippet printKey(key)}
@@ -414,12 +423,10 @@
   >
 {/snippet}
 {#if navigator.maxTouchPoints > 1}
-  <div
-    class="keyboardbar"
-    style:bottom="max(calc(2.75em + 1px), {innerHeight - visualBottom}px)"
-  >
+  <!-- Must set top instead of bottom for correct placement on iOS -->
+  <div class="keyboardbar" style:top="calc({visualBottom}px - 2.5em * 2)">
     <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
-    {#if Math.abs(innerHeight - visualBottom) > 5}
+    {#if showInputButtons}
       <div class="buttonbar">
         {@render insertTextButton("=")}
         {@render insertTextButton("(")}
