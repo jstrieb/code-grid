@@ -53,6 +53,7 @@
       - Title
       - HTML contents
       - Snapped or free
+  - Title bar
   - List open and minimized windows at the bottom
   - Snap windows
   - Focus order for z-index stacking
@@ -61,6 +62,7 @@
   - Auto-complete quotes, parentheses, etc.
   - Indent extra between quotes, parentheses, etc.
   - Turn on manual save instead of auto save
+  - Save indicator
 - Save/load window
   - Add share buttons using `navigator.share`
   - Add download button
@@ -68,6 +70,8 @@
   - Preview before loading
   - Load button
   - Display load errors
+  - Paste image
+  - Load from URL (CSV, JSON)
 - Formula processing
   - "symbols" in formulas
   - Namespaced formula functions
