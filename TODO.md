@@ -22,7 +22,6 @@
   - Click cell while editing formula to insert it
   - Add conveniences for LLMs
   - Event hooks
-  - Move formula bar to bottom
   - Zoom out extra on mobile, but only cells and code, not UI elements
   - Frozen rows and columns
   - Toggle off automatic cell updates

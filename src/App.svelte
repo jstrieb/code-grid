@@ -31,6 +31,16 @@
     margin: 0 -0.5em;
     padding: 0.25em;
     border-top: 1px solid var(--fg-color);
+    width: 100%;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: calc(0.25em + 3px);
+  }
+
+  .buttonbar {
     min-height: max-content;
     display: flex;
     flex-direction: row;
@@ -38,9 +48,6 @@
     justify-content: flex-start;
     align-items: center;
     gap: 0.5ch;
-    width: 100%;
-    position: absolute;
-    z-index: 19;
     overflow-x: auto;
   }
 
@@ -48,6 +55,7 @@
     margin: -0.5em;
     padding: 0.25em;
     border-top: 1px solid var(--fg-color);
+    border-bottom: 1px solid var(--fg-color);
     min-height: max-content;
     display: flex;
     flex-direction: row;
@@ -267,9 +275,12 @@
   bind:innerHeight
 />
 
-<div>
-  <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
-</div>
+{#if navigator.maxTouchPoints <= 1}
+  <!-- Else float the bar above the virtual keyboard -->
+  <div>
+    <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
+  </div>
+{/if}
 
 <div class="tabs">
   <Tabs bind:globals bind:value={globals.currentSheetIndex} />
@@ -402,28 +413,33 @@
     shadow="2px">{text}</Button
   >
 {/snippet}
-{#if Math.abs(innerHeight - visualBottom) > 5}
+{#if navigator.maxTouchPoints > 1}
   <div
     class="keyboardbar"
-    style:top="calc({visualBottom}px - 2em - 2 * 0.25em - 2px)"
+    style:bottom="max(calc(2.75em + 1px), {innerHeight - visualBottom}px)"
   >
-    {@render insertTextButton("=")}
-    {@render insertTextButton("(")}
-    {@render insertTextButton(")")}
-    {@render insertTextButton("[")}
-    {@render insertTextButton("]")}
-    {@render insertTextButton("+")}
-    {@render insertTextButton("-")}
-    {@render insertTextButton("*")}
-    {@render insertTextButton("/")}
-    {@render insertTextButton('"')}
-    {@render insertTextButton("{")}
-    {@render insertTextButton("}")}
-    {@render insertTextButton(";")}
-    {@render insertTextButton(">")}
-    {@render insertTextButton("<")}
-    {@render insertTextButton(":")}
-    {@render insertTextButton("?")}
+    <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
+    {#if Math.abs(innerHeight - visualBottom) > 5}
+      <div class="buttonbar">
+        {@render insertTextButton("=")}
+        {@render insertTextButton("(")}
+        {@render insertTextButton(")")}
+        {@render insertTextButton("[")}
+        {@render insertTextButton("]")}
+        {@render insertTextButton("+")}
+        {@render insertTextButton("-")}
+        {@render insertTextButton("*")}
+        {@render insertTextButton("/")}
+        {@render insertTextButton('"')}
+        {@render insertTextButton("{")}
+        {@render insertTextButton("}")}
+        {@render insertTextButton(";")}
+        {@render insertTextButton(">")}
+        {@render insertTextButton("<")}
+        {@render insertTextButton(":")}
+        {@render insertTextButton("?")}
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -469,7 +485,7 @@
       </div>
     {/snippet}
     {#snippet clickable(handler)}
-      <Button square onclick={handler} style="height: 1.5em;">=</Button>
+      <Button square onclick={handler} style="height: 2em;">=</Button>
     {/snippet}
   </ShyMenu>
   <div style="flex-grow: 1;"><!-- Spacer --></div>
