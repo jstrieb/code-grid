@@ -146,9 +146,11 @@
   - history.pushstate with non-cloneable values fails
   - Copy/paste does not always work
   - Line numbers have small lag on scroll
-  - Special keys bar has bad placement on Chrome on Android
   - Special keys bar buttons cause active element blur when double tapped on
     iOS
   - Side-scrolling special keys bar on iOS inserts on pointer up
+  - Special keys bar and formula bar is scrollable on mobile, even with
+    `touch-action: none` - needs touch handler with preventDefault to stop
+    vertical scrolling
   - Accidentally typing "RC" while typing another formula can cause everything
     to hang

@@ -49,6 +49,8 @@
     align-items: center;
     gap: 0.5ch;
     overflow-x: auto;
+    background-color: var(--bg-color);
+    z-index: 19;
   }
 
   .bottombar {
@@ -239,7 +241,7 @@
   $effect(() => {
     // iOS scrolls the formula bar to the middle on focus, this counteracts that
     // (if it happens to run after the keyboard is up - inconsistent)
-    if (showInputButtons) {
+    if (showInputButtons && visualBottom) {
       window.scrollTo({
         top: 0,
         behavior: "instant",
