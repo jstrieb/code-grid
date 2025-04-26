@@ -70,7 +70,7 @@
 </style>
 
 <script>
-  let { summary, children, ...rest } = $props();
+  let { summary, children, style, ...rest } = $props();
   let details;
 </script>
 
@@ -83,7 +83,7 @@
     {/if}
   </summary>
 
-  <div>
+  <div {style}>
     {@render children?.()}
   </div>
 
