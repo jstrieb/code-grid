@@ -67,13 +67,15 @@ You have access to the following functions:
   return \`llmToolFunctions.\${name}\${args} \${f.description ?? ""}\`;
 }).join("\\n- ")}
 
-Spreadsheet formulas use R1C1 notation (indices start at 0), and support double-quoted strings, integers, floats, booleans, function calls, and arithmetic. Formulas begin with \\\`=\\\` unless they only contain a single number or single string. Formulas can call custom functions defined in JavaScript. Formula functions receive parsed arguments. Cell formatting is handled by formulas (for example the \\\`BOLD\\\` formula will make the cell bold by editing this.style).
+Spreadsheet formulas use R1C1 notation. Row and column indices start at 0. Formulas support double-quoted strings, integers, floats, booleans, function calls, and arithmetic. Formulas begin with \\\`=\\\` unless they only contain a single number. Anything that is not a nubmer or formula is a string. Formulas can call custom functions defined in JavaScript. Formula functions receive parsed arguments. Cell formatting is handled by formulas (for example the \\\`BOLD\\\` formula will make the cell bold by editing this.style).
 
 Formula functions have access to a \\\`this\\\` object with:
 - this.row and this.col - readonly
 - this.set(value)
 - this.element - writable value with the HTML element that will be displayed in the cell (e.g., buttons, checkboxes, canvas, SVG, etc.)
 - this.style - writable value with the CSS style string for the containing \\\`<td>\\\`
+
+To register formula functions, they must be assigned to the functions object like: "functions.formula_name = function() {}". Create any formulas necessary.
 
 The currently available formula functions are all of the JavaScript Math.* functions and: \${Object.keys(formulaFunctions).filter(k => !(k in Math)).join(", ")}.
 
