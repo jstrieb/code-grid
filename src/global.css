@@ -58,3 +58,11 @@ button {
 ul {
   margin-left: 1em;
 }
+
+input[type="checkbox"] {
+  appearance: auto;
+}
+
+textarea {
+  overscroll-behavior: auto;
+}

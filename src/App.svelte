@@ -107,6 +107,7 @@
   import Details from "./Details.svelte";
   import Dialog from "./Dialog.svelte";
   import FormulaBar from "./FormulaBar.svelte";
+  import Llm from "./Llm.svelte";
   import SaveLoad from "./SaveLoad.svelte";
   import Settings from "./Settings.svelte";
   import ShyMenu from "./ShyMenu.svelte";
@@ -157,7 +158,9 @@
   }
 
   let dontSave = $state(false);
+  let saveData = $state();
   const save = debounce((data) => {
+    saveData = data;
     imageData = JSON.stringify(data, replaceValues);
     if (dontSave) {
       dontSave = false;
@@ -320,7 +323,7 @@
   bind:open={globals.editorOpen}
   style="display: flex; flex-direction: column; align-items: stretch; overflow: hidden; gap: 0.25em;"
 >
-  <CodeEditor bind:editor bind:code={globals.formulaCode} />
+  <CodeEditor numbers={true} bind:editor bind:code={globals.formulaCode} />
   {#if codeError}
     <p style="white-space: pre; overflow-x: auto; flex-shrink: 0;">
       {codeError}
@@ -400,6 +403,13 @@
   </div>
 </Dialog>
 
+<Dialog
+  bind:open={globals.llmOpen}
+  style="display: flex; flex-direction: column; gap: 1em;"
+>
+  <Llm {globals} />
+</Dialog>
+
 {#snippet insertTextButton(text)}
   <Button
     onpointerdown={(e) => {
@@ -472,6 +482,10 @@
           {
             text: "Code Editor",
             onclick: () => (globals.editorOpen = !globals.editorOpen),
+          },
+          {
+            text: "Edit with Large Language Models (LLMs)",
+            onclick: () => (globals.llmOpen = !globals.llmOpen),
           },
           {
             text: "New Spreadsheet",

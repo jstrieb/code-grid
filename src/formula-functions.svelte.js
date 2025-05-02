@@ -5,6 +5,7 @@ import { debounce } from "./helpers.js";
 import * as parsers from "./parsers.js";
 import * as classes from "./classes.svelte.js";
 import * as compression from "./compress.js";
+import { llmToolFunctions, llmModels } from "./llm.svelte.js";
 import { undefinedArgsToIdentity } from "./helpers.js";
 
 export let functions = $state({});
@@ -27,6 +28,12 @@ export function evalCode(code, ret = () => {}) {
   } catch {}
   try {
     throw compression;
+  } catch {}
+  try {
+    throw llmToolFunctions;
+  } catch {}
+  try {
+    throw llmModels;
   } catch {}
 
   try {

@@ -33,6 +33,8 @@
   - Settings input with numeric input and buttons on either side
   - CSP to restrict `worker-src` (except that we don't want to block web
     workers, only service workers)
+- LLM
+  - Make LLM conversational -- send messages back and forth to iterate
 - Clipboard integration
   - Cut
   - Fix "put" behavior to copy formulas around to selection

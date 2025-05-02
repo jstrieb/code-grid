@@ -29,7 +29,12 @@
 </style>
 
 <script>
-  let { editor = $bindable(), code = $bindable(""), ...rest } = $props();
+  let {
+    numbers = false,
+    editor = $bindable(),
+    code = $bindable(""),
+    ...rest
+  } = $props();
   let lineNumbers = $state();
 
   function indent(s) {
@@ -92,12 +97,14 @@
 </script>
 
 <div class="container">
-  <div class="numbers" bind:this={lineNumbers}>
-    {#each code.split("\n") as _, i}
-      <div>{i + 1}</div>
-    {/each}
-    <div style="min-height: 5em"></div>
-  </div>
+  {#if numbers}
+    <div class="numbers" bind:this={lineNumbers}>
+      {#each code.split("\n") as _, i}
+        <div>{i + 1}</div>
+      {/each}
+      <div style="min-height: 5em"></div>
+    </div>
+  {/if}
   <textarea
     bind:this={editor}
     bind:value={code}
