@@ -14,13 +14,16 @@
     white-space: pre-line;
     padding: 0.25em;
     min-height: 5em;
-    height: 5em;
     flex-grow: 1;
     flex-shrink: 1;
-    resize: vertical;
   }
 
-  input[type="password"] {
+  textarea {
+    resize: vertical;
+    height: 8em;
+  }
+
+  input {
     border: 1px solid var(--fg-color);
     padding: 0.25em;
   }
@@ -41,7 +44,6 @@
     justify-content: flex-end;
     align-items: center;
     gap: 1em;
-    margin-top: -0.75em;
   }
 </style>
 
@@ -53,6 +55,7 @@
   // May appear unused, but actually used during evals
   import { llmToolFunctions, llmModels } from "./llm.svelte.js";
   import { functions as formulaFunctions } from "./formula-functions.svelte";
+  import CodeEditor from "./CodeEditor.svelte";
 
   let { globals } = $props();
   let response = $state();
@@ -86,7 +89,6 @@ Available spreadsheets:
   ).join('\\n')
 }
 `);
-  let llmCode = $state("");
 
   // Need to call eval in a separate function from derived.by to ensure globals,
   // functions, and prompt are in-scope
@@ -103,14 +105,24 @@ Available spreadsheets:
   });
 
   async function submit() {
-    response = llmModels[modelName].request(prompt, systemPrompt, {
-      apiKey: llmModels[modelName].apiKey,
-    });
-    // TODO: Fix race condition if the button is pushed multiple times
-    llmCode = await response;
+    response = llmModels[modelName]
+      .request(prompt, systemPrompt)
+      .then((parts) =>
+        parts.map((part) => {
+          if (part.startsWith("```") && part.endsWith("```")) {
+            return {
+              code: part
+                .replaceAll(/(^````*( *javascript *)?\n)|(\n````*$)/g, "")
+                .trim(),
+            };
+          } else {
+            return part;
+          }
+        }),
+      );
   }
 
-  function execute() {
+  function execute(llmCode) {
     llmToolFunctions.globals = globals;
     eval(
       llmCode +
@@ -143,6 +155,10 @@ Available spreadsheets:
       <!-- <Button>Save</Button> -->
     </div>
   </label>
+  <label>
+    Model
+    <input type="text" bind:value={llmModels[modelName].model} />
+  </label>
 </Details>
 
 <Details>
@@ -165,18 +181,35 @@ Available spreadsheets:
     placeholder="Make a simple budget spreadsheet template"
     bind:value={prompt}
   ></textarea>
+  <div class="buttons" style="margin-top: 0.5em;">
+    <Button onclick={submit}>Submit</Button>
+  </div>
 </div>
-
-<div class="buttons"><Button onclick={submit}>Submit</Button></div>
 
 {#if response}
   <h1>LLM Response</h1>
   {#await response}
     <p>Loading...</p>
-  {:then}
-    <textarea bind:value={llmCode} style:min-height="10em" style:flex-grow="2"
-    ></textarea>
-    <div class="buttons"><Button onclick={execute}>Execute</Button></div>
+  {:then r}
+    <div style="gap: 0.25em;">
+      {#each r as part, i}
+        {#if part.code}
+          <Details open>
+            {#snippet summary()}Code{/snippet}
+            <CodeEditor bind:code={r[i].code} style="min-height: 10em"
+            ></CodeEditor>
+            <div class="buttons">
+              <Button onclick={() => execute(r[i].code)}>Execute</Button>
+            </div>
+          </Details>
+        {:else}
+          <Details open>
+            {#snippet summary()}Text{/snippet}
+            <pre class="message">{part}</pre>
+          </Details>
+        {/if}
+      {/each}
+    </div>
     <!-- TODO: Add error display if evaluated code throws -->
   {:catch e}
     <p>Error: {e?.message ?? e}</p>

@@ -60,6 +60,8 @@ export const keybindings = {
   "Shift+:": "Toggle Code Editor",
   "Ctrl+s": "Toggle Save and Load",
   "Meta+s": "Toggle Save and Load",
+  "Ctrl+i": "Toggle LLM",
+  "Meta+i": "Toggle LLM",
   g: "Go To",
   "Shift+g": "Go to Bottom",
   "Ctrl+z": "Undo",
@@ -243,6 +245,10 @@ export const actions = {
         globals.put(true, true);
         break;
     }
+  },
+
+  "Toggle LLM": (e, globals) => {
+    globals.llmOpen = !globals.llmOpen;
   },
 
   "Toggle Save and Load": (e, globals) => {
