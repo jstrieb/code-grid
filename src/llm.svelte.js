@@ -5,6 +5,7 @@ llmToolFunctions.newSheet = function (name, cells) {
   this.globals?.addSheet(name, cells.length, cols, (i, j) =>
     cells[i]?.[j]?.toString(),
   );
+  this.globals.currentSheetIndex = this.globals.sheets.length - 1;
 };
 llmToolFunctions.newSheet.description =
   "takes a 2D array of strings containing formulas";
@@ -20,7 +21,7 @@ llmToolFunctions.getCellValue = function (sheetIndex, row, col) {
 };
 
 llmToolFunctions.getCellFormula = function (sheetIndex, row, col) {
-  return this.globals.sheets[sheetIndex]?.cells[row]?.[col]?.formula;
+  return this.globals.sheets[sheetIndex]?.cells[row]?.[col]?.formula ?? "";
 };
 
 llmToolFunctions.setCellFormula = function (sheetIndex, row, col, formula) {
@@ -31,7 +32,7 @@ llmToolFunctions.setCellFormula = function (sheetIndex, row, col, formula) {
 export const llmModels = $state({});
 
 llmModels.Gemini = {
-  model: "gemini-2.5-pro-exp-03-25",
+  model: "gemini-2.5-flash-preview-04-17",
   async request(prompt, systemPrompt) {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`,

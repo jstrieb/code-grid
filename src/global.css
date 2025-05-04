@@ -63,6 +63,7 @@ input[type="checkbox"] {
   appearance: auto;
 }
 
-textarea {
+textarea,
+pre {
   overscroll-behavior: auto;
 }

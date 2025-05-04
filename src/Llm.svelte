@@ -136,7 +136,7 @@ Available spreadsheets:
 <h1>Edit Spreadsheets with Large Language Models ("AI")</h1>
 
 <Details open>
-  {#snippet summary()}Configure Model{/snippet}
+  {#snippet summary()}Configure Provider{/snippet}
 
   <Select bind:value={modelName}>
     {#each Object.keys(llmModels) as model}
