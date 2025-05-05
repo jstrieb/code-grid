@@ -66,12 +66,12 @@
   let responsePromise = $state();
   let modelName = $state("Gemini");
   let template =
-    $state(`You modify a spreadsheet by executing JavaScript code. You output JavaScript code in Markdown blocks. You do not output any explanation or comments. You are concise and succinct. You are a technical expert with extensive experience with JavaScript and data science. You query for more information if it would improve your response.
+    $state(`You modify a spreadsheet by executing JavaScript code. You output JavaScript code in Markdown blocks. You do not output any explanation or comments. You are concise and succinct. You are a technical expert with extensive experience with JavaScript and data science. You query the spreadsheet for more information if it would improve your response.
 
 Formulas begin with an equals sign (\\\`=\\\`), and can contain:
 - Numbers such as \\\`123\\\` and \\\`-3.21\\\`
 - Strings such as \\\`"asdf"\\\` and \\\`"multi\\\\nline"\\\`
-- Singleton references in R1C1 notation such as \\\`R10C3\\\` (zero-indexed) for absolute references, \\\`R[-1]c[2]\\\` for relative references, and \\\`RC\\\` for self-references
+- Singleton references in R1C1 notation such as \\\`R10C3\\\` (zero-indexed) and \\\`RC0\\\` for absolute references, \\\`R[-1]c[2]\\\` for relative references, and \\\`RC\\\` for self-references
   - Negative absolute references start from the end of a row or column, such as \\\`R-1C-1\\\` to select the cell in the bottom right corner of the sheet, and \\\`R1C0:R1C-1\\\` to select all of row 1
 - Ranges such as \\\`R[-3]C:R[-1]C\\\`
 - References and ranges across sheets like \\\`S1!R1C1\\\` and \\\`S[1]!R2C2:R2C-1\\\` and \\\`S-1R2C3\\\` (the exclamation point is optional)
@@ -81,10 +81,11 @@ Formulas begin with an equals sign (\\\`=\\\`), and can contain:
 Formula function definitions have access to a \\\`this\\\` object with:
 - this.row and this.col - readonly
 - this.set(value)
-- this.element - writable value with the HTML element that will be displayed in the cell (e.g., buttons, checkboxes, canvas, SVG, etc.)
-- this.style - writable value with the CSS style string for the containing \\\`<td>\\\`
+- this.element - writable with the HTML DOMElement that will be displayed in the cell (e.g., buttons, checkboxes, canvas, SVG, etc.)
+- this.style - writable with the CSS style string for the containing \\\`<td>\\\`
 
 You define any formula functions you use that do not already exist. To define formula functions, they must be assigned like: "functions.formula_name = function() {}" in a call to \\\`addFunction\\\`.
+
 
 The currently available formula functions are all of the JavaScript Math.* functions and: \${Object.keys(formulaFunctions).filter(k => !(k in Math)).join(", ")}.
 
@@ -94,12 +95,52 @@ You can run the following functions:
   return \`llmToolFunctions.\${name}\${args} \${f.description ?? ""}\`;
 }).join("\\n- ")}
 
-Available spreadsheets: 
-\${
-  globals.sheets.map(
-    (sheet, i) => \`\${i}. "\${sheet.name}" - \${sheet.heights.length} rows, \${sheet.widths.length} cols\`
-  ).join('\\n')
+Querying can only be used to get data from the environment. It cannot be used to ask the user questions. You can query multiple things at once.
+
+
+Example:
+
+User:
+Find the receipt items that contain seafood items and make them red.
+
+Model:
+\\\`\\\`\\\`javascript
+const sheets = llmToolFunctions.getSheets();
+llmToolFunctions.query("Sheets", sheets);
+let firstRows = {};
+sheets.forEach((sheet, sheetIndex) => {
+  firstRows[sheet.name] = new Array(sheet.cols).fill().map(
+    (_, i) => llmToolFunctions.getCellFormula(sheetIndex, 0, i)
+  )
+});
+llmToolFunctions.query("First rows", firstRows);
+\\\`\\\`\\\`
+
+User:
+Sheets: [{"name": "Sheet 1", "rows": 10, "cols": 3}, {"name": "Receipt", "rows": 6, "cols": 2}]
+First rows: {"Sheet 1": [null, null, null], "Receipt": ["=BOLD(\\\\"Item\\\\")", "=BOLD(\\\\"Cost\\\\")"]}
+
+Model:
+\\\`\\\`\\\`javascript
+llmToolFunctions.query("Items", new Array(6).fill().map(
+  (_, i) => llmToolFunctions.getCellFormula(1, i, 0)
+));
+\\\`\\\`\\\`
+
+User:
+Items: ["=BOLD(\\\\"Items\\\\")", "shrimp", "chicken", "vegetables", "scallops", "cups"]
+
+Model:
+\\\`\\\`\\\`javascript
+llmToolFunctions.addFunction(\\\`
+functions.red = function (s) {
+  this.style += "color: red;"
+  return s;
 }
+\\\`);
+llmToolFunctions.setCellFormula(1, 1, 0, \\\`=RED(\\\${llmToolFunctions.getCellFormula(1, 1, 0)})\\\`)
+llmToolFunctions.setCellFormula(1, 4, 0, \\\`=RED(\\\${llmToolFunctions.getCellFormula(1, 4, 0)})\\\`)
+\\\`\\\`\\\`
 `);
   let conversation = $state([
     { role: "system", text: "" },
@@ -154,6 +195,20 @@ Available spreadsheets:
 
   function execute(llmCode, i) {
     llmToolFunctions.globals = globals;
+
+    llmToolFunctions.query = (name, value) => {
+      let userResponse;
+      for (
+        userResponse = conversation[i + 1];
+        userResponse != null && userResponse.role != "user";
+        i++
+      ) {}
+      if (userResponse.text.length && !userResponse.text.endsWith("\n")) {
+        userResponse.text += "\n";
+      }
+      userResponse.text += `${name}: ${JSON.stringify(value)}`;
+    };
+
     eval(
       llmCode +
         // Allows user code to show up in the devtools debugger as "llm-code.js"
@@ -210,7 +265,7 @@ Available spreadsheets:
     <div style="margin-left: 10%;">
       <Details open={part.text.startsWith("Error")}>
         {#snippet summary()}System prompt{/snippet}
-        <pre>{part.text}</pre>
+        <pre style="white-space: pre;">{part.text}</pre>
       </Details>
     </div>
   {:else if part.role == "user"}

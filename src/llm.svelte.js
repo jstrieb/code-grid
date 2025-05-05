@@ -33,6 +33,18 @@ llmToolFunctions.getFormulaFunction = function (name) {
   return functions[name].toString();
 };
 
+llmToolFunctions.getSheets = function () {
+  return this.globals.sheets.map(({ name, cells }) => ({
+    name,
+    rows: cells.length,
+    cols: cells[0]?.length ?? 0,
+  }));
+};
+
+llmToolFunctions.query = function (value) {
+  throw new Error("Implemented in Llm.svelte");
+};
+
 // TODO: Save models to IndexDB (or local storage)
 export const llmModels = $state({});
 
@@ -51,7 +63,7 @@ llmModels.Gemini = {
             parts: conversation
               .filter(({ role }) => role == "system")
               .map(({ text }) =>
-                text.split("\n\n").map((s) => ({ text: s.trim() })),
+                text.split("\n\n\n").map((s) => ({ text: s.trim() })),
               )
               .flat(Infinity),
           },
