@@ -1,3 +1,5 @@
+import { functions } from "./formula-functions.svelte";
+
 export const llmToolFunctions = $state({});
 
 llmToolFunctions.newSheet = function (name, cells) {
@@ -25,6 +27,10 @@ llmToolFunctions.getCellFormula = function (sheetIndex, row, col) {
 
 llmToolFunctions.setCellFormula = function (sheetIndex, row, col, formula) {
   this.globals.sheets[sheetIndex].cells[row][col].formula = formula;
+};
+
+llmToolFunctions.getFormulaFunction = function (name) {
+  return functions[name].toString();
 };
 
 // TODO: Save models to IndexDB (or local storage)

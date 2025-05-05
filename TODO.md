@@ -34,7 +34,14 @@
   - CSP to restrict `worker-src` (except that we don't want to block web
     workers, only service workers)
 - LLM
-  - Make LLM conversational -- send messages back and forth to iterate
+  - Button to clear conversation
+  - Button to export conversation
+  - Button to import conversation
+  - Link to where to get API key
+  - API support
+    - ChatGPT
+    - Huggingface
+    - Ollama
 - Clipboard integration
   - Cut
   - Fix "put" behavior to copy formulas around to selection

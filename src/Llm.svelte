@@ -66,25 +66,33 @@
   let responsePromise = $state();
   let modelName = $state("Gemini");
   let template =
-    $state(`You modify a spreadsheet by executing JavaScript code. You output JavaScript code in Markdown blocks. You do not output any explanation or comments. You are concise and succinct. You are a technical expert with extensive experience with JavaScript and data science.
+    $state(`You modify a spreadsheet by executing JavaScript code. You output JavaScript code in Markdown blocks. You do not output any explanation or comments. You are concise and succinct. You are a technical expert with extensive experience with JavaScript and data science. You query for more information if it would improve your response.
 
-You have access to the following functions:
-- \${Object.entries(llmToolFunctions).map(([name, f]) => {
-  const args = f.toString().replaceAll("\\n", " ").replaceAll(/  */g, " ").match(/\\([^)]*\\)/)?.[0] ?? "";
-  return \`llmToolFunctions.\${name}\${args} \${f.description ?? ""}\`;
-}).join("\\n- ")}
+Formulas begin with an equals sign (\\\`=\\\`), and can contain:
+- Numbers such as \\\`123\\\` and \\\`-3.21\\\`
+- Strings such as \\\`"asdf"\\\` and \\\`"multi\\\\nline"\\\`
+- Singleton references in R1C1 notation such as \\\`R10C3\\\` (zero-indexed) for absolute references, \\\`R[-1]c[2]\\\` for relative references, and \\\`RC\\\` for self-references
+  - Negative absolute references start from the end of a row or column, such as \\\`R-1C-1\\\` to select the cell in the bottom right corner of the sheet, and \\\`R1C0:R1C-1\\\` to select all of row 1
+- Ranges such as \\\`R[-3]C:R[-1]C\\\`
+- References and ranges across sheets like \\\`S1!R1C1\\\` and \\\`S[1]!R2C2:R2C-1\\\` and \\\`S-1R2C3\\\` (the exclamation point is optional)
+- Function calls (case insensitive) containing expressions as arguments such as \\\`sum(RC0:RC[-1])\\\`, \\\`sLiDeR(0, 10, 1)\\\`, and \\\`DOLLARS(PRODUCT(1 * 2 + 3, 4, 3, R[-1]C))\\\`
+- Optionally parenthesized binary operations combining any of the expressions above such as \\\`(RC[-2] + RC[-3]) * 100\\\` and \\\`1 + -2 + 3 ** 5\\\`
 
-Spreadsheet formulas use R0C0 notation. Row and column indices start at 0. Formulas support double-quoted strings, integers, floats, booleans, function calls, and arithmetic. Formulas begin with \\\`=\\\` unless they only contain a single number. Anything that is not a nubmer or formula is a string. Formulas can call custom functions defined in JavaScript. Formula functions receive parsed arguments. Cell formatting is handled by formulas (for example the \\\`BOLD\\\` formula will make the cell bold by editing this.style).
-
-Formula functions have access to a \\\`this\\\` object with:
+Formula function definitions have access to a \\\`this\\\` object with:
 - this.row and this.col - readonly
 - this.set(value)
 - this.element - writable value with the HTML element that will be displayed in the cell (e.g., buttons, checkboxes, canvas, SVG, etc.)
 - this.style - writable value with the CSS style string for the containing \\\`<td>\\\`
 
-To register formula functions, they must be assigned to the functions object like: "functions.formula_name = function() {}". Create any formulas necessary.
+You define any formula functions you use that do not already exist. To define formula functions, they must be assigned like: "functions.formula_name = function() {}" in a call to \\\`addFunction\\\`.
 
 The currently available formula functions are all of the JavaScript Math.* functions and: \${Object.keys(formulaFunctions).filter(k => !(k in Math)).join(", ")}.
+
+You can run the following functions:
+- \${Object.entries(llmToolFunctions).map(([name, f]) => {
+  const args = f.toString().replaceAll("\\n", " ").replaceAll(/  */g, " ").match(/\\([^)]*\\)/)?.[0] ?? "";
+  return \`llmToolFunctions.\${name}\${args} \${f.description ?? ""}\`;
+}).join("\\n- ")}
 
 Available spreadsheets: 
 \${
@@ -144,7 +152,7 @@ Available spreadsheets:
       });
   }
 
-  function execute(llmCode) {
+  function execute(llmCode, i) {
     llmToolFunctions.globals = globals;
     eval(
       llmCode +
@@ -152,6 +160,10 @@ Available spreadsheets:
         "\n//# sourceURL=llm-code.js",
     );
     delete llmToolFunctions.globals;
+  }
+
+  function scrollIntoView(e) {
+    e.scrollIntoView();
   }
 </script>
 
@@ -219,7 +231,7 @@ Available spreadsheets:
       </Details>
     </div>
   {:else if part.role == "model"}
-    <div style="margin-right: 10%;">
+    <div use:scrollIntoView style="margin-right: 10%;">
       {#if part.code}
         <Details open>
           {#snippet summary()}Code{/snippet}
@@ -228,7 +240,7 @@ Available spreadsheets:
             style="min-height: 10em; resize: vertical;"
           ></CodeEditor>
           <div class="buttons">
-            <Button onclick={() => execute(part.code)}>Execute</Button>
+            <Button onclick={() => execute(part.code, i)}>Execute</Button>
           </div>
         </Details>
       {:else}
@@ -242,7 +254,7 @@ Available spreadsheets:
 {/each}
 
 {#await responsePromise}
-  <p>Loading...</p>
+  <p use:scrollIntoView>Loading...</p>
 {:catch e}
   <p>Error: {e?.message ?? e}</p>
 {/await}
