@@ -33,7 +33,7 @@ export const llmModels = $state({});
 
 llmModels.Gemini = {
   model: "gemini-2.5-flash-preview-04-17",
-  async request(prompt, systemPrompt) {
+  async request(conversation) {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`,
       {
@@ -43,23 +43,24 @@ llmModels.Gemini = {
         },
         body: JSON.stringify({
           system_instruction: {
-            parts: systemPrompt.split("\n\n").map((s) => ({ text: s.trim() })),
+            parts: conversation
+              .filter(({ role }) => role == "system")
+              .map(({ text }) =>
+                text.split("\n\n").map((s) => ({ text: s.trim() })),
+              )
+              .flat(Infinity),
           },
           tools: [
             {
               google_search: {},
             },
           ],
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
+          contents: conversation
+            .filter(({ role }) => role != "system")
+            .map(({ role, text, code }) => ({
+              role,
+              parts: [{ text: text ?? "```javascript\n" + code + "\n```" }],
+            })),
         }),
       },
     )

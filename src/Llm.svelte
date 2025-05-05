@@ -1,7 +1,6 @@
 <style>
   div,
   label {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
   }
@@ -28,6 +27,12 @@
     padding: 0.25em;
   }
 
+  hr {
+    border: 0;
+    border-top: 1px dashed var(--fg-color);
+    margin: 1em 0;
+  }
+
   .row {
     display: flex;
     flex-direction: row;
@@ -49,20 +54,19 @@
 
 <script>
   import Button from "./Button.svelte";
+  import CodeEditor from "./CodeEditor.svelte";
   import Details from "./Details.svelte";
   import Select from "./Select.svelte";
 
   // May appear unused, but actually used during evals
   import { llmToolFunctions, llmModels } from "./llm.svelte.js";
   import { functions as formulaFunctions } from "./formula-functions.svelte";
-  import CodeEditor from "./CodeEditor.svelte";
 
   let { globals } = $props();
-  let response = $state();
+  let responsePromise = $state();
   let modelName = $state("Gemini");
-  let prompt = $state("");
   let template =
-    $state(`You modify a spreadsheet by executing JavaScript code. You only output JavaScript code. You do not output any explanation or comments. You are concise and succinct. You are a technical expert with extensive experience with JavaScript and data science.
+    $state(`You modify a spreadsheet by executing JavaScript code. You output JavaScript code in Markdown blocks. You do not output any explanation or comments. You are concise and succinct. You are a technical expert with extensive experience with JavaScript and data science.
 
 You have access to the following functions:
 - \${Object.entries(llmToolFunctions).map(([name, f]) => {
@@ -70,7 +74,7 @@ You have access to the following functions:
   return \`llmToolFunctions.\${name}\${args} \${f.description ?? ""}\`;
 }).join("\\n- ")}
 
-Spreadsheet formulas use R1C1 notation. Row and column indices start at 0. Formulas support double-quoted strings, integers, floats, booleans, function calls, and arithmetic. Formulas begin with \\\`=\\\` unless they only contain a single number. Anything that is not a nubmer or formula is a string. Formulas can call custom functions defined in JavaScript. Formula functions receive parsed arguments. Cell formatting is handled by formulas (for example the \\\`BOLD\\\` formula will make the cell bold by editing this.style).
+Spreadsheet formulas use R0C0 notation. Row and column indices start at 0. Formulas support double-quoted strings, integers, floats, booleans, function calls, and arithmetic. Formulas begin with \\\`=\\\` unless they only contain a single number. Anything that is not a nubmer or formula is a string. Formulas can call custom functions defined in JavaScript. Formula functions receive parsed arguments. Cell formatting is handled by formulas (for example the \\\`BOLD\\\` formula will make the cell bold by editing this.style).
 
 Formula functions have access to a \\\`this\\\` object with:
 - this.row and this.col - readonly
@@ -89,37 +93,55 @@ Available spreadsheets:
   ).join('\\n')
 }
 `);
+  let conversation = $state([
+    { role: "system", text: "" },
+    { role: "user", text: "" },
+  ]);
 
-  // Need to call eval in a separate function from derived.by to ensure globals,
-  // functions, and prompt are in-scope
-  function evaluate(t, { formulaFunctions, globals, prompt }) {
+  // Need to call eval in a separate function from derived.by to ensure globals
+  // and functions are in-scope
+  function evaluate(t, { formulaFunctions, globals }) {
     return eval(`\`${t}\``);
   }
 
-  let systemPrompt = $derived.by(() => {
+  $effect(() => {
     try {
-      return evaluate(template, { formulaFunctions, globals, prompt });
+      conversation[0].text = evaluate(template, { formulaFunctions, globals });
     } catch (e) {
-      return `Error: ${e?.message ?? e ?? ""}`;
+      conversation[0].text = `Error: ${e?.message ?? e ?? ""}`;
     }
   });
 
-  async function submit() {
-    response = llmModels[modelName]
-      .request(prompt, systemPrompt)
+  $effect(() => {
+    if (conversation[conversation.length - 1].role != "user") {
+      conversation.push({ role: "user", text: "" });
+    }
+  });
+
+  async function submit(conversationSlice) {
+    conversation = conversationSlice;
+    responsePromise = llmModels[modelName]
+      .request(conversationSlice)
       .then((parts) =>
         parts.map((part) => {
           if (part.startsWith("```") && part.endsWith("```")) {
             return {
+              role: "model",
               code: part
                 .replaceAll(/(^````*( *javascript *)?\n)|(\n````*$)/g, "")
                 .trim(),
             };
           } else {
-            return part;
+            return {
+              role: "model",
+              text: part,
+            };
           }
         }),
-      );
+      )
+      .then((parts) => {
+        conversation = conversation.concat(parts);
+      });
   }
 
   function execute(llmCode) {
@@ -167,51 +189,60 @@ Available spreadsheets:
     <p>Template</p>
     <textarea bind:value={template}></textarea>
   </div>
-
-  <div>
-    <p>System prompt</p>
-    <pre>{systemPrompt}</pre>
-  </div>
 </Details>
 
-<div>
-  <p>Prompt</p>
-  <textarea
-    class="prompt"
-    placeholder="Make a simple budget spreadsheet template"
-    bind:value={prompt}
-  ></textarea>
-  <div class="buttons" style="margin-top: 0.5em;">
-    <Button onclick={submit}>Submit</Button>
-  </div>
-</div>
+<hr />
 
-{#if response}
-  <h1>LLM Response</h1>
-  {#await response}
-    <p>Loading...</p>
-  {:then r}
-    <div style="gap: 0.25em;">
-      {#each r as part, i}
-        {#if part.code}
-          <Details open>
-            {#snippet summary()}Code{/snippet}
-            <CodeEditor bind:code={r[i].code} style="min-height: 10em"
-            ></CodeEditor>
-            <div class="buttons">
-              <Button onclick={() => execute(r[i].code)}>Execute</Button>
-            </div>
-          </Details>
-        {:else}
-          <Details open>
-            {#snippet summary()}Text{/snippet}
-            <pre class="message">{part}</pre>
-          </Details>
-        {/if}
-      {/each}
+{#each conversation as part, i}
+  {#if part.role == "system"}
+    <div style="margin-left: 10%;">
+      <Details open={part.text.startsWith("Error")}>
+        {#snippet summary()}System prompt{/snippet}
+        <pre>{part.text}</pre>
+      </Details>
     </div>
-    <!-- TODO: Add error display if evaluated code throws -->
-  {:catch e}
-    <p>Error: {e?.message ?? e}</p>
-  {/await}
-{/if}
+  {:else if part.role == "user"}
+    <div style="margin-left: 10%;">
+      <Details open>
+        {#snippet summary()}User{/snippet}
+        <textarea
+          placeholder={i == 1
+            ? "Make a comprehensive budget spreadsheet for a 25 year old living in Manhattan and making $75k per year"
+            : ""}
+          bind:value={part.text}
+        ></textarea>
+        <div class="buttons">
+          <Button onclick={() => submit(conversation.slice(0, i + 1))}
+            >Submit</Button
+          >
+        </div>
+      </Details>
+    </div>
+  {:else if part.role == "model"}
+    <div style="margin-right: 10%;">
+      {#if part.code}
+        <Details open>
+          {#snippet summary()}Code{/snippet}
+          <CodeEditor
+            bind:code={part.code}
+            style="min-height: 10em; resize: vertical;"
+          ></CodeEditor>
+          <div class="buttons">
+            <Button onclick={() => execute(part.code)}>Execute</Button>
+          </div>
+        </Details>
+      {:else}
+        <Details open>
+          {#snippet summary()}Text{/snippet}
+          <pre class="message">{part.text}</pre>
+        </Details>
+      {/if}
+    </div>
+  {/if}
+{/each}
+
+{#await responsePromise}
+  <p>Loading...</p>
+{:catch e}
+  <p>Error: {e?.message ?? e}</p>
+{/await}
