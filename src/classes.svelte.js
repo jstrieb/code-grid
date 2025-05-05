@@ -397,10 +397,13 @@ functions.crypto = async (ticker) => {
   addSheet(name, rows, cols, formula, initial, start = this.sheets.length) {
     const sheet = new Sheet(name, rows, cols, formula, initial);
     sheet.globals = this;
+    this.deselect();
     this.sheets.splice(start, 0, sheet);
+    this.currentSheetIndex = start;
   }
 
   deleteSheets(n, start = this.sheets.length - n) {
+    this.deselect();
     return this.sheets.splice(start, n);
   }
 }

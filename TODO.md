@@ -156,4 +156,3 @@
     vertical scrolling
   - Accidentally typing "RC" while typing another formula can cause everything
     to hang
-  - Deleting a sheet with a selection throws an exception

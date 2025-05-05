@@ -5,7 +5,6 @@ llmToolFunctions.newSheet = function (name, cells) {
   this.globals?.addSheet(name, cells.length, cols, (i, j) =>
     cells[i]?.[j]?.toString(),
   );
-  this.globals.currentSheetIndex = this.globals.sheets.length - 1;
 };
 llmToolFunctions.newSheet.description =
   "takes a 2D array of strings containing formulas";
