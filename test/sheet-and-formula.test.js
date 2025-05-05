@@ -644,3 +644,14 @@ test("Operator overloading with monkeypatching", async () => {
     ["test ".repeat(3), "test ".repeat(9), "tEsT"],
   ]);
 });
+
+test("Single-quoted strings", async () => {
+  const state = createSheet([
+    ["'test'", "='test'", "='test' + \"toast\""],
+    ["=bold('test')", "='te\\'st\\n\\n'", "='te\\\\\\'st'"],
+  ]);
+  await expectSheet(state.currentSheet, [
+    ["'test'", "test", "testtoast"],
+    ["test", "te'st\n\n", "te\\'st"],
+  ]);
+});

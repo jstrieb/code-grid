@@ -399,16 +399,25 @@ const number = num.map((args) => new Num(args));
 const stringChar = alt(
   str("\\\\").map((_) => "\\"),
   str('\\"').map((_) => '"'),
+  str("\\'").map((_) => "'"),
   str("\\t").map((_) => "\t"),
   str("\\n").map((_) => "\n"),
   anyChar,
 );
-const string = whitespace
-  .then(str('"'))
-  .then(stringChar.until(str('"')).optional([]).concat())
-  .skip(str('"'))
-  .skip(whitespace)
-  .map((args) => new Str(args));
+const string = alt(
+  whitespace
+    .then(str('"'))
+    .then(stringChar.until(str('"')).optional([]).concat())
+    .skip(str('"'))
+    .skip(whitespace)
+    .map((args) => new Str(args)),
+  whitespace
+    .then(str("'"))
+    .then(stringChar.until(str("'")).optional([]).concat())
+    .skip(str("'"))
+    .skip(whitespace)
+    .map((args) => new Str(args)),
+);
 
 const logic = forwardDeclaration();
 const value = lex(
