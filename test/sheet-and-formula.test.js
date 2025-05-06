@@ -655,3 +655,14 @@ test("Single-quoted strings", async () => {
     ["test", "te'st\n\n", "te\\'st"],
   ]);
 });
+
+test("Negation as a unary operation", async () => {
+  const state = createSheet([
+    ["-5.0", "=-3.2", "=-(6)", "=---3"],
+    ["=3**-2", "=3**-(--2)", "=-AVERAGE(1, 2, 3)", "=---SUM(-3, -4, -5)"],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [-5.0, -3.2, -6, -3],
+    [Math.pow(3, -2), Math.pow(3, -2), -2, 3 + 4 + 5],
+  ]);
+});

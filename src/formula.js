@@ -138,6 +138,7 @@ class UnaryOperation extends Expression {
   static operations = {
     "!": (x) => !x,
     "~": (x) => ~x,
+    "-": (x) => -x,
   };
 
   operator;
@@ -435,7 +436,7 @@ const unary = forwardDeclaration();
 unary.become(
   lex(
     alt(
-      seq(alt(lex("!"), lex("~")), unary).map(
+      seq(alt(...Object.keys(UnaryOperation.operations).map(lex)), unary).map(
         (args) => new UnaryOperation(...args),
       ),
       value,
