@@ -11,6 +11,14 @@ llmToolFunctions.newSheet = function (name, cells) {
 llmToolFunctions.newSheet.description =
   "takes a 2D array of strings containing formulas";
 
+llmToolFunctions.addRow = function (sheetIndex, offset) {
+  this.globals.sheets[sheetIndex]?.addRows(1, offset);
+};
+
+llmToolFunctions.addCol = function (sheetIndex, offset) {
+  this.globals.sheets[sheetIndex]?.addCols(1, offset);
+};
+
 llmToolFunctions.addFunction = function (code) {
   this.globals.formulaCode += `\n${code}\n`;
 };
@@ -27,6 +35,10 @@ llmToolFunctions.getCellFormula = function (sheetIndex, row, col) {
 
 llmToolFunctions.setCellFormula = function (sheetIndex, row, col, formula) {
   this.globals.sheets[sheetIndex].cells[row][col].formula = formula;
+};
+
+llmToolFunctions.getFormulaFunctionsList = function () {
+  return Object.keys(functions);
 };
 
 llmToolFunctions.getFormulaFunction = function (name) {
@@ -59,6 +71,10 @@ llmModels.Gemini = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          generation_config: {
+            temperature: 0.3,
+            stop_sequences: ["PAUSE"],
+          },
           system_instruction: {
             parts: conversation
               .filter(({ role }) => role == "system")
@@ -89,6 +105,8 @@ llmModels.Gemini = {
         console.error(e);
         throw e;
       });
-    return response?.candidates?.[0]?.content?.parts?.map(({ text }) => text);
+    return response?.candidates?.[0]?.content?.parts
+      ?.map(({ text }) => text.trim())
+      .filter((text) => text);
   },
 };
