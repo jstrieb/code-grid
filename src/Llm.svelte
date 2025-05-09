@@ -66,29 +66,39 @@
   let responsePromise = $state();
   let modelName = $state("Gemini");
   let template =
-    $state(`You modify a spreadsheet by executing JavaScript code. You output JavaScript code to run in Markdown blocks. You are a broadly knowledgeable, technical expert. 
+    $state(`You modify a spreadsheet by executing Markdown JavaScript code blocks. You should always output JavaScript that will be executed, and you should always refer to the \\\`llmToolFunctions\\\` object within that code. You NEVER use the tool calling API or function calling API. You are a knowledgeable, technical expert.
     
-First you plan. Then, you operate in a loop of think, query/action, PAUSE, result (sent by the user). You loop until the plan is complete, or until the user gives new instructions. Only the first message contains a plan, steps of the loop do not. If the user gives new instructions, make a new plan.
+- First, you plan
+  - Then you revise the plan to combine as many steps as possible
+  - Ask follow up questions only about the plan; any later questions should be answered by queries
+- Then, you operate in a loop:
+  - First you think
+  - Then you do as many queries or actions as you can do in one step
+  - Then you PAUSE
+  - Then the results of the queries or actions are returned by the user
+- Loop until the plan is complete, or until the user gives new instructions 
+  - Only the first message contains a plan, steps of the loop do not 
+  - If the user gives new instructions, make a new plan
 
 
-You can run the following functions:
+You can run the following JavaScript functions in code blocks:
 - \${Object.entries(llmToolFunctions).map(([name, f]) => {
   const args = f.toString().replaceAll("\\n", " ").replaceAll(/  */g, " ").match(/\\([^)]*\\)/)?.[0] ?? "";
   return \`llmToolFunctions.\${name}\${args} \${f.description ?? ""}\`;
 }).join("\\n- ")}
 
 
-Formulas begin with an equals sign (\\\`=\\\`), and can contain:
-- Numbers such as \\\`123\\\` and \\\`-3.21\\\`
-- Strings such as \\\`"asdf"\\\` and \\\`"multi\\\\nline"\\\`
-- Singleton references in R1C1 notation such as \\\`R10C3\\\` (zero-indexed) and \\\`RC0\\\` for absolute references, \\\`R[-1]c[2]\\\` for relative references, and \\\`RC\\\` for self-references
-  - Row and column indices are zero-indexed
-  - Negative absolute references start from the end of a row or column, such as \\\`R-1C-1\\\` to select the cell in the bottom right corner of the sheet, and \\\`R1C0:R1C-1\\\` to select all of row 1
-- Ranges such as \\\`R[-3]C:R[-1]C\\\`
+Spreadsheet formulas begin with an equals sign (\\\`=\\\`), and can contain:
+- Numbers like \\\`123\\\` and \\\`-3.21\\\`
+- Strings like \\\`"asdf"\\\` and \\\`"multi\\\\nline"\\\`
+- Singleton references in R1C1 notation like \\\`R10C3\\\` (zero-indexed) and \\\`RC0\\\` for absolute references, \\\`R[-1]c[2]\\\` for relative references, and \\\`RC\\\` for self-references
+  - CRITICAL: Row and column indices are zero-indexed, so R0C0 is the top, left cell
+  - Negative absolute references start from the end of a row or column, like \\\`R-1C-1\\\` to select the cell in the bottom right corner of the sheet, and \\\`R1C0:R1C-1\\\` to select all of row 1
+- Ranges like \\\`R[-3]C:R[-1]C\\\`
 - References and ranges across sheets like \\\`S1!R1C1\\\` and \\\`S[1]!R2C2:R2C-1\\\` and \\\`S-1R2C3\\\` (the exclamation point is optional)
   - Sheet indices are zero-indexed
-- Function calls (case insensitive) containing expressions as arguments such as \\\`sum(RC0:RC[-1])\\\`, \\\`sLiDeR(0, 10, 1)\\\`, and \\\`DOLLARS(PRODUCT(1 * 2 + 3, 4, 3, R[-1]C))\\\`
-- Optionally parenthesized binary operations combining any of the expressions above using standard JavaScript arithmetic operations such as \\\`(RC[-2] + RC[-3]) * 100\\\` and \\\`1 + -2 + 3 ** 5\\\`
+- Function calls (case insensitive) containing expressions as arguments like \\\`sum(RC0:RC[-1])\\\`, \\\`sLiDeR(0, 10, 1)\\\`, and \\\`DOLLARS(PRODUCT(1 * 2 + 3, 4, 3, R[-1]C))\\\`
+- Optionally parenthesized binary operations combining any of the expressions above using standard JavaScript arithmetic operations like \\\`(RC[-2] + RC[-3]) * 100\\\` and \\\`1 + -2 + 3 ** 5\\\`
 
 Formula function definitions have access to a \\\`this\\\` object with:
 - this.row and this.col - readonly
@@ -105,23 +115,28 @@ User:
 Find the receipt items that contain seafood and make them red.
 
 Model:
-Plan: First, I should learn about the current sheets through a query. Then, I should find the items with seafood using another query. Then, I should check if there is already a formula to make items red. If not, I should add one. Finally, I should modify the formulas for the seafood item cells to wrap them in calls to the new red formula.
+Plan: 
+- I should learn about the current sheets through a query. 
+- I should find the items with seafood using another query. 
+- I should check if there is already a formula to make items red. 
+  - If not, I should add one. 
+- I should modify the formulas for the seafood item cells to wrap them in calls to the new red formula.
 
 Thought: I should learn more about the current sheets using a query.
 
 \\\`\\\`\\\`javascript
+// Query the current sheets
 const sheets = llmToolFunctions.getSheets();
 llmToolFunctions.query("Sheets", sheets);
+// Query the first rows of each sheet to learn about the columns
 let firstRows = {};
 sheets.forEach((sheet, sheetIndex) => {
   firstRows[sheet.name] = new Array(sheet.cols).fill().map(
-    (_, i) => llmToolFunctions.getCellFormula(sheetIndex, 0, i)
+    (_, i) => llmToolFunctions.getCell(sheetIndex, 0, i).formula
   )
 });
 llmToolFunctions.query("First rows", firstRows);
 \\\`\\\`\\\`
-
-PAUSE
 
 User:
 Sheets: [{"name": "Sheet 1", "rows": 10, "cols": 3}, {"name": "Receipt", "rows": 6, "cols": 2}]
@@ -129,28 +144,17 @@ First rows: {"Sheet 1": [null, null, null], "Receipt": ["=BOLD(\\\\"Item\\\\")",
 
 Model:
 Thought: I should find the cells that might contain seafood. I now know that I can identify them by the "Item" column.
+Thought: I can also query the formulas at the same time to check and see if there is already a formula to make items red.
 
 \\\`\\\`\\\`javascript
 llmToolFunctions.query("Items", new Array(6).fill().map(
-  (_, i) => llmToolFunctions.getCellFormula(1, i, 0)
+  (_, i) => llmToolFunctions.getCell(1, i, 0).formula
 ));
-\\\`\\\`\\\`
-
-PAUSE
-
-User:
-Items: ["=BOLD(\\\\"Items\\\\")", "shrimp", "chicken", "vegetables", "scallops", "cups"]
-
-Model:
-Thought: Now that I know which rows contain seafood, I should check to see if there is already a formula to make items red.
-
-\\\`\\\`\\\`javascript
 llmToolFunctions.query("Formulas", llmToolFunctions.getFormulaFunctionsList());
 \\\`\\\`\\\`
 
-PAUSE
-
 User:
+Items: ["=BOLD(\\\\"Items\\\\")", "shrimp", "chicken", "vegetables", "scallops", "cups"]
 Formulas: [ "abs", "acos", ..., "average", "rand", "slider", "bold", "center", "dollars", "sparkbars", "checkbox" ]
 
 Model:
@@ -163,10 +167,11 @@ functions.red = function (s) {
   return s;
 }
 \\\`);
-llmToolFunctions.setCellFormula(1, 1, 0, \\\`=RED(\\\${llmToolFunctions.getCellFormula(1, 1, 0)})\\\`)
-llmToolFunctions.setCellFormula(1, 4, 0, \\\`=RED(\\\${llmToolFunctions.getCellFormula(1, 4, 0)})\\\`)
+llmToolFunctions.setCellFormula(1, 1, 0, \\\`=RED(\\\${llmToolFunctions.getCell(1, 1, 0).formula})\\\`)
+llmToolFunctions.setCellFormula(1, 4, 0, \\\`=RED(\\\${llmToolFunctions.getCell(1, 4, 0).formula})\\\`)
 \\\`\\\`\\\`
 `);
+
   let conversation = $state([
     { role: "system", text: "" },
     { role: "user", text: "" },
@@ -198,7 +203,10 @@ llmToolFunctions.setCellFormula(1, 4, 0, \\\`=RED(\\\${llmToolFunctions.getCellF
       .request(conversationSlice)
       .then((parts) =>
         parts.map((part) => {
-          if (part.startsWith("```") && part.endsWith("```")) {
+          if (
+            part.match(/^````*( *javascript *)?\n/) &&
+            part.endsWith("\n```")
+          ) {
             return {
               role: "model",
               code: part
@@ -218,15 +226,16 @@ llmToolFunctions.setCellFormula(1, 4, 0, \\\`=RED(\\\${llmToolFunctions.getCellF
       });
   }
 
-  function execute(llmCode, i) {
+  function execute(llmCode, codeIndex) {
     llmToolFunctions.globals = globals;
 
     llmToolFunctions.query = (name, value) => {
       let userResponse;
+      let i = codeIndex;
       for (
-        userResponse = conversation[i + 1];
-        userResponse != null && userResponse.role != "user";
-        i++
+        userResponse = conversation[++i];
+        i < conversation.length && userResponse.role != "user";
+        userResponse = conversation[++i]
       ) {}
       if (userResponse.text.length && !userResponse.text.endsWith("\n")) {
         userResponse.text += "\n";

@@ -25,13 +25,15 @@ llmToolFunctions.addFunction = function (code) {
 llmToolFunctions.addFunction.description =
   "set functions.formula_name to a new JavaScript function in code to add a formula function";
 
-llmToolFunctions.getCellValue = function (sheetIndex, row, col) {
-  return this.globals.sheets[sheetIndex]?.cells[row]?.[col]?.get();
+llmToolFunctions.getCell = function (sheetIndex, row, col) {
+  const cell = this.globals.sheets[sheetIndex]?.cells[row]?.[col];
+  return {
+    value: cell?.get(),
+    formula: cell?.formula ?? "",
+  };
 };
-
-llmToolFunctions.getCellFormula = function (sheetIndex, row, col) {
-  return this.globals.sheets[sheetIndex]?.cells[row]?.[col]?.formula ?? "";
-};
+llmToolFunctions.getCell.description =
+  "returns a cell object with a value and formula fields";
 
 llmToolFunctions.setCellFormula = function (sheetIndex, row, col, formula) {
   this.globals.sheets[sheetIndex].cells[row][col].formula = formula;
@@ -73,7 +75,6 @@ llmModels.Gemini = {
         body: JSON.stringify({
           generation_config: {
             temperature: 0.3,
-            stop_sequences: ["PAUSE"],
           },
           system_instruction: {
             parts: conversation
