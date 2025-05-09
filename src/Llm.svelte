@@ -66,7 +66,7 @@
   let responsePromise = $state();
   let modelName = $state("Gemini");
   let template =
-    $state(`You modify a spreadsheet by executing Markdown JavaScript code blocks. You should always output JavaScript that will be executed, and you should always refer to the \\\`llmToolFunctions\\\` object within that code. You NEVER use the tool calling API or function calling API. You are a knowledgeable, technical expert.
+    $state(`You modify a spreadsheet by executing Markdown JavaScript code blocks. You should always output JavaScript that will be executed, and you should always refer to the \`llmToolFunctions\` object within that code. You NEVER use the tool calling API or function calling API. You are a knowledgeable, technical expert.
     
 - First, you plan
   - Then you revise the plan to combine as many steps as possible
@@ -84,27 +84,27 @@
 You can run the following JavaScript functions in code blocks:
 - \${Object.entries(llmToolFunctions).map(([name, f]) => {
   const args = f.toString().replaceAll("\\n", " ").replaceAll(/  */g, " ").match(/\\([^)]*\\)/)?.[0] ?? "";
-  return \`llmToolFunctions.\${name}\${args} \${f.description ?? ""}\`;
+  return "llmToolFunctions." + name + args + " " + (f.description ?? "");
 }).join("\\n- ")}
 
 
-Spreadsheet formulas begin with an equals sign (\\\`=\\\`), and can contain:
-- Numbers like \\\`123\\\` and \\\`-3.21\\\`
-- Strings like \\\`"asdf"\\\` and \\\`"multi\\\\nline"\\\`
-- Singleton references in R1C1 notation like \\\`R10C3\\\` (zero-indexed) and \\\`RC0\\\` for absolute references, \\\`R[-1]c[2]\\\` for relative references, and \\\`RC\\\` for self-references
+Spreadsheet formulas begin with an equals sign (\`=\`), and can contain:
+- Numbers like \`123\` and \`-3.21\`
+- Strings like \`"asdf"\` and \`"multi\\\\nline"\`
+- Singleton references in R1C1 notation like \`R10C3\` (zero-indexed) and \`RC0\` for absolute references, \`R[-1]c[2]\` for relative references, and \`RC\` for self-references
   - CRITICAL: Row and column indices are zero-indexed, so R0C0 is the top, left cell
-  - Negative absolute references start from the end of a row or column, like \\\`R-1C-1\\\` to select the cell in the bottom right corner of the sheet, and \\\`R1C0:R1C-1\\\` to select all of row 1
-- Ranges like \\\`R[-3]C:R[-1]C\\\`
-- References and ranges across sheets like \\\`S1!R1C1\\\` and \\\`S[1]!R2C2:R2C-1\\\` and \\\`S-1R2C3\\\` (the exclamation point is optional)
+  - Negative absolute references start from the end of a row or column, like \`R-1C-1\` to select the cell in the bottom right corner of the sheet, and \`R1C0:R1C-1\` to select all of row 1
+- Ranges like \`R[-3]C:R[-1]C\`
+- References and ranges across sheets like \`S1!R1C1\` and \`S[1]!R2C2:R2C-1\` and \`S-1R2C3\` (the exclamation point is optional)
   - Sheet indices are zero-indexed
-- Function calls (case insensitive) containing expressions as arguments like \\\`sum(RC0:RC[-1])\\\`, \\\`sLiDeR(0, 10, 1)\\\`, and \\\`DOLLARS(PRODUCT(1 * 2 + 3, 4, 3, R[-1]C))\\\`
-- Optionally parenthesized binary operations combining any of the expressions above using standard JavaScript arithmetic operations like \\\`(RC[-2] + RC[-3]) * 100\\\` and \\\`1 + -2 + 3 ** 5\\\`
+- Function calls (case insensitive) containing expressions as arguments like \`sum(RC0:RC[-1])\`, \`sLiDeR(0, 10, 1)\`, and \`DOLLARS(PRODUCT(1 * 2 + 3, 4, 3, R[-1]C))\`
+- Optionally parenthesized binary operations combining any of the expressions above using standard JavaScript arithmetic operations like \`(RC[-2] + RC[-3]) * 100\` and \`1 + -2 + 3 ** 5\`
 
-Formula function definitions have access to a \\\`this\\\` object with:
+Formula function definitions have access to a \`this\` object with:
 - this.row and this.col - readonly
 - this.set(value)
 - this.element - writable with the HTML DOMElement that will be displayed in the cell (e.g., buttons, checkboxes, canvas, SVG, etc.)
-- this.style - writable with the CSS style string for the containing \\\`<td>\\\`
+- this.style - writable with the CSS style string for the containing \`<td>\`
 
 You add any formula functions you use if they do not already exist.
 
@@ -124,7 +124,7 @@ Plan:
 
 Thought: I should learn more about the current sheets using a query.
 
-\\\`\\\`\\\`javascript
+\`\`\`javascript
 // Query the current sheets
 const sheets = llmToolFunctions.getSheets();
 llmToolFunctions.query("Sheets", sheets);
@@ -136,7 +136,7 @@ sheets.forEach((sheet, sheetIndex) => {
   )
 });
 llmToolFunctions.query("First rows", firstRows);
-\\\`\\\`\\\`
+\`\`\`
 
 User:
 Sheets: [{"name": "Sheet 1", "rows": 10, "cols": 3}, {"name": "Receipt", "rows": 6, "cols": 2}]
@@ -146,12 +146,12 @@ Model:
 Thought: I should find the cells that might contain seafood. I now know that I can identify them by the "Item" column.
 Thought: I can also query the formulas at the same time to check and see if there is already a formula to make items red.
 
-\\\`\\\`\\\`javascript
+\`\`\`javascript
 llmToolFunctions.query("Items", new Array(6).fill().map(
   (_, i) => llmToolFunctions.getCell(1, i, 0).formula
 ));
 llmToolFunctions.query("Formulas", llmToolFunctions.getFormulaFunctionsList());
-\\\`\\\`\\\`
+\`\`\`
 
 User:
 Items: ["=BOLD(\\\\"Items\\\\")", "shrimp", "chicken", "vegetables", "scallops", "cups"]
@@ -160,16 +160,16 @@ Formulas: [ "abs", "acos", ..., "average", "rand", "slider", "bold", "center", "
 Model:
 Thought: Since there is no formula to make items red, I should add one. And I can make the seafood item cells red to complete my task.
 
-\\\`\\\`\\\`javascript
-llmToolFunctions.addFunction(\\\`
+\`\`\`javascript
+llmToolFunctions.addFunction(\`
 functions.red = function (s) {
   this.style += "color: red;"
   return s;
 }
-\\\`);
-llmToolFunctions.setCellFormula(1, 1, 0, \\\`=RED(\\\${llmToolFunctions.getCell(1, 1, 0).formula})\\\`)
-llmToolFunctions.setCellFormula(1, 4, 0, \\\`=RED(\\\${llmToolFunctions.getCell(1, 4, 0).formula})\\\`)
-\\\`\\\`\\\`
+\`);
+llmToolFunctions.setCellFormula(1, 1, 0, \`=RED(\\\${llmToolFunctions.getCell(1, 1, 0).formula})\`)
+llmToolFunctions.setCellFormula(1, 4, 0, \`=RED(\\\${llmToolFunctions.getCell(1, 4, 0).formula})\`)
+\`\`\`
 `);
 
   let conversation = $state([
@@ -180,7 +180,7 @@ llmToolFunctions.setCellFormula(1, 4, 0, \\\`=RED(\\\${llmToolFunctions.getCell(
   // Need to call eval in a separate function from derived.by to ensure globals
   // and functions are in-scope
   function evaluate(t, { formulaFunctions, globals }) {
-    return eval(`\`${t}\``);
+    return eval(`\`${t.replaceAll("`", "\\`")}\``);
   }
 
   $effect(() => {
