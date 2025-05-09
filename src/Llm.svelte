@@ -66,7 +66,14 @@
   let responsePromise = $state();
   let modelName = $state("Gemini");
   let template =
-    $state(`You modify a spreadsheet by executing Markdown JavaScript code blocks. You should always output JavaScript that will be executed, and you should always refer to the \`llmToolFunctions\` object within that code. You NEVER use the tool calling API or function calling API. You are a knowledgeable, technical expert.
+    $state(`You modify a spreadsheet by executing Markdown JavaScript code blocks. You follow these rules exactly:
+- You NEVER use the tool calling API or function calling API
+- You always output JavaScript that will be executed
+- You always refer to the \`llmToolFunctions\` object within that code 
+- You always query for information (unless you are adding a new sheet)
+- You try to do as many queries as possible in each block
+- You always make row and column values start from 0
+- You try to use formatting functions (like \`BOLD\` and \`DOLLARS\`) whenever possible
     
 - First, you plan
   - Then you revise the plan to combine as many steps as possible
@@ -91,14 +98,17 @@ You can run the following JavaScript functions in code blocks:
 Spreadsheet formulas begin with an equals sign (\`=\`), and can contain:
 - Numbers like \`123\` and \`-3.21\`
 - Strings like \`"asdf"\` and \`"multi\\\\nline"\`
-- Singleton references in R1C1 notation like \`R10C3\` (zero-indexed) and \`RC0\` for absolute references, \`R[-1]c[2]\` for relative references, and \`RC\` for self-references
+- Singleton references in R1C1 notation 
   - CRITICAL: Row and column indices are zero-indexed, so R0C0 is the top, left cell
+  - Like \`R10C3\` (zero-indexed) and \`RC0\` for absolute references
+  - Like \`R[-1]c[2]\` for relative references
+  - Omit relative or absolute offsets like \`RC\` for self-references
   - Negative absolute references start from the end of a row or column, like \`R-1C-1\` to select the cell in the bottom right corner of the sheet, and \`R1C0:R1C-1\` to select all of row 1
 - Ranges like \`R[-3]C:R[-1]C\`
 - References and ranges across sheets like \`S1!R1C1\` and \`S[1]!R2C2:R2C-1\` and \`S-1R2C3\` (the exclamation point is optional)
   - Sheet indices are zero-indexed
 - Function calls (case insensitive) containing expressions as arguments like \`sum(RC0:RC[-1])\`, \`sLiDeR(0, 10, 1)\`, and \`DOLLARS(PRODUCT(1 * 2 + 3, 4, 3, R[-1]C))\`
-- Optionally parenthesized binary operations combining any of the expressions above using standard JavaScript arithmetic operations like \`(RC[-2] + RC[-3]) * 100\` and \`1 + -2 + 3 ** 5\`
+- Optionally parenthesized binary operations combining any of the expressions above using standard JavaScript infix operations like \`(RC[-2] + RC[-3]) * 100\` and \`1 + -2 + 3 ** 5\`
 
 Formula function definitions have access to a \`this\` object with:
 - this.row and this.col - readonly
@@ -132,7 +142,7 @@ llmToolFunctions.query("Sheets", sheets);
 let firstRows = {};
 sheets.forEach((sheet, sheetIndex) => {
   firstRows[sheet.name] = new Array(sheet.cols).fill().map(
-    (_, i) => llmToolFunctions.getCell(sheetIndex, 0, i).formula
+    (_, i) => llmToolFunctions.getCell(sheetIndex, 0, i)
   )
 });
 llmToolFunctions.query("First rows", firstRows);
@@ -140,7 +150,7 @@ llmToolFunctions.query("First rows", firstRows);
 
 User:
 Sheets: [{"name": "Sheet 1", "rows": 10, "cols": 3}, {"name": "Receipt", "rows": 6, "cols": 2}]
-First rows: {"Sheet 1": [null, null, null], "Receipt": ["=BOLD(\\\\"Item\\\\")", "=BOLD(\\\\"Cost\\\\")"]}
+First rows: {"Sheet 1": [{}, {}, {}], "Receipt": [{"formula": "=BOLD(\\\\"Item\\\\")", "value": "Item"}, {"formula": "=BOLD(\\\\"Cost\\\\")", "value": "Cost"}]}
 
 Model:
 Thought: I should find the cells that might contain seafood. I now know that I can identify them by the "Item" column.
@@ -148,13 +158,13 @@ Thought: I can also query the formulas at the same time to check and see if ther
 
 \`\`\`javascript
 llmToolFunctions.query("Items", new Array(6).fill().map(
-  (_, i) => llmToolFunctions.getCell(1, i, 0).formula
+  (_, i) => llmToolFunctions.getCell(1, i, 0)
 ));
 llmToolFunctions.query("Formulas", llmToolFunctions.getFormulaFunctionsList());
 \`\`\`
 
 User:
-Items: ["=BOLD(\\\\"Items\\\\")", "shrimp", "chicken", "vegetables", "scallops", "cups"]
+Items: [{"formula": "=BOLD(\\\\"Items\\\\")", "value": "Items"}, {"formula": "shrimp", "value": "shrimp"}, {"formula": "chicken", "value": "chicken"}, ... ]
 Formulas: [ "abs", "acos", ..., "average", "rand", "slider", "bold", "center", "dollars", "sparkbars", "checkbox" ]
 
 Model:
@@ -243,6 +253,7 @@ llmToolFunctions.setCellFormula(1, 4, 0, \`=RED(\\\${llmToolFunctions.getCell(1,
       userResponse.text += `${name}: ${JSON.stringify(value)}`;
     };
 
+    // TODO: Display the error
     eval(
       llmCode +
         // Allows user code to show up in the devtools debugger as "llm-code.js"
@@ -253,6 +264,10 @@ llmToolFunctions.setCellFormula(1, 4, 0, \`=RED(\\\${llmToolFunctions.getCell(1,
 
   function scrollIntoView(e) {
     e.scrollIntoView();
+  }
+
+  function oninput(slice) {
+    return;
   }
 </script>
 
@@ -307,6 +322,15 @@ llmToolFunctions.setCellFormula(1, 4, 0, \`=RED(\\\${llmToolFunctions.getCell(1,
       <Details open>
         {#snippet summary()}User{/snippet}
         <textarea
+          onkeydown={(e) => {
+            if (
+              e.key.toLocaleLowerCase() == "enter" &&
+              (e.ctrlKey || e.metaKey)
+            ) {
+              e.target.blur();
+              submit(conversation.slice(0, i + 1));
+            }
+          }}
           placeholder={i == 1
             ? "Make a comprehensive budget spreadsheet for a 25 year old living in Manhattan and making $75k per year"
             : ""}

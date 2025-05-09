@@ -20,7 +20,6 @@
   - Separate logging system with tracebacks for formula errors
   - Toolbar with buttons (editable)
   - Click cell while editing formula to insert it
-  - Add conveniences for LLMs
   - Event hooks
   - Zoom out extra on mobile, but only cells and code, not UI elements
   - Frozen rows and columns
@@ -165,3 +164,4 @@
     vertical scrolling
   - Accidentally typing "RC" while typing another formula can cause everything
     to hang
+  - Formula functions declared with any caps will not be accessible

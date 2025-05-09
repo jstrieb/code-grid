@@ -27,10 +27,17 @@ llmToolFunctions.addFunction.description =
 
 llmToolFunctions.getCell = function (sheetIndex, row, col) {
   const cell = this.globals.sheets[sheetIndex]?.cells[row]?.[col];
-  return {
-    value: cell?.get(),
-    formula: cell?.formula ?? "",
+  const result = {
+    formula: cell?.formula,
   };
+  const value = cell?.get();
+  if (value != result.formula) {
+    result.value = value;
+  }
+  if (cell.errorText) {
+    result.error = cell.errorText;
+  }
+  return result;
 };
 llmToolFunctions.getCell.description =
   "returns a cell object with a value and formula fields";
@@ -74,7 +81,7 @@ llmModels.Gemini = {
         },
         body: JSON.stringify({
           generation_config: {
-            temperature: 0.3,
+            temperature: 0.5,
           },
           system_instruction: {
             parts: conversation
