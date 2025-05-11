@@ -178,6 +178,7 @@ test("Complex logical expressions in formulas", async () => {
       "=~0 >>> 0 << 12",
       "=!(~0 >>> 0 & 0x1 | 0xff) || false",
       "=if(5 < 3 || 2 > 1 && 1 == 1 || 2 != 1 && 3 <= 0x5, 2 >= 1, 10)",
+      "=if(5 < 3 || 2 > 1 && 1 = 1 || 2 <> 1 && 3 <= 0x5, 2 >= 1, 10)",
     ],
   ]);
   await expectSheet(state.currentSheet, [
@@ -186,6 +187,7 @@ test("Complex logical expressions in formulas", async () => {
       ((!0 && !false && !!true) || !!"true") && "",
       (~0 >>> 0) << 12,
       !(((~0 >>> 0) & 0x1) | 0xff) || false,
+      5 < 3 || (2 > 1 && 1 == 1) || (2 != 1 && 3 <= 0x5) ? 2 >= 1 : 10,
       5 < 3 || (2 > 1 && 1 == 1) || (2 != 1 && 3 <= 0x5) ? 2 >= 1 : 10,
     ],
   ]);

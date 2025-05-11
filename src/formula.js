@@ -90,6 +90,8 @@ class BinaryOperation extends Expression {
     "<": (x, y) => x < y,
     "&&": (x, y) => x && y,
     "||": (x, y) => x || y,
+    "<>": (x, y) => x !== y,
+    "=": (x, y) => x === y,
 
     // Bitwise
     "&": (x, y) => (x >>> 0) & (y >>> 0),
@@ -458,6 +460,8 @@ const relational = leftAssociativeBinOp(shift, BinaryOperation, [
 const equality = leftAssociativeBinOp(relational, BinaryOperation, [
   "==",
   "!=",
+  "=",
+  "<>",
 ]);
 
 const bitwiseAnd = leftAssociativeBinOp(equality, BinaryOperation, ["&"]);

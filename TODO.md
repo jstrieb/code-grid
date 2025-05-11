@@ -84,7 +84,6 @@
   - Namespaced formula functions
   - Make parsing faster
     - Hand-written recursive descent
-  - Add <> as alternative for !=
 - Local storage
   - Save sheets
   - Load sheets
