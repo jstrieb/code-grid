@@ -30,6 +30,8 @@ export const keybindings = {
   d: "Delete (Vim)",
   "Ctrl+c": "Copy",
   "Meta+c": "Copy",
+  "Ctrl+x": "Cut",
+  "Meta+x": "Cut",
   "Ctrl+v": "Paste",
   "Ctrl+Shift+v": "Paste values",
   "Meta+v": "Paste",
@@ -171,6 +173,14 @@ function setPasteBufferFromClipboard(globals, clipboard) {
 }
 
 export const actions = {
+  Cut: async (e, globals) => {
+    const { type, start, end } = globals.selected;
+    actions.Copy(e, globals);
+    globals.setSelectionStart(type, start);
+    globals.setSelectionEnd(end);
+    actions.Delete(e, globals);
+  },
+
   Copy: async (e, globals) => {
     const cells = globals.getSelectedCells();
     if (cells == null) {

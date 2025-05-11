@@ -70,7 +70,7 @@ llmToolFunctions.query = function (value) {
 export const llmModels = $state({});
 
 llmModels.Gemini = {
-  model: "gemini-2.5-flash-preview-04-17",
+  model: "gemini-2.5-pro-exp-03-25",
   async request(conversation) {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`,

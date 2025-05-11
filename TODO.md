@@ -43,7 +43,6 @@
     - Ollama
   - Tool function exception handling
 - Clipboard integration
-  - Cut
   - Fix "put" behavior to copy formulas around to selection
 - Settings window
   - Change colors
