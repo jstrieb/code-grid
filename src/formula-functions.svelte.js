@@ -42,6 +42,10 @@ export function evalCode(code, ret = () => {}) {
         // Allows user code to show up in the devtools debugger as "user-code.js"
         "\n//# sourceURL=user-code.js",
     );
+    // Canonicalize function names, since only lowercased version is used
+    Object.entries(functions).forEach(([name, f]) => {
+      functions[name.toLocaleLowerCase()] = f;
+    });
     return ret();
   } catch (e) {
     return ret(e);

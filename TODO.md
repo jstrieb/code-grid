@@ -162,4 +162,3 @@
     vertical scrolling
   - Accidentally typing "RC" while typing another formula can cause everything
     to hang
-  - Formula functions declared with any caps will not be accessible

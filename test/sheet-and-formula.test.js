@@ -668,3 +668,14 @@ test("Negation as a unary operation", async () => {
     [Math.pow(3, -2), Math.pow(3, -2), -2, 3 + 4 + 5],
   ]);
 });
+
+test("Custom formula functions with caps in declaration", async () => {
+  evalCode(
+    `functions.FACTORIAL = (n) => n == 0 ? 1 : (n * functions.FACTORIAL(n - 1))`,
+  );
+  const state = createSheet([["6", "=factorial(RC0)"]]);
+  await expectSheet(state.currentSheet, [[6, 720]]);
+  evalCode(`functions.With_underscores = (n) => n * 2`);
+  state.currentSheet.cells[0][1].formula = "=with_underscores(RC0)";
+  await expectSheet(state.currentSheet, [[6, 12]]);
+});
