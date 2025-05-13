@@ -41,6 +41,7 @@
     - ChatGPT
     - Huggingface
     - Ollama
+    - OpenRouter
   - Tool function exception handling
 - Clipboard integration
   - Fix "put" behavior to copy formulas around to selection
@@ -132,6 +133,7 @@
   - Playwright
   - Integrate Playwright coverage with vitest coverage
   - Test parsers and classes in formulas
+  - LLM tests
 - Push to versioned folders on Pages based on git tags
 - Documentation
   - README

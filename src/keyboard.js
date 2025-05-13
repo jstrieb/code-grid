@@ -32,9 +32,11 @@ export const keybindings = {
   "Meta+c": "Copy",
   "Ctrl+x": "Cut",
   "Meta+x": "Cut",
-  "Ctrl+v": "Paste",
   "Ctrl+Shift+v": "Paste values",
-  "Meta+v": "Paste",
+  // Disabled here because we handle paste event instead
+  // TODO: Handle these keybindings only if no paste event is fired
+  // "Ctrl+v": "Paste",
+  // "Meta+v": "Paste",
   "Meta+Shift+v": "Paste values",
   p: "Put After",
   "Shift+p": "Put Before",
@@ -81,14 +83,33 @@ export const keybindings = {
   // gT and gt
 };
 
-async function getClipboard() {
-  let clipboard = await navigator.clipboard.read();
+async function getClipboard(e) {
   const types = {};
-  for (const item of clipboard) {
-    for (const type of item.types) {
-      if (type in types || !type.startsWith("text/")) continue;
-      const blob = await item.getType(type);
-      types[type] = await blob.text();
+  const dataTransfer = e.dataTransfer ?? e.clipboardData;
+  if (dataTransfer != null) {
+    await Promise.all(
+      Array.from(dataTransfer.items).map(
+        (item) =>
+          new Promise((resolve) => {
+            if (item.kind != "string") return resolve();
+            item.getAsString((s) => {
+              if (item.type in types || !item.type.startsWith("text/")) {
+                return resolve();
+              }
+              types[item.type] = s;
+              resolve();
+            });
+          }),
+      ),
+    );
+  } else {
+    let clipboard = await navigator.clipboard.read();
+    for (const item of clipboard) {
+      for (const type of item.types) {
+        if (type in types || !type.startsWith("text/")) continue;
+        const blob = await item.getType(type);
+        types[type] = await blob.text();
+      }
     }
   }
   return types;
@@ -131,10 +152,12 @@ function setPasteBufferFromClipboard(globals, clipboard) {
     globals.pasteBuffer = new Register(
       type,
       Array.from(table.querySelectorAll("tr")).map((row) =>
-        Array.from(row.querySelectorAll("td")).map(
+        Array.from(row.querySelectorAll("td, th")).map(
           ({ dataset: { formula }, innerText: value }) => ({
-            formula: formula != "" ? formula : undefined,
-            get: () => (value != "" ? value : undefined),
+            formula:
+              formula || (value != "" && value != null ? value : undefined),
+            // Values can be zero, so we have to explicitly check falsy cases
+            get: () => (value != "" && value != null ? value : undefined),
           }),
         ),
       ),
@@ -242,13 +265,13 @@ export const actions = {
 
   Paste: async (e, globals) => {
     // TODO: Notify the user of paste error
-    setPasteBufferFromClipboard(globals, await getClipboard());
+    setPasteBufferFromClipboard(globals, await getClipboard(e));
     return actions["Put After"](e, globals);
   },
 
   "Paste values": async (e, globals) => {
     // TODO: Notify the user of paste error
-    setPasteBufferFromClipboard(globals, await getClipboard());
+    setPasteBufferFromClipboard(globals, await getClipboard(e));
     switch (globals.mode) {
       case "normal":
       case "visual":

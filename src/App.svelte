@@ -118,7 +118,7 @@
   import { compressText } from "./compress.js";
   import { evalDebounced, functions } from "./formula-functions.svelte.js";
   import { debounce, replaceValues } from "./helpers.js";
-  import { keyboardHandler, keybindings } from "./keyboard.js";
+  import { actions, keyboardHandler, keybindings } from "./keyboard.js";
 
   let { urlData } = $props();
   let globals = $state(
@@ -270,6 +270,9 @@
 {/snippet}
 
 <svelte:window
+  onpaste={(e) => actions.Paste(e, globals)}
+  ondragover={(e) => e.preventDefault(/* Necessary for drop handler to work */)}
+  ondrop={(e) => actions.Paste(e, globals)}
   onkeydown={(e) => keyboardHandler(e, globals)}
   onpopstate={(e) => {
     if (e.state == null) {
