@@ -32,6 +32,7 @@
   - Settings input with numeric input and buttons on either side
   - CSP to restrict `worker-src` (except that we don't want to block web
     workers, only service workers)
+  - Publish mode where cells cannot be edited and it's just an interactive app
 - LLM
   - Button to clear conversation
   - Button to export conversation

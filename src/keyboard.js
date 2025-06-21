@@ -32,11 +32,11 @@ export const keybindings = {
   "Meta+c": "Copy",
   "Ctrl+x": "Cut",
   "Meta+x": "Cut",
-  "Ctrl+Shift+v": "Paste values",
   // Disabled here because we handle paste event instead
   // TODO: Handle these keybindings only if no paste event is fired
   // "Ctrl+v": "Paste",
   // "Meta+v": "Paste",
+  "Ctrl+Shift+v": "Paste values",
   "Meta+Shift+v": "Paste values",
   p: "Put After",
   "Shift+p": "Put Before",
