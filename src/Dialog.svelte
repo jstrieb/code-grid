@@ -164,10 +164,10 @@
 <dialog
   bind:this={dialog}
   class:small-shadow={dragging}
-  style:top="{top}px"
-  style:left="{left}px"
-  style:--width="{width}px"
-  style:--height="{height}px"
+  style:top="max(0px, {top}px)"
+  style:left="max(0px, {left}px)"
+  style:--width="min(calc(100% - {left}px), {width}px)"
+  style:--height="min(calc(100% - {top}px), {height}px)"
 >
   <div class="top">
     <svg class="drag" onpointerdown={topPointerDown} onpointerup={topPointerUp}>
