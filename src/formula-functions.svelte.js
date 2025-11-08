@@ -106,7 +106,22 @@ functions.bold = function (s) {
 };
 
 functions.center = function (s) {
-  this.style += "text-align: center;";
+  const e = this.element;
+  this.element = Object.assign(document.createElement("div"), {
+    style: `
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+    `,
+  });
+  this.element.appendChild(e ?? document.createTextNode(s));
   return s;
 };
 
@@ -133,9 +148,16 @@ functions.checkbox = function (label) {
     value = !!previous;
     return !!previous;
   });
+  const e = this.element;
   this.element = Object.assign(document.createElement("label"), {
-    innerText: label,
-    style: "display: flex; align-items: center; gap: 1ch; margin: 0 0.5em;",
+    style: `
+      display: flex; 
+      justify-content: center;
+      align-items: center; 
+      gap: 1ch; 
+      margin: 0 0.5em;
+      width: 100%;
+    `,
   });
   this.element.appendChild(
     Object.assign(document.createElement("input"), {
@@ -145,5 +167,6 @@ functions.checkbox = function (label) {
       oninput: (e) => this.set(e.target.checked),
     }),
   );
+  this.element.appendChild(e ?? document.createTextNode(label));
   return value;
 };
