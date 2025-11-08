@@ -4,3 +4,5 @@ build
 .vscode
 .DS_Store
 coverage
+*.swp
+*.swo
