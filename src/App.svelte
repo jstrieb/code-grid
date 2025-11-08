@@ -50,7 +50,6 @@
     gap: 0.5ch;
     overflow-x: auto;
     background-color: var(--bg-color);
-    z-index: 19;
   }
 
   .bottombar {
@@ -117,7 +116,7 @@
   import { State, Sheet } from "./classes.svelte.js";
   import { compressText } from "./compress.js";
   import { evalDebounced, functions } from "./formula-functions.svelte.js";
-  import { debounce, replaceValues } from "./helpers.js";
+  import { debounce, replaceValues, nextZIndex } from "./helpers.js";
   import { actions, keyboardHandler, keybindings } from "./keyboard.js";
 
   let { urlData } = $props();
@@ -292,6 +291,7 @@
   bind:innerHeight
 />
 
+<!-- TODO: Better heuristic that doesn't trigger on touchscreen laptops -->
 {#if navigator.maxTouchPoints <= 1}
   <!-- Else float the bar above the virtual keyboard -->
   <div>
@@ -442,7 +442,7 @@
   <div class="keyboardbar" style:top="calc({visualBottom}px - 2.5em * 2)">
     <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
     {#if showInputButtons}
-      <div class="buttonbar">
+      <div class="buttonbar" style:z-index={nextZIndex()}>
         {@render insertTextButton("=")}
         {@render insertTextButton("(")}
         {@render insertTextButton(")")}
@@ -471,6 +471,7 @@
       <div
         class="startmenu"
         bind:offsetHeight={startHeight}
+        style:z-index={nextZIndex()}
         style:--height="{startHeight}px"
       >
         {@render builder([

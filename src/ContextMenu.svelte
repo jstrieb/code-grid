@@ -37,7 +37,6 @@
 <style>
   .menu {
     position: absolute;
-    z-index: 20;
     background: none;
     /* TODO: Keep? Adjust? */
     width: 300px;
@@ -47,7 +46,7 @@
 
 <script>
   import ShyMenu from "./ShyMenu.svelte";
-
+  import { nextZIndex } from "./helpers.js";
   import { tick } from "svelte";
 
   const {
@@ -93,6 +92,7 @@
       class="menu"
       style:left="{menuX}px"
       style:top="{menuY}px"
+      style:z-index={nextZIndex()}
       bind:offsetWidth={menuWidth}
       bind:offsetHeight={menuHeight}
     >

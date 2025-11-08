@@ -74,3 +74,10 @@ export function replaceValues(k, v) {
   // TODO: Do other things to make the data URL smaller
   return v;
 }
+
+let nextIndex = 10;
+export function nextZIndex(increment = 1) {
+  const result = nextIndex;
+  nextIndex += increment;
+  return result;
+}

@@ -85,7 +85,7 @@
 
 <script>
   import Button from "./Button.svelte";
-  import { randomId } from "./helpers.js";
+  import { randomId, nextZIndex } from "./helpers.js";
 
   const minDimension = Math.min(window.innerWidth, window.innerHeight);
 
@@ -101,6 +101,13 @@
   let dialog = $state();
   let pointerStart = $state();
   let dragging = $state(false);
+
+  let zindex = $state(nextZIndex());
+  $effect(() => {
+    if (open) {
+      zindex = nextZIndex();
+    }
+  });
 
   // If the dots pattern is redeclared (when there are multiple <Dialog>
   // components, for example), and the first one is inside of a `display:
@@ -168,6 +175,8 @@
   style:left="max(0px, {left}px)"
   style:--width="min(calc(100% - {left}px), {width}px)"
   style:--height="min(calc(100% - {top}px), {height}px)"
+  style:z-index={zindex}
+  onpointerdown={() => (zindex = nextZIndex())}
 >
   <div class="top">
     <svg class="drag" onpointerdown={topPointerDown} onpointerup={topPointerUp}>
