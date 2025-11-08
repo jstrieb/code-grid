@@ -1,23 +1,23 @@
-.PHONY: lint dev build test watch-test pre-commit-check install-pre-commit
+.PHONY: build dev lint test watch-test pre-commit-check install-pre-commit
 
-build: dep-npm dep-node-modules
+build: node_modules
 	npx vite build
 
-dev: dep-npm dep-node-modules install-pre-commit
+dev: node_modules install-pre-commit
 	npx vite --host 0
 
-lint: dep-npm dep-node-modules
+lint: node_modules
 	npx prettier --write .
 
-test: dep-npm dep-node-modules
+test: node_modules
 	npx vitest run --coverage
 
-watch-test: dep-npm dep-node-modules
+watch-test: node_modules
 	npx vitest --coverage
 
 pre-commit-check: pre-commit-lint test
 
-pre-commit-lint: dep-npm dep-node-modules
+pre-commit-lint: node_modules
 	@npx prettier --check $$( \
 		git diff --name-only --cached \
 	) || ( \
@@ -36,16 +36,16 @@ install-pre-commit: .git/hooks/pre-commit
 	chmod +x '$@'
 
 
-.PHONY: dep-npm dep-node-modules
+.PHONY: dep-npm
+deps: dep-npm node_modules
 
 dep-npm:
-	@npm -h 2>&1 | grep 'npm@' > /dev/null 2>&1 || ( \
+	@npm --version >/dev/null 2>&1 || ( \
 		printf '%s\n' \
 			'NPM required!' \
 			'https://nodejs.org/en/download/package-manager' ; \
 		exit 1 ; \
 	)
 
-dep-node-modules: package.json package-lock.json dep-npm
-	@test -d node_modules > /dev/null 2>&1 \
-		|| npm install
+node_modules: package.json package-lock.json | dep-npm
+	npm ci
