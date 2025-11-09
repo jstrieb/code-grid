@@ -42,8 +42,8 @@
 
   button {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: -0.25em;
+    bottom: -0.25em;
     left: -5px;
     width: 10px;
     border: 0;
@@ -60,12 +60,48 @@
     border-left: 1px dashed var(--fg-color);
   }
 
+  button div::before {
+    content: "";
+    width: 1em;
+    height: 5px;
+    border-top: 1px dashed var(--fg-color);
+    position: absolute;
+    top: 0;
+    cursor: pointer;
+  }
+
+  button div::after {
+    content: "";
+    width: 1em;
+    height: 5px;
+    border-bottom: 1px dashed var(--fg-color);
+    position: absolute;
+    bottom: 0;
+    cursor: pointer;
+  }
+
   button:hover div {
     border-left: 2px solid var(--fg-color);
   }
 
+  button:hover div::before {
+    border-top: 2px solid var(--fg-color);
+  }
+
+  button:hover div::after {
+    border-bottom: 2px solid var(--fg-color);
+  }
+
   button:active div {
     border-left: 3px solid var(--fg-color);
+  }
+
+  button:active div::before {
+    border-top: 3px solid var(--fg-color);
+  }
+
+  button:active div::after {
+    border-bottom: 3px solid var(--fg-color);
   }
 </style>
 
