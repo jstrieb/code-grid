@@ -53,6 +53,7 @@ functions.crypto = async (ticker) => {
   settings = $state({
     mobileZoom: 100,
   });
+  forceSave = $state(0);
 
   static load(data) {
     let result = new State(
@@ -514,7 +515,21 @@ export class Sheet {
           );
           cell.value.rederive(
             flattenArgs(computed),
-            (dependencyValues, set, update) => {
+            (dependencyValues, _set, _update) => {
+              const set = (...args) => {
+                try {
+                  return _set(...args);
+                } finally {
+                  this.globals.forceSave++;
+                }
+              };
+              const update = (...args) => {
+                try {
+                  return _update(...args);
+                } finally {
+                  this.globals.forceSave++;
+                }
+              };
               let _this = {
                 set,
                 update,

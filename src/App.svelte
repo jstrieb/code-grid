@@ -176,6 +176,9 @@
     }
   }, 1000);
   $effect(() => {
+    // Allow cell changes with get or update to trigger save. Those updates
+    // change forceSave
+    globals.forceSave;
     save({
       sheets: [
         // Spreads necessary for reactivity
