@@ -215,8 +215,10 @@
       square
       shadow="2px"
       style="height: 1.5em"
-      onclick={() => (open = false)}>X</Button
+      onclick={() => (open = false)}
     >
+      &times;
+    </Button>
   </div>
   <div class="main" {...rest}>
     {@render children()}
