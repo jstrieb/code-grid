@@ -272,7 +272,17 @@
 {/snippet}
 
 <svelte:window
-  onpaste={(e) => actions.Paste(e, globals)}
+  onpaste={(e) => {
+    // Don't handle keypresses from within text or other editable inputs
+    if (
+      globals.mode == "insert" ||
+      ["input", "textarea"].includes(e.target?.tagName.toLocaleLowerCase()) ||
+      e.target.isContentEditable
+    ) {
+      return;
+    }
+    actions.Paste(e, globals);
+  }}
   ondragover={(e) => e.preventDefault(/* Necessary for drop handler to work */)}
   ondrop={(e) => actions.Paste(e, globals)}
   onkeydown={(e) => keyboardHandler(e, globals)}
