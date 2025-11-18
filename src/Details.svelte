@@ -106,11 +106,11 @@
 </style>
 
 <script>
-  let { summary, children, style, ...rest } = $props();
+  let { summary, children, style, open = $bindable(), ...rest } = $props();
   let details;
 </script>
 
-<details bind:this={details} {...rest}>
+<details bind:this={details} bind:open {...rest}>
   <summary>
     {#if summary}
       {@render summary()}
