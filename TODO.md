@@ -28,7 +28,6 @@
   - Highlight referenced cells when in insert mode
   - Cells can run functions in a destructor
   - Context menu as last child of body, gets moved by right click
-  - Render tables to images to save and share screenshots
   - Settings input with numeric input and buttons on either side
   - CSP to restrict `worker-src` (except that we don't want to block web
     workers, only service workers)
@@ -165,3 +164,4 @@
     vertical scrolling
   - Accidentally typing "RC" while typing another formula can cause everything
     to hang
+  - Tons of issues with screenshot rendering

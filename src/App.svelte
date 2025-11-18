@@ -116,7 +116,12 @@
   import { State, Sheet } from "./classes.svelte.js";
   import { compressText } from "./compress.js";
   import { evalDebounced, functions } from "./formula-functions.svelte.js";
-  import { debounce, replaceValues, nextZIndex } from "./helpers.js";
+  import {
+    debounce,
+    replaceValues,
+    nextZIndex,
+    domToImage,
+  } from "./helpers.js";
   import { actions, keyboardHandler, keybindings } from "./keyboard.js";
 
   let { urlData } = $props();
@@ -127,6 +132,8 @@
   let startHeight = $state(0);
   let scrollArea = $state();
   let imageData = $state();
+  let tableImage = $state();
+  let showScreenshot = $state(false);
 
   // svelte-ignore state_referenced_locally
   if (!urlData) {
@@ -174,6 +181,9 @@
       // HTMLElements)
       window.history.pushState(undefined, "", "#" + compressed);
     }
+    if (showScreenshot) {
+      tableImage = domToImage(table);
+    }
   }, 1000);
   $effect(() => {
     // Allow cell changes with get or update to trigger save. Those updates
@@ -199,6 +209,12 @@
       ],
       formulaCode: globals.formulaCode,
     });
+  });
+  $effect(() => {
+    globals.currentSheetIndex;
+    if (showScreenshot) {
+      tableImage = domToImage(table);
+    }
   });
 
   Object.entries(window.localStorage)
@@ -351,6 +367,23 @@
   <div
     style="display: flex; flex-direction: column; gap: 0.5em; padding: 0.5em;"
   >
+    <Details bind:open={showScreenshot}>
+      {#snippet summary()}Screenshot{/snippet}
+      <p>
+        This feature is likely to not work correctly for some sheet cells and
+        some browsers.
+      </p>
+      {#await tableImage}
+        <p>Loading...</p>
+      {:then src}
+        <img
+          style="display: block; width: 100%; min-width: 0px; min-height: 0px; object-fit: contain;"
+          {src}
+        />
+      {:catch err}
+        <p>Error {err}</p>
+      {/await}
+    </Details>
     <SaveLoad bind:globals {imageData} />
   </div>
 </Dialog>

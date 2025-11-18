@@ -81,3 +81,90 @@ export function nextZIndex(increment = 1) {
   nextIndex += increment;
   return result;
 }
+
+const elementProperties = Object.getOwnPropertyNames(HTMLElement.prototype);
+const objectProperties = Object.getOwnPropertyNames(Object.prototype);
+function cloneNode(node) {
+  const result = node.cloneNode(false);
+  let style;
+  try {
+    style = window.getComputedStyle(node);
+  } catch {
+    return result;
+  }
+  for (const s of style) {
+    result.style[s] = style.getPropertyValue(s);
+  }
+  for (const prop of Object.getOwnPropertyNames(node.__proto__)) {
+    if (typeof node[prop] == "function") continue;
+    if (objectProperties.includes(prop)) continue;
+    if (elementProperties.includes(prop)) continue;
+    const attribute = node[prop];
+    if (attribute == null || attribute == "") continue;
+    result.setAttribute(prop, attribute);
+  }
+  for (const child of node.childNodes) {
+    result.appendChild(cloneNode(child));
+  }
+  return result;
+}
+
+export async function domToImage(node) {
+  if (node == null) return undefined;
+
+  const { width, height } = node.getBoundingClientRect();
+  const padding = 10;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", width + padding * 2);
+  svg.setAttribute("height", width + padding * 2);
+  Array.from(
+    document.querySelectorAll("link[rel='stylesheet'], style"),
+  ).forEach((tag) => {
+    svg.append(cloneNode(tag));
+  });
+  const foreignObject = Object.assign(
+    document.createElementNS("http://www.w3.org/2000/svg", "foreignObject"),
+    { style: "width: 100%; height: 100%;" },
+  );
+  const root = Object.assign(
+    document.createElementNS("http://www.w3.org/1999/xhtml", "div"),
+    { style: `width: 100%; height: 100%; padding: ${(padding * 3) / 4}px;` },
+  );
+  root.appendChild(cloneNode(node));
+  foreignObject.append(root);
+  svg.appendChild(foreignObject);
+
+  const serializer = new XMLSerializer();
+  const blob = new Blob([serializer.serializeToString(svg)], {
+    type: "image/svg+xml",
+  });
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", (e) => {
+      resolve(e.target.result);
+    });
+    reader.addEventListener("error", (e) => {
+      reject(e);
+    });
+    reader.readAsDataURL(blob);
+  });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width + padding * 2;
+  canvas.height = height + padding * 2;
+  const context = canvas.getContext("2d");
+  context.fillStyle = "white";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => {
+      context.drawImage(image, 0, 0);
+      resolve();
+    });
+    image.addEventListener("error", (e) => {
+      reject(e);
+    });
+    image.src = dataUrl;
+  });
+  return canvas.toDataURL("image/png");
+}
