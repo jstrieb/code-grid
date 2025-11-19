@@ -134,6 +134,15 @@ functions.dollars = undefinedArgsToIdentity(function (d) {
   return d;
 });
 
+const percentFormat = new Intl.NumberFormat("en-US", {
+  style: "percent",
+  maximumFractionDigits: 4,
+});
+functions.percent = function (p) {
+  this.element = document.createTextNode(percentFormat.format(p));
+  return p;
+};
+
 functions.sparkbars = (...args) => {
   const lines = "▁▂▃▄▅▆▇█";
   const min = Math.min(...args),

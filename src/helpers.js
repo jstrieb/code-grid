@@ -17,7 +17,7 @@ export function debounce(f, delay, max = undefined) {
 }
 
 export function sum(l) {
-  return l.reduce((x, accum) => x + accum, 0);
+  return l.reduce((accum, x) => accum + x, 0);
 }
 
 // Wrap a function such that its args are automatically converted to additive
