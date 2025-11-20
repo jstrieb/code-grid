@@ -1,7 +1,7 @@
 <script>
   import Menu from "./Menu.svelte";
 
-  import { keyEventToString } from "./keyboard.js";
+  import { keyEventToString } from "../keyboard.js";
 
   const { menu, clickable, children, ...rest } = $props();
 

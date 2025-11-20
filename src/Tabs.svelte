@@ -84,7 +84,7 @@
 </style>
 
 <script>
-  import ContextMenu from "./ContextMenu.svelte";
+  import ContextMenu from "./components/ContextMenu.svelte";
 
   let { globals = $bindable(), value = $bindable() } = $props();
   let tabs = $derived(globals.sheets.map((s) => s.name));

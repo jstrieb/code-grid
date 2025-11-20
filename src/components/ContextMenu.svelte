@@ -46,7 +46,7 @@
 
 <script>
   import ShyMenu from "./ShyMenu.svelte";
-  import { nextZIndex } from "./helpers.js";
+  import { nextZIndex } from "../lib/helpers.js";
   import { tick } from "svelte";
 
   const {

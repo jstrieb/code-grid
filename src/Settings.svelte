@@ -7,8 +7,8 @@
 </style>
 
 <script>
-  import Button from "./Button.svelte";
-  import NumericInput from "./NumericInput.svelte";
+  import Button from "./components/Button.svelte";
+  import NumericInput from "./components/NumericInput.svelte";
 
   let { globals = $bindable() } = $props();
 

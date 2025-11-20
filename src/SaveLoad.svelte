@@ -47,11 +47,12 @@
 </style>
 
 <script>
-  import Button from "./Button.svelte";
-  import FileBrowser from "./FileBrowser.svelte";
+  import Button from "./components/Button.svelte";
+  import FileBrowser from "./components/FileBrowser.svelte";
 
   import { State } from "./classes.svelte";
-  import { compressText, decompressText } from "./compress.js";
+
+  import { compressText, decompressText } from "./lib/compress.js";
 
   let { imageData, globals = $bindable() } = $props();
 

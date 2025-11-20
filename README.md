@@ -327,22 +327,27 @@ the application from the highest to lowest level.
   throughout the application
   - `Sheet.newCell` is responsible for reactively rederiving the store that
     computes a cell's value; it is run whenever the cell's value changes
-- [`src/store.js`](src/store.js) – implementation of "rederivable" stores that
-  can change their derived dependencies without invalidating their object
-  reference
+- [`src/lib/store.js`](src/lib/store.js) – implementation of "rederivable"
+  stores that can change their derived dependencies without invalidating their
+  object reference
   - Every cell's value is a rederivable store that is rederived when its formula
     changes, and updated whenever any of its dependencies' values changes
 - [`src/formula.js`](src/formula.js) – formula parsing logic
-- [`src/parsers.js`](src/parsers.js) – parser combinator library used for formula parsing
-- [`src/keyboard.js`](src/keyboard.js) – mapping of keyboard shortcuts to handlers
-- [`src/*.svelte`](src/) – UI components
+- [`src/parsers.js`](src/lib/parsers.js) – parser combinator library used for
+  formula parsing
+- [`src/keyboard.js`](src/keyboard.js) – mapping of keyboard shortcuts to
+  handlers
+- [`src/*.svelte`](src/) – UI "views" consisting of the composition of
+  components with logic
+- [`src/components/*.svelte`](src/components/) – atomic UI components
 - [`src/formula-functions.js`](src/formula-functions.js) – "standard library"
   formula functions available in every spreadsheet
   - Includes functionality to `eval` user code and add functions to the formula
     function object
 - [`src/global.css`](src/global.css) and [`public/*`](public/) – global
   stylesheet, favicons, etc.
-- [`src/compress.js`](src/compress.js) – compress and decompress text using PNGs
+- [`src/lib/compress.js`](src/lib/compress.js) – compress and decompress text
+  using PNGs
 - [`test/*`](test/) – test suite and related functions
 
 ## Cool Code Highlights

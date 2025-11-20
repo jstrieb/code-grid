@@ -170,9 +170,10 @@
 </style>
 
 <script>
-  import Button from "./Button.svelte";
   import Cell from "./Cell.svelte";
-  import NumericInput from "./NumericInput.svelte";
+
+  import Button from "./components/Button.svelte";
+  import NumericInput from "./components/NumericInput.svelte";
 
   let { globals = $bindable(), table = $bindable() } = $props();
   let selected = $derived(globals.selected);

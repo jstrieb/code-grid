@@ -53,10 +53,10 @@
 </style>
 
 <script>
-  import Button from "./Button.svelte";
-  import CodeEditor from "./CodeEditor.svelte";
-  import Details from "./Details.svelte";
-  import Select from "./Select.svelte";
+  import Button from "./components/Button.svelte";
+  import CodeEditor from "./components/CodeEditor.svelte";
+  import Details from "./components/Details.svelte";
+  import Select from "./components/Select.svelte";
 
   // May appear unused, but actually used during evals
   import { llmToolFunctions, llmModels } from "./llm.svelte.js";

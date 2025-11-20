@@ -3,7 +3,7 @@ import {
   sum as arraySum,
   reshape,
   undefinedArgsToIdentity,
-} from "./helpers.js";
+} from "./lib/helpers.js";
 import {
   str,
   regex,
@@ -15,7 +15,7 @@ import {
   whitespace,
   EOF,
   anyChar,
-} from "./parsers.js";
+} from "./lib/parsers.js";
 
 class Expression {
   // Return a concrete value from an expression given the values in the other

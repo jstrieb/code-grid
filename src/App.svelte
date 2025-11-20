@@ -101,28 +101,30 @@
 </style>
 
 <script>
-  import Button from "./Button.svelte";
-  import CodeEditor from "./CodeEditor.svelte";
-  import Details from "./Details.svelte";
-  import Dialog from "./Dialog.svelte";
   import FormulaBar from "./FormulaBar.svelte";
   import Llm from "./Llm.svelte";
   import SaveLoad from "./SaveLoad.svelte";
   import Settings from "./Settings.svelte";
-  import ShyMenu from "./ShyMenu.svelte";
   import Table from "./Table.svelte";
   import Tabs from "./Tabs.svelte";
 
   import { State, Sheet } from "./classes.svelte.js";
-  import { compressText } from "./compress.js";
   import { evalDebounced, functions } from "./formula-functions.svelte.js";
+  import { actions, keyboardHandler, keybindings } from "./keyboard.js";
+
+  import Button from "./components/Button.svelte";
+  import CodeEditor from "./components/CodeEditor.svelte";
+  import Details from "./components/Details.svelte";
+  import Dialog from "./components/Dialog.svelte";
+  import ShyMenu from "./components/ShyMenu.svelte";
+
+  import { compressText } from "./lib/compress.js";
   import {
     debounce,
     replaceValues,
     nextZIndex,
     domToImage,
-  } from "./helpers.js";
-  import { actions, keyboardHandler, keybindings } from "./keyboard.js";
+  } from "./lib/helpers.js";
 
   let { urlData } = $props();
   let globals = $state(

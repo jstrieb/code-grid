@@ -85,7 +85,7 @@
 
 <script>
   import Button from "./Button.svelte";
-  import { randomId, nextZIndex } from "./helpers.js";
+  import { randomId, nextZIndex } from "../lib/helpers.js";
 
   const minDimension = Math.min(window.innerWidth, window.innerHeight);
 

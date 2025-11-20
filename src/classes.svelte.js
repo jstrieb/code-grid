@@ -1,8 +1,9 @@
 import { formula } from "./formula.js";
-import { debounce, randomId } from "./helpers.js";
-import { ParseError } from "./parsers.js";
-import { rederivable } from "./store.js";
 import { functions, evalCode } from "./formula-functions.svelte.js";
+
+import { debounce, randomId } from "./lib/helpers.js";
+import { ParseError } from "./lib/parsers.js";
+import { rederivable } from "./lib/store.js";
 
 import { get } from "svelte/store";
 

@@ -1,12 +1,12 @@
-import { debounce } from "./helpers.js";
+import { debounce } from "./lib/helpers.js";
 
 // Import required so code that is `eval`ed can modify formula functions and
 // use parser combinators. Do not remove, even though it appears "unused."
-import * as parsers from "./parsers.js";
 import * as classes from "./classes.svelte.js";
-import * as compression from "./compress.js";
+import * as parsers from "./lib/parsers.js";
+import * as compression from "./lib/compress.js";
 import { llmToolFunctions, llmModels } from "./llm.svelte.js";
-import { undefinedArgsToIdentity } from "./helpers.js";
+import { undefinedArgsToIdentity } from "./lib/helpers.js";
 
 export let functions = $state({});
 
