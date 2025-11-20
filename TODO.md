@@ -165,3 +165,5 @@
   - Accidentally typing "RC" while typing another formula can cause everything
     to hang
   - Tons of issues with screenshot rendering
+  - Only select from the top window/dialog, don't copy or paste cells if in a
+    textbox or other window

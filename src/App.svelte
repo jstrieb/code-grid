@@ -377,6 +377,7 @@
         <p>Loading...</p>
       {:then src}
         <img
+          alt="Screenshot of the current sheet"
           style="display: block; width: 100%; min-width: 0px; min-height: 0px; object-fit: contain;"
           {src}
         />
