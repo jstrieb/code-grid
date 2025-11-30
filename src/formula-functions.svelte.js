@@ -84,7 +84,11 @@ functions.rand = functions.random;
 // Miscellaneous utility functions
 functions.slider = function slider(min, max, step, value) {
   this.update((previous) => {
-    value = value ?? previous ?? 0;
+    if (previous != null && typeof previous !== "string") {
+      value = previous;
+    } else {
+      value = value ?? 0;
+    }
   });
   this.element = Object.assign(document.createElement("input"), {
     min,
@@ -155,7 +159,7 @@ functions.checkbox = function (label) {
   let value;
   this.update((previous) => {
     value = !!previous;
-    return !!previous;
+    return value;
   });
   const e = this.element;
   this.element = Object.assign(document.createElement("label"), {
