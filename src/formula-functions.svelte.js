@@ -133,8 +133,12 @@ const dollarFormat = Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
 });
-functions.dollars = undefinedArgsToIdentity(function (d) {
-  this.element = document.createTextNode(dollarFormat.format(d));
+functions.dollars = undefinedArgsToIdentity(function (d, return_str) {
+  const str = dollarFormat.format(d);
+  if (return_str) {
+    return str;
+  }
+  this.element = document.createTextNode(str);
   return d;
 });
 
@@ -142,10 +146,14 @@ const percentFormat = new Intl.NumberFormat("en-US", {
   style: "percent",
   maximumFractionDigits: 4,
 });
-functions.percent = function (p) {
-  this.element = document.createTextNode(percentFormat.format(p));
+functions.percent = undefinedArgsToIdentity(function (p, return_str) {
+  const str = percentFormat.format(p);
+  if (return_str) {
+    return str;
+  }
+  this.element = document.createTextNode(str);
   return p;
-};
+});
 
 functions.sparkbars = (...args) => {
   const lines = "▁▂▃▄▅▆▇█";
