@@ -66,14 +66,12 @@
   let responsePromise = $state();
   let modelName = $state("Gemini");
   let template =
-    $state(`You modify a spreadsheet by executing Markdown JavaScript code blocks. You follow these rules exactly:
-- You NEVER use the tool calling API or function calling API
-- You always output JavaScript that will be executed
-- You always refer to the \`llmToolFunctions\` object within that code 
+    $state(`You modify a spreadsheet by executing JavaScript code. You follow these rules exactly:
 - You always query for information (unless you are adding a new sheet)
-- You try to do as many queries as possible in each block
-- You always make row and column values start from 0
+- You try to collate as many queries as possible in each tool call
+- You always make row and column values start from 0 (R0C0 is the top left corner of the sheet)
 - You try to use formatting functions (like \`BOLD\` and \`DOLLARS\`) whenever possible
+- You pass string arguments wrapped in quotes like \`=BOLD("Title")\`
     
 - First, you plan
   - Then you revise the plan to combine as many steps as possible
@@ -88,7 +86,7 @@
   - If the user gives new instructions, make a new plan
 
 
-You can run the following JavaScript functions in code blocks:
+You can run the following JavaScript functions:
 - \${Object.entries(llmToolFunctions).map(([name, f]) => {
   const args = f.toString().replaceAll("\\n", " ").replaceAll(/  */g, " ").match(/\\([^)]*\\)/)?.[0] ?? "";
   return "llmToolFunctions." + name + args + " " + (f.description ?? "");
@@ -116,75 +114,14 @@ Formula function definitions have access to a \`this\` object with:
 - this.element - writable with the HTML DOMElement that will be displayed in the cell (e.g., buttons, checkboxes, canvas, SVG, etc.)
 - this.style - writable with the CSS style string for the containing \`<td>\`
 
-You add any formula functions you use if they do not already exist.
-
-
-Example:
-
-User:
-Find the receipt items that contain seafood and make them red.
-
-Model:
-Plan: 
-- I should learn about the current sheets through a query. 
-- I should find the items with seafood using another query. 
-- I should check if there is already a formula to make items red. 
-  - If not, I should add one. 
-- I should modify the formulas for the seafood item cells to wrap them in calls to the new red formula.
-
-Thought: I should learn more about the current sheets using a query.
-
-\`\`\`javascript
-// Query the current sheets
-const sheets = llmToolFunctions.getSheets();
-llmToolFunctions.query("Sheets", sheets);
-// Query the first rows of each sheet to learn about the columns
-let firstRows = {};
-sheets.forEach((sheet, sheetIndex) => {
-  firstRows[sheet.name] = new Array(sheet.cols).fill().map(
-    (_, i) => llmToolFunctions.getCell(sheetIndex, 0, i)
-  )
-});
-llmToolFunctions.query("First rows", firstRows);
-\`\`\`
-
-User:
-Sheets: [{"name": "Sheet 1", "rows": 10, "cols": 3}, {"name": "Receipt", "rows": 6, "cols": 2}]
-First rows: {"Sheet 1": [{}, {}, {}], "Receipt": [{"formula": "=BOLD(\\\\"Item\\\\")", "value": "Item"}, {"formula": "=BOLD(\\\\"Cost\\\\")", "value": "Cost"}]}
-
-Model:
-Thought: I should find the cells that might contain seafood. I now know that I can identify them by the "Item" column.
-Thought: I can also query the formulas at the same time to check and see if there is already a formula to make items red.
-
-\`\`\`javascript
-llmToolFunctions.query("Items", new Array(6).fill().map(
-  (_, i) => llmToolFunctions.getCell(1, i, 0)
-));
-llmToolFunctions.query("Formulas", llmToolFunctions.getFormulaFunctionsList());
-\`\`\`
-
-User:
-Items: [{"formula": "=BOLD(\\\\"Items\\\\")", "value": "Items"}, {"formula": "shrimp", "value": "shrimp"}, {"formula": "chicken", "value": "chicken"}, ... ]
-Formulas: [ "abs", "acos", ..., "average", "rand", "slider", "bold", "center", "dollars", "sparkbars", "checkbox" ]
-
-Model:
-Thought: Since there is no formula to make items red, I should add one. And I can make the seafood item cells red to complete my task.
-
-\`\`\`javascript
-llmToolFunctions.addFunction(\`
-functions.red = function (s) {
-  this.style += "color: red;"
-  return s;
-}
-\`);
-llmToolFunctions.setCellFormula(1, 1, 0, \`=RED(\\\${llmToolFunctions.getCell(1, 1, 0).formula})\`)
-llmToolFunctions.setCellFormula(1, 4, 0, \`=RED(\\\${llmToolFunctions.getCell(1, 4, 0).formula})\`)
-\`\`\`
-`);
+You add any formula functions you use if they do not already exist.`);
 
   let conversation = $state([
     { role: "system", text: "" },
-    { role: "user", text: "" },
+    {
+      role: "user",
+      text: "",
+    },
   ]);
 
   // Need to call eval in a separate function from derived.by to ensure globals
@@ -211,35 +148,15 @@ llmToolFunctions.setCellFormula(1, 4, 0, \`=RED(\\\${llmToolFunctions.getCell(1,
     conversation = conversationSlice;
     responsePromise = llmModels[modelName]
       .request(conversationSlice)
-      .then((parts) =>
-        parts.map((part) => {
-          if (
-            part.match(/^````*( *javascript *)?\n/) &&
-            part.endsWith("\n```")
-          ) {
-            return {
-              role: "model",
-              code: part
-                .replaceAll(/(^````*( *javascript *)?\n)|(\n````*$)/g, "")
-                .trim(),
-            };
-          } else {
-            return {
-              role: "model",
-              text: part,
-            };
-          }
-        }),
-      )
       .then((parts) => {
         conversation = conversation.concat(parts);
       });
   }
 
   function execute(llmCode, codeIndex) {
+    const { log, warn, error } = console;
     llmToolFunctions.globals = globals;
-
-    llmToolFunctions.query = (name, value) => {
+    llmToolFunctions.query = (value, name) => {
       let userResponse;
       let i = codeIndex;
       for (
@@ -247,19 +164,44 @@ llmToolFunctions.setCellFormula(1, 4, 0, \`=RED(\\\${llmToolFunctions.getCell(1,
         i < conversation.length && userResponse.role != "user";
         userResponse = conversation[++i]
       ) {}
-      if (userResponse.text.length && !userResponse.text.endsWith("\n")) {
-        userResponse.text += "\n";
+      let response = "";
+      if (name) {
+        response += `${name}: `;
       }
-      userResponse.text += `${name}: ${JSON.stringify(value)}`;
+      response += JSON.stringify(value);
+      if (!userResponse?.response) {
+        conversation.splice(i, 0, { role: "user", response });
+      } else {
+        userResponse.response += "\n" + response;
+      }
+    };
+    console.log = (value) => {
+      log(value);
+      llmToolFunctions.query(value, "LOG");
+    };
+    console.warn = (value) => {
+      warn(value);
+      llmToolFunctions.query(value, "WARN");
+    };
+    console.error = (value) => {
+      error(value);
+      llmToolFunctions.query(value, "ERROR");
     };
 
-    // TODO: Display the error
-    eval(
-      llmCode +
-        // Allows user code to show up in the devtools debugger as "llm-code.js"
-        "\n//# sourceURL=llm-code.js",
-    );
+    try {
+      eval(
+        llmCode +
+          // Allows user code to show up in the devtools debugger as "llm-code.js"
+          "\n//# sourceURL=llm-code.js",
+      );
+    } catch (e) {
+      console.error(e?.message ?? e?.toString() ?? e);
+    }
+
     delete llmToolFunctions.globals;
+    console.log = log;
+    console.warn = warn;
+    console.error = error;
   }
 
   function scrollIntoView(e) {
@@ -321,21 +263,37 @@ llmToolFunctions.setCellFormula(1, 4, 0, \`=RED(\\\${llmToolFunctions.getCell(1,
     <div style="margin-left: 10%;">
       <Details open>
         {#snippet summary()}User{/snippet}
-        <textarea
-          onkeydown={(e) => {
-            if (
-              e.key.toLocaleLowerCase() == "enter" &&
-              (e.ctrlKey || e.metaKey)
-            ) {
-              e.target.blur();
-              submit(conversation.slice(0, i + 1));
-            }
-          }}
-          placeholder={i == 1
-            ? "Make a comprehensive budget spreadsheet for a 25 year old living in Manhattan and making $75k per year"
-            : ""}
-          bind:value={part.text}
-        ></textarea>
+        {#if part.response}
+          <CodeEditor
+            onkeydown={(e) => {
+              if (
+                e.key.toLocaleLowerCase() == "enter" &&
+                (e.ctrlKey || e.metaKey)
+              ) {
+                e.target.blur();
+                submit(conversation.slice(0, i + 1));
+              }
+            }}
+            bind:code={part.response}
+            style="min-height: 10em; resize: vertical;"
+          ></CodeEditor>
+        {:else}
+          <textarea
+            onkeydown={(e) => {
+              if (
+                e.key.toLocaleLowerCase() == "enter" &&
+                (e.ctrlKey || e.metaKey)
+              ) {
+                e.target.blur();
+                submit(conversation.slice(0, i + 1));
+              }
+            }}
+            placeholder={i == 1
+              ? "Make a comprehensive budget spreadsheet for a 25 year old living in Manhattan and making $75k per year"
+              : ""}
+            bind:value={part.text}
+          ></textarea>
+        {/if}
         <div class="buttons">
           <Button onclick={() => submit(conversation.slice(0, i + 1))}
             >Submit</Button

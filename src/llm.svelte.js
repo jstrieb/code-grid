@@ -9,7 +9,7 @@ llmToolFunctions.newSheet = function (name, cells) {
   );
 };
 llmToolFunctions.newSheet.description =
-  "takes a 2D array of strings containing formulas";
+  "cells is a 2D array of strings containing formulas, and a required argument";
 
 llmToolFunctions.addRow = function (sheetIndex, offset) {
   this.globals.sheets[sheetIndex]?.addRows(1, offset);
@@ -70,7 +70,7 @@ llmToolFunctions.query = function (value) {
 export const llmModels = $state({});
 
 llmModels.Gemini = {
-  model: "gemini-2.5-pro-exp-03-25",
+  model: "gemini-flash-latest",
   async request(conversation) {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`,
@@ -82,7 +82,31 @@ llmModels.Gemini = {
         body: JSON.stringify({
           generation_config: {
             temperature: 0.5,
+            thinkingConfig: {
+              thinkingBudget: -1,
+            },
           },
+          tools: [
+            // { google_search: {}, url_context: {}, },
+            {
+              functionDeclarations: [
+                {
+                  name: "evalJavaScript",
+                  description:
+                    "Evaluate JavaScript code in the spreadsheet context to read and modify spreadsheet state",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      code: {
+                        type: "string",
+                      },
+                    },
+                    required: ["code"],
+                  },
+                },
+              ],
+            },
+          ],
           system_instruction: {
             parts: conversation
               .filter(({ role }) => role == "system")
@@ -91,17 +115,38 @@ llmModels.Gemini = {
               )
               .flat(Infinity),
           },
-          tools: [
-            {
-              google_search: {},
-            },
-          ],
           contents: conversation
             .filter(({ role }) => role != "system")
-            .map(({ role, text, code }) => ({
-              role,
-              parts: [{ text: text ?? "```javascript\n" + code + "\n```" }],
-            })),
+            .filter(
+              // Text can be null or set, but not empty string
+              ({ text }) => text !== "",
+            )
+            .map(({ role, text, code, response }) => {
+              if (text) {
+                return { role, parts: [{ text }] };
+              } else if (code) {
+                return {
+                  role,
+                  parts: [
+                    {
+                      functionCall: { name: "evalJavaScript", args: { code } },
+                    },
+                  ],
+                };
+              } else if (response) {
+                return {
+                  role,
+                  parts: [
+                    {
+                      function_response: {
+                        name: "evalJavaScript",
+                        response: { output: response },
+                      },
+                    },
+                  ],
+                };
+              }
+            }),
         }),
       },
     )
@@ -113,8 +158,16 @@ llmModels.Gemini = {
         console.error(e);
         throw e;
       });
-    return response?.candidates?.[0]?.content?.parts
-      ?.map(({ text }) => text.trim())
-      .filter((text) => text);
+    const result = response?.candidates?.[0]?.content?.parts?.map(
+      ({ text, functionCall }) => {
+        if (functionCall) {
+          return { role: "model", code: functionCall?.args?.code };
+        } else {
+          return { role: "model", text };
+        }
+      },
+    );
+    console.log(result);
+    return result;
   },
 };
