@@ -410,48 +410,6 @@ functions.crypto = async (ticker) => {
   }
 }
 
-function flattenArgs(computed) {
-  if (computed?.refs == null) {
-    return computed.value;
-  }
-  return (
-    computed.refs
-      .map((r) => flattenArgs(r))
-      .flat()
-      // Hack for detecting stores instead of primitive values
-      .filter((r) => r?.subscribe != null)
-  );
-}
-
-function flattenComputedToFunction(computed) {
-  if (computed?.refs == null) {
-    return (...args) => args;
-  }
-  let thunk = computed.thunk ?? ((...args) => args);
-  let refArgsCounts = computed.refs.map((r) => r?.numRefArgs ?? 1);
-  return async (...args) => {
-    let offset = 0;
-    // Call the thunk with the correct args from the flattened list. Use `.call`
-    // and `.apply` to pass the correct `this` value.
-    return await thunk.apply(
-      this,
-      (
-        await Promise.all(
-          computed.refs.map((r, i) => {
-            const oldOffset = offset;
-            offset += refArgsCounts[i];
-            // Recurse with the relevant portion of the flattened arguments list
-            return flattenComputedToFunction.call(
-              this,
-              r,
-            )(...args.slice(oldOffset, offset));
-          }),
-        )
-      ).flat(),
-    );
-  };
-}
-
 export class Sheet {
   name = $state();
   cells = $state();
@@ -515,7 +473,7 @@ export class Sheet {
             cell.col,
           );
           cell.value.rederive(
-            flattenArgs(computed),
+            computed.flattenArgs(),
             (dependencyValues, _set, _update) => {
               const set = (...args) => {
                 try {
@@ -545,11 +503,8 @@ export class Sheet {
                 element: undefined,
                 globals: this.globals,
               };
-              flattenComputedToFunction
-                .call(
-                  _this,
-                  computed,
-                )(...dependencyValues)
+              computed
+                .flattenComputedToFunction(_this)(...dependencyValues)
                 .then(([result]) => {
                   update((old) => {
                     // TODO: Find a better trigger for resets than just waiting

@@ -42,6 +42,55 @@ class ExpressionValue {
       this.numRefArgs = arraySum(refs.map(({ numRefArgs: n }) => n));
     }
   }
+
+  flattenArgs() {
+    if (this?.refs == null) {
+      return this.value;
+    }
+    return (
+      this.refs
+        // Using `this` here is a hack for calling this method on arguments that
+        // may not be instances of ExpressionValue. `r.flattenArgs()` would be
+        // more correct, but does not always apply.
+        .map((r) => this.flattenArgs.call(r))
+        .flat()
+        // Hack for detecting stores instead of primitive values
+        .filter((r) => r?.subscribe != null)
+    );
+  }
+
+  flattenComputedToFunction(formulaFunctionThis) {
+    const computed = this;
+    if (computed?.refs == null) {
+      return (...args) => args;
+    }
+    let thunk = computed.thunk ?? ((...args) => args);
+    let refArgsCounts = computed.refs.map((r) => r?.numRefArgs ?? 1);
+    return async (...args) => {
+      let offset = 0;
+      // Call the thunk with the correct args from the flattened list. Use
+      // `.call` and `.apply` to pass the correct `this` value.
+      return await thunk.apply(
+        formulaFunctionThis,
+        (
+          await Promise.all(
+            computed.refs.map((r, i) => {
+              const oldOffset = offset;
+              offset += refArgsCounts[i];
+              // Recurse with the relevant portion of the flattened arguments
+              // list. Using `this` here is a hack for calling this method on
+              // arguments that may not be instances of ExpressionValue. See
+              // flattenArgs above as well.
+              return this.flattenComputedToFunction.call(
+                r,
+                formulaFunctionThis,
+              )(...args.slice(oldOffset, offset));
+            }),
+          )
+        ).flat(),
+      );
+    };
+  }
 }
 
 function singleton(f) {
