@@ -679,3 +679,14 @@ test("Custom formula functions with caps in declaration", async () => {
   state.currentSheet.cells[0][1].formula = "=with_underscores(RC0)";
   await expectSheet(state.currentSheet, [[6, 12]]);
 });
+
+test("Binary literals", async () => {
+  const state = createSheet([
+    ["0b1000", "-0b1000", "=~0b1000", "=~-0b1000", "=-~0b1000"],
+    ["=R[-1]C", "=R[-1]C", "=R[-1]C", "=R[-1]C", "=R[-1]C"],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [8, -8, -9, 7, 9],
+    [8, -8, -9, 7, 9],
+  ]);
+});

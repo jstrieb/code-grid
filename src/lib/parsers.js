@@ -233,6 +233,7 @@ export const EOF = (() => {
 export const anyChar = new Parser((s) => new ParseResult(s[0], s.slice(1)));
 export const num = alt(
   regex(/-?\d[_\d]*\.\d+/).map((x) => parseFloat(x.replaceAll("_", ""))),
+  regex(/-?0b[01][_01]*/).map((x) => parseInt(x.replace(/0b/, ""), 2)),
   regex(/-?(0x[0-9A-Fa-f][_0-9A-Fa-f]*|\d[_\d]*)/).map((x) =>
     parseInt(x.replaceAll("_", "")),
   ),
