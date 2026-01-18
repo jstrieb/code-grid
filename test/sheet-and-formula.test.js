@@ -1,4 +1,4 @@
-import { Sheet, State } from "../src/classes.svelte.js";
+import { State } from "../src/classes.svelte.js";
 import { test, expect, beforeEach } from "vitest";
 import { evalCode, functions } from "../src/formula-functions.svelte.js";
 
@@ -689,4 +689,26 @@ test("Binary literals", async () => {
     [8, -8, -9, 7, 9],
     [8, -8, -9, 7, 9],
   ]);
+});
+
+test("State.load preserves elements", async () => {
+  const state = createSheet([["1", "2", "3"]]);
+  await expectSheet(state.currentSheet, [[1, 2, 3]]);
+  state.elements.formulaBar = document.createElement("textarea");
+  state.elements.formulaBar.setAttribute("data-testid", "shouldPreserve");
+
+  const savedState = createSheet([["4", "5", "6"]]);
+  await expectSheet(savedState.currentSheet, [[4, 5, 6]]);
+
+  const testFormulaCode = "functions.testFormulaCode = () => {}";
+  state.load({
+    sheets: savedState.sheets,
+    formulaCode: testFormulaCode,
+  });
+
+  await expectSheet(state.currentSheet, [[4, 5, 6]]);
+  expect(state.formulaCode).toBe(testFormulaCode);
+  expect(state.elements.formulaBar.getAttribute("data-testid")).toBe(
+    "shouldPreserve",
+  );
 });
