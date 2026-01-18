@@ -14,20 +14,7 @@ function minmax(min, x, max) {
   return Math.min(Math.max(x, min), max);
 }
 
-export class State {
-  sheets = $state([]);
-  currentSheetIndex = $state(0);
-  currentSheet = $derived(this.sheets[this.currentSheetIndex]);
-  selected = $state(new Selection());
-  mode = $state("normal");
-  keyQueue = $state([]);
-  pasteBuffer = $state(new Register());
-  elements = $state({});
-  helpOpen = $state(false);
-  editorOpen = $state(false);
-  imageOpen = $state(false);
-  llmOpen = $state(false);
-  formulaCode = $state(`// Examples of user-defined formula functions
+const sampleFormulaCode = () => `// Examples of user-defined formula functions
 
 functions.factorial = (n) => {
   if (n == 0) return 1;
@@ -50,14 +37,49 @@ functions.crypto = async (ticker) => {
       ),
     );
 };
-`);
+`;
+
+class LoadableState {
+  sheets = $state([]);
+  formulaCode = $state(sampleFormulaCode());
+
+  constructor(sheets, formulaCode) {
+    this.sheets = sheets;
+    this.sheets.forEach((sheet) => (sheet.globals = this));
+    if (formulaCode != null) {
+      this.formulaCode = formulaCode;
+      evalCode(this.formulaCode);
+    }
+  }
+}
+
+export class State {
+  sheets = $state([]);
+  currentSheetIndex = $state(0);
+  currentSheet = $derived(this.sheets[this.currentSheetIndex]);
+  selected = $state(new Selection());
+  mode = $state("normal");
+  keyQueue = $state([]);
+  pasteBuffer = $state(new Register());
+  elements = $state({});
+  helpOpen = $state(false);
+  editorOpen = $state(false);
+  imageOpen = $state(false);
+  llmOpen = $state(false);
   settings = $state({
     mobileZoom: 100,
   });
+  formulaCode = $state(sampleFormulaCode());
   forceSave = $state(0);
 
-  static load(data) {
-    let result = new State(
+  static fromData(data) {
+    const state = new State([]);
+    state.load(data);
+    return state;
+  }
+
+  load(data) {
+    let result = new LoadableState(
       data.sheets.map((sheet) => {
         let s = new Sheet(
           sheet.name,
@@ -72,18 +94,16 @@ functions.crypto = async (ticker) => {
       }),
       data.formulaCode,
     );
-    return result;
+    this._reload(result);
+  }
+
+  _reload(loadableState) {
+    this.sheets = loadableState.sheets;
+    this.formulaCode = loadableState.formulaCode;
   }
 
   constructor(sheets, formulaCode) {
-    this.sheets = sheets;
-    this.sheets.forEach((sheet) => {
-      sheet.globals = this;
-    });
-    if (formulaCode != null) {
-      this.formulaCode = formulaCode;
-      evalCode(this.formulaCode);
-    }
+    this._reload(new LoadableState(sheets, formulaCode));
   }
 
   getSelectedCells() {

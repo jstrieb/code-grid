@@ -3,7 +3,7 @@ import { test, expect, beforeEach } from "vitest";
 import { evalCode, functions } from "../src/formula-functions.svelte.js";
 
 function createSheet(cells, formulaCode = "") {
-  return State.load({
+  return State.fromData({
     sheets: [
       {
         name: "Sheet 1",
