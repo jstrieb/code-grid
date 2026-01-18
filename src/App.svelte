@@ -162,7 +162,7 @@
         return undefined;
       }
     }
-    return State.load(data);
+    return State.fromData(data);
   }
 
   let dontSave = $state(false);
@@ -309,7 +309,7 @@
       return;
     }
     dontSave = true;
-    globals = Object.assign(State.load(e.state), {
+    globals = Object.assign(State.fromData(e.state), {
       currentSheetIndex: globals.currentSheetIndex,
       mode: globals.mode,
       helpOpen: globals.helpOpen,
