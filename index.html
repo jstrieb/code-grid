@@ -52,11 +52,13 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
-
-    <!-- 
-      Keep here to style loading screen before other stylesheets are loaded.
-    -->
+  </head>
+  <body>
     <style>
+      * {
+        margin: 0;
+      }
+
       body {
         padding: 0.5em;
         /* Fall back on vh units if svh doesn't work (i.e., not on mobile). */
@@ -68,11 +70,8 @@
         min-height: 100svh;
         max-height: 100svh;
       }
-    </style>
-  </head>
-  <body>
-    <div
-      style="
+
+      div {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -80,27 +79,15 @@
         gap: 1em;
         height: 100%;
         font-family: sans-serif;
-      "
-    >
+      }
+    </style>
+    <div>
       <img
         width="64"
         height="64"
-        src="data:image/svg+xml,%3Csvg version='1.1' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- %3Cstyle%3E@media (prefers-color-scheme: dark) %7B g %7B filter: invert(); %7D %7D%3C/style%3E --%3E%3Cg transform='matrix(.9794 0 0 .9794 .3293 .3293)'%3E%3Crect x='3.9869' y='3.9869' width='28.35' height='28.35' fill='%23fff'/%3E%3Crect x='4.3289' y='4.3289' width='27.666' height='27.666' stroke='%23000' stroke-width='.010417' fill='%23000'/%3E%3Crect x='-.33623' y='-.33623' width='29.338' height='29.338' fill='%23fff'/%3E%3Crect x='.5' y='.5' width='27.666' height='27.666' fill='%23fff' stroke='%23000'/%3E%3Cpath d='m21.611 12.864h-14.556v-3.0525h14.556zm0 5.9911h-14.556v-3.0525h14.556z' fill='%23000'/%3E%3C/g%3E%3C/svg%3E"
+        src="data:image/svg+xml,%3Csvg version='1.1' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E /* @media (prefers-color-scheme: dark) %7B g %7B filter: invert(); %7D %7D */ :root %7B --offset: calc(32px - 28.734px); --offset2: calc(27.766px - 32px); %7D @keyframes orbit %7B 0%25 %7B transform: translate(0); %7D 25%25 %7B transform: translate(var(--offset), 0); %7D 50%25 %7B transform: translate(var(--offset), var(--offset)); %7D 75%25 %7B transform: translate(0, var(--offset)); %7D %7D @keyframes orbit2 %7B 0%25 %7B transform: translate(0); %7D 25%25 %7B transform: translate(var(--offset2), 0); %7D 50%25 %7B transform: translate(var(--offset2), var(--offset2)); %7D 75%25 %7B transform: translate(0, var(--offset2)); %7D %7D g:last-of-type %3E * %7B animation: orbit 3s linear infinite; animation-delay: 1s; %7D g:first-of-type %3E * %7B animation: orbit2 3s linear infinite; animation-delay: 1s; %7D %3C/style%3E%3Cg%3E%3Crect x='4.2341' y='4.2341' width='27.766' height='27.766' fill='%23fff' stroke-width='.9794'/%3E%3Crect x='4.569' y='4.569' width='27.096' height='27.096' stroke='%23000' stroke-width='.010202'/%3E%3C/g%3E%3Cg stroke-width='.9794'%3E%3Crect x='0' y='0' width='28.734' height='28.734' fill='%23fff'/%3E%3Crect x='.819' y='.819' width='27.096' height='27.096' fill='%23fff' stroke='%23000'/%3E%3Cpath d='m21.495 12.928h-14.256v-2.9896h14.256zm0 5.8677h-14.256v-2.9896h14.256z'/%3E%3C/g%3E%3C/svg%3E%0A"
       />
-      <p style="margin: 0">
-        Loading<span style="position: absolute">...</span>
-      </p>
-      <script>
-        const span =
-          document.currentScript.previousElementSibling.lastElementChild;
-        let periods = 3;
-        const interval = setInterval(() => {
-          if (!span.isConnected) {
-            clearInterval(interval);
-          }
-          span.innerText = ".".repeat(++periods % 4);
-        }, 500);
-      </script>
+      <p>Loading...</p>
     </div>
   </body>
   <script type="module">
