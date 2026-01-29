@@ -61,19 +61,33 @@ class Function extends Expression {
           // Mutating the updated array causes hard-to-debug problems with this
           // store later on
           updated = [...updated];
-          set(
-            f.apply(
-              _this,
-              computed.map((x) => (x?.subscribe ? updated.shift() : x)),
-            ),
+          const result = f.apply(
+            _this,
+            computed.map((x) => (x?.subscribe ? updated.shift() : x)),
           );
+          if (result instanceof Promise) {
+            // TODO: In this case, _this.cleanup may not be set by the time the
+            // function returns. That's why we check if result is a promise rather
+            // than awaiting everything
+            result.then((r) => set(r));
+          } else {
+            set(result);
+          }
           return _this.cleanup;
         },
       );
     } else {
       return readable(null, (set, update) => {
         Object.assign(_this, { set, update });
-        set(f.apply(_this, computed));
+        const result = f.apply(_this, computed);
+        if (result instanceof Promise) {
+          // TODO: In this case, _this.cleanup may not be set by the time the
+          // function returns. That's why we check if result is a promise rather
+          // than awaiting everything
+          result.then((r) => set(r));
+        } else {
+          set(result);
+        }
         return _this.cleanup;
       });
     }
