@@ -16,6 +16,7 @@ import {
   EOF,
   anyChar,
 } from "./lib/parsers.js";
+import { readable, derived } from "svelte/store";
 
 class Expression {
   // Return a concrete value from an expression given the values in the other
@@ -24,79 +25,6 @@ class Expression {
   compute(globals, sheet, r, c) {
     throw new Error("Not yet implemented");
   }
-}
-
-class ExpressionValue {
-  thunk;
-  refs;
-  numRefArgs;
-
-  // Everything except for ranges should pass thunks that return a singleton
-  // array. This is to prevent accidental flattening of list arguments while the
-  // reference tree is being flattened.
-  constructor(thunk, refs, numRefArgs = undefined) {
-    this.thunk = thunk;
-    this.refs = refs;
-    this.numRefArgs = numRefArgs;
-    if (this.numRefArgs == null) {
-      this.numRefArgs = arraySum(refs.map(({ numRefArgs: n }) => n));
-    }
-  }
-
-  flattenArgs() {
-    if (this?.refs == null) {
-      return this.value;
-    }
-    return (
-      this.refs
-        // Using `this` here is a hack for calling this method on arguments that
-        // may not be instances of ExpressionValue. `r.flattenArgs()` would be
-        // more correct, but does not always apply.
-        .map((r) => this.flattenArgs.call(r))
-        .flat()
-        // Hack for detecting stores instead of primitive values
-        .filter((r) => r?.subscribe != null)
-    );
-  }
-
-  flattenComputedToFunction(formulaFunctionThis) {
-    const computed = this;
-    if (computed?.refs == null) {
-      return (...args) => args;
-    }
-    let thunk = computed.thunk ?? ((...args) => args);
-    let refArgsCounts = computed.refs.map((r) => r?.numRefArgs ?? 1);
-    return async (...args) => {
-      let offset = 0;
-      // Call the thunk with the correct args from the flattened list. Use
-      // `.call` and `.apply` to pass the correct `this` value.
-      return await thunk.apply(
-        formulaFunctionThis,
-        (
-          await Promise.all(
-            computed.refs.map((r, i) => {
-              const oldOffset = offset;
-              offset += refArgsCounts[i];
-              // Recurse with the relevant portion of the flattened arguments
-              // list. Using `this` here is a hack for calling this method on
-              // arguments that may not be instances of ExpressionValue. See
-              // flattenArgs above as well.
-              return this.flattenComputedToFunction.call(
-                r,
-                formulaFunctionThis,
-              )(...args.slice(oldOffset, offset));
-            }),
-          )
-        ).flat(),
-      );
-    };
-  }
-}
-
-function singleton(f) {
-  return async function (...args) {
-    return [await f.apply(this, args)];
-  };
 }
 
 class Function extends Expression {
@@ -115,8 +43,40 @@ class Function extends Expression {
     if (f == null) {
       throw new Error(`"${name}" is not a function`);
     }
-    const refs = this.args.map((a) => a.compute(globals, sheet, r, c));
-    return new ExpressionValue(singleton(f), refs);
+    const computed = this.args.map((arg) =>
+      arg?.compute ? arg.compute(globals, sheet, r, c) : arg,
+    );
+    const _this = {
+      globals,
+      sheet,
+      row: r,
+      col: c,
+      // TODO: width, height, style, element
+    };
+    if (computed.some((x) => x?.subscribe)) {
+      return derived(
+        computed.filter((x) => x?.subscribe),
+        (updated, set, update) => {
+          Object.assign(_this, { set, update });
+          // Mutating the updated array causes hard-to-debug problems with this
+          // store later on
+          updated = [...updated];
+          set(
+            f.apply(
+              _this,
+              computed.map((x) => (x?.subscribe ? updated.shift() : x)),
+            ),
+          );
+          return _this.cleanup;
+        },
+      );
+    } else {
+      return readable(null, (set, update) => {
+        Object.assign(_this, { set, update });
+        set(f.apply(_this, computed));
+        return _this.cleanup;
+      });
+    }
   }
 }
 
@@ -158,30 +118,60 @@ class BinaryOperation extends Expression {
     this.ast = Array.from(ast);
   }
 
-  compute(globals, sheet, r, c) {
-    const thunk = (...args) => {
-      this.ast
-        .filter((x) => typeof x === "string")
-        .forEach((op) => {
-          const x = args.shift();
-          const y = args.shift();
-          if (typeof x[op] === "function") {
-            args.unshift(x[op](y));
-          } else if (typeof x[op]?.forward === "function") {
-            args.unshift(x[op].forward(y));
-          } else if (typeof y[op]?.reverse === "function") {
-            args.unshift(y[op].reverse(x));
-          } else {
-            args.unshift(BinaryOperation.operations[op](x, y));
-          }
-        });
-      // Note that args is a singleton list
-      return args;
-    };
-    const refs = this.ast
-      .filter((x) => x?.compute)
-      .map((x) => x.compute(globals, sheet, r, c));
-    return new ExpressionValue(undefinedArgsToIdentity(thunk), refs);
+  static evaluate(op, x, y) {
+    if (typeof x[op] === "function") {
+      return x[op](y);
+    } else if (typeof x[op]?.forward === "function") {
+      return x[op].forward(y);
+    } else if (typeof y[op]?.reverse === "function") {
+      return y[op].reverse(x);
+    } else {
+      return BinaryOperation.operations[op](x, y);
+    }
+  }
+
+  compute(...args) {
+    const ast = [...this.ast];
+    if (ast.length < 3) {
+      console.log(ast);
+      throw new Error("Binary operation AST has incorrect length");
+    }
+    while (ast.length > 1) {
+      if (ast.length % 2 != 1) {
+        console.log(ast);
+        throw new Error("Binary operation AST has incorrect length");
+      }
+      const x = ((z) => (z?.compute ? z.compute(...args) : z))(ast.shift());
+      const op = ast.shift();
+      const y = ((z) => (z?.compute ? z.compute(...args) : z))(ast.shift());
+      const isXStore = x?.subscribe;
+      const isYStore = y?.subscribe;
+
+      if (isXStore && isYStore) {
+        ast.unshift(
+          derived([x, y], ([a, b], set) =>
+            set(BinaryOperation.evaluate(op, a ?? 0, b ?? 0)),
+          ),
+        );
+      } else if (isXStore) {
+        ast.unshift(
+          derived([x], ([a], set) =>
+            set(BinaryOperation.evaluate(op, a ?? 0, y ?? 0)),
+          ),
+        );
+      } else if (isYStore) {
+        ast.unshift(
+          derived([y], ([b], set) =>
+            set(BinaryOperation.evaluate(op, x ?? 0, b ?? 0)),
+          ),
+        );
+      } else {
+        ast.unshift(BinaryOperation.evaluate(op, x ?? 0, y ?? 0));
+      }
+    }
+
+    const [computed] = ast;
+    return computed;
   }
 }
 
@@ -201,16 +191,24 @@ class UnaryOperation extends Expression {
     this.operand = operand;
   }
 
-  compute(globals, sheet, r, c) {
-    const thunk = (x) => {
-      if (typeof x[this.operator] === "function") {
-        return [x[this.operator]()];
-      } else {
-        return [UnaryOperation.operations[this.operator](x)];
-      }
-    };
-    const refs = [this.operand.compute(globals, sheet, r, c)];
-    return new ExpressionValue(undefinedArgsToIdentity(thunk), refs);
+  static evaluate(op, x) {
+    if (typeof x[op] === "function") {
+      return x[op]();
+    } else {
+      return UnaryOperation.operations[op](x);
+    }
+  }
+
+  compute(...args) {
+    const { operand, operator } = this;
+    const computed = operand?.compute ? operand.compute(...args) : operand;
+    if (computed?.subscribe) {
+      return derived([computed], (x, set) =>
+        set(UnaryOperation.evaluate(operator, x ?? 0)),
+      );
+    } else {
+      return UnaryOperation.evaluate(operator, computed ?? 0);
+    }
   }
 }
 
@@ -266,7 +264,18 @@ class Ref extends Expression {
     } else {
       col = c + this.c.relative;
     }
-    return new ExpressionValue((x) => [x], [rows[row][col]], 1);
+
+    try {
+      return rows[row][col].value;
+    } catch {
+      if (sheet == s) {
+        throw new Error(`Invalid cell R${row}C${col}`);
+      } else {
+        throw new Error(
+          `Invalid cell R${i}C${j} in sheet ${globals.sheets[sheet].name}`,
+        );
+      }
+    }
   }
 }
 
@@ -354,34 +363,16 @@ class Range extends Expression {
     const height = Math.abs(startRow - endRow) + 1;
     const width = Math.abs(startCol - endCol) + 1;
 
-    // Reshape ranges that have more than one row and column
-    const thunk = (...args) => [
-      height > 1 && width > 1 ? reshape(args, height, width) : args,
-    ];
-    const refs = rows
-      .slice(startRow, endRow + 1)
-      .map((r) => r.slice(startCol, endCol + 1))
-      .flat();
-    return new ExpressionValue(thunk, refs, refs.length);
+    return derived(
+      rows
+        .slice(startRow, endRow + 1)
+        .map((r) => r.slice(startCol, endCol + 1))
+        .flat()
+        .map(({ value }) => value),
+      (values, set) => set(reshape(values, height, width)),
+    );
   }
 }
-
-class Primitive extends Expression {
-  value;
-
-  constructor(n) {
-    super();
-    this.value = n;
-  }
-
-  compute() {
-    return new ExpressionValue(() => [this.value], []);
-  }
-}
-
-class Num extends Primitive {}
-class Str extends Primitive {}
-class Bool extends Primitive {}
 
 function leftAssociativeBinOp(subparser, cls, operations) {
   return lex(
@@ -409,6 +400,10 @@ function rightAssociativeBinOp(subparser, cls, operations) {
   return result;
 }
 
+function init(cls) {
+  return (args) => new cls(...args);
+}
+
 const expression = forwardDeclaration();
 
 const name = regex(/[a-zA-Z_][a-zA-Z0-9_]*/);
@@ -417,7 +412,7 @@ const fun = seq(
   str("(")
     .then(expression.sep_by(lex(",")).optional([]))
     .skip(str(")")),
-).map((args) => new Function(...args));
+).map(init(Function));
 
 const cellDigits = regex(/-?\d[_\d]*/).map((x) =>
   parseInt(x.replaceAll("_", "")),
@@ -436,7 +431,7 @@ const ref = seq(
   s.then(cellNum).skip(regex(/!?/)).optional(),
   r.then(cellNum),
   c.then(cellNum),
-).map((args) => new Ref(...args));
+).map(init(Ref));
 
 const range = seq(
   s.then(cellNum).skip(regex(/!?/)).optional(),
@@ -444,9 +439,7 @@ const range = seq(
   c.then(cellNum).skip(lex(":")),
   r.then(cellNum),
   c.then(cellNum),
-).map((args) => new Range(...args));
-
-const number = num.map((args) => new Num(args));
+).map(init(Range));
 
 const stringChar = alt(
   str("\\\\").map((_) => "\\"),
@@ -461,25 +454,23 @@ const string = alt(
     .then(str('"'))
     .then(stringChar.until(str('"')).optional([]).concat())
     .skip(str('"'))
-    .skip(whitespace)
-    .map((args) => new Str(args)),
+    .skip(whitespace),
   whitespace
     .then(str("'"))
     .then(stringChar.until(str("'")).optional([]).concat())
     .skip(str("'"))
-    .skip(whitespace)
-    .map((args) => new Str(args)),
+    .skip(whitespace),
 );
 
 const logic = forwardDeclaration();
 const value = lex(
   alt(
-    lex(number),
+    lex(num),
     lex(string),
     lex(fun),
     lex(ref),
-    lex("true").map((_) => new Bool(true)),
-    lex("false").map((_) => new Bool(false)),
+    lex("true").map((_) => true),
+    lex("false").map((_) => false),
     lex("(").then(logic).skip(lex(")")),
   ),
 );
@@ -488,7 +479,7 @@ unary.become(
   lex(
     alt(
       seq(alt(...Object.keys(UnaryOperation.operations).map(lex)), unary).map(
-        (args) => new UnaryOperation(...args),
+        init(UnaryOperation),
       ),
       value,
     ),
@@ -522,4 +513,4 @@ const logicalOr = leftAssociativeBinOp(logicalAnd, BinaryOperation, ["||"]);
 logic.become(logicalOr);
 
 expression.become(alt(lex(range), logic));
-export const formula = alt(str("=").then(expression), number).skip(EOF);
+export const formula = alt(str("=").then(expression), lex(num)).skip(EOF);

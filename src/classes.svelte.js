@@ -466,82 +466,46 @@ export class Sheet {
 
         try {
           const parsed = formula.parse(cell.formula);
-          const computed = parsed.compute(
-            this.globals,
-            this.globals.sheets.indexOf(this),
-            cell.row,
-            cell.col,
-          );
-          cell.value.rederive(
-            computed.flattenArgs(),
-            (dependencyValues, _set, _update) => {
-              const set = (...args) => {
-                try {
-                  return _set(...args);
-                } finally {
-                  this.globals.forceSave++;
+          const computed = parsed?.compute
+            ? parsed.compute(
+                this.globals,
+                this.globals.sheets.indexOf(this),
+                cell.row,
+                cell.col,
+              )
+            : parsed;
+          if (computed?.subscribe) {
+            cell.value.rederive([computed], ([result], _, update) => {
+              update((old) => {
+                // TODO: Find a better trigger for resets than just waiting
+                // after updates finish. If, for example, a self-referential
+                // cell's async formula takes longer than the debounce time to
+                // compute, it may run forever.
+                debouncedResetUpdateCount();
+                // Do a finite number of iterations if we're not converging.
+                if (updateCount++ > maxUpdates) {
+                  return old;
                 }
-              };
-              const update = (...args) => {
-                try {
-                  return _update(...args);
-                } finally {
-                  this.globals.forceSave++;
-                }
-              };
-              let _this = {
-                set,
-                update,
-                // Recompute the sheet index in case it's changed between the
-                // parsed.compute call above and when this callback is called
-                sheet: this.globals.sheets.indexOf(this),
-                row: cell.row,
-                col: cell.col,
-                width: this.widths[cell.col],
-                height: this.heights[cell.row],
-                style: cell.style,
-                element: undefined,
-                globals: this.globals,
-              };
-              computed
-                .flattenComputedToFunction(_this)(...dependencyValues)
-                .then(([result]) => {
-                  update((old) => {
-                    // TODO: Find a better trigger for resets than just waiting
-                    // after updates finish. If, for example, a self-referential
-                    // cell's async formula takes longer than the debounce time to
-                    // compute, it may run forever.
-                    debouncedResetUpdateCount();
-                    // Do a finite number of iterations if we're not converging.
-                    if (updateCount++ > maxUpdates) {
-                      return old;
-                    }
 
-                    // Svelte implementation of writable stores (from which
-                    // rederivable stores inherit) does not check for approximate
-                    // floating point equality when determining if dependents
-                    // should refresh. Doing so here prevents spurious cyclic
-                    // updates as values converge.
-                    if (
-                      Number.isFinite(old) &&
-                      Number.isFinite(result) &&
-                      Math.abs(old - result) < Number.EPSILON
-                    ) {
-                      return old;
-                    }
-                    return result;
-                  });
-                  cell.style = _this.style;
-                  cell.element = _this.element;
-                  cell.errorText = _this.errorText;
-                })
-                .catch((e) => {
-                  set(undefined);
-                  cell.errorText = `Error: ${e?.message ?? e}`;
-                  cell.errorStack = e?.stack;
-                });
-            },
-          );
+                // Svelte implementation of writable stores (from which
+                // rederivable stores inherit) does not check for approximate
+                // floating point equality when determining if dependents
+                // should refresh. Doing so here prevents spurious cyclic
+                // updates as values converge.
+                if (
+                  Number.isFinite(old) &&
+                  Number.isFinite(result) &&
+                  Math.abs(old - result) < Number.EPSILON
+                ) {
+                  return old;
+                }
+                return result;
+              });
+              // TODO: Update cell.style, element, etc?
+            });
+          } else {
+            cell.value.rederive([], (_, set) => set(computed));
+          }
         } catch (e) {
           if (!(e instanceof ParseError)) {
             cell.errorText = `Error: ${e.message}`;
@@ -551,6 +515,8 @@ export class Sheet {
             cell.value.rederive([], (_, set) => set(cell.formula));
           }
         }
+        // Hack to force unsubscribing and cleaning up when effect re-runs
+        return () => cell.value.rederive([], () => {});
       });
     });
 

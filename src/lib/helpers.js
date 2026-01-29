@@ -47,6 +47,7 @@ function replaceWithId(a, id) {
 }
 
 export function reshape(l, rows, cols) {
+  if (rows == 1 || cols == 1) return l;
   return new Array(rows)
     .fill()
     .map((_, i) => new Array(cols).fill().map((_, j) => l[i * cols + j]));
