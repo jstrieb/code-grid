@@ -71,7 +71,10 @@
     reader.addEventListener("load", () => {
       const data = reader.result.match(/,(.*)/)[1];
       decompressText(data)
-        .then((result) => globals.load(JSON.parse(result)))
+        .then((result) => {
+          globals.load(JSON.parse(result));
+          globals.imageOpen = false;
+        })
         .catch((e) => {
           console.error(e);
           /* TODO */
