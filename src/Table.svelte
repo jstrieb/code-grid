@@ -175,7 +175,7 @@
   import Button from "./components/Button.svelte";
   import NumericInput from "./components/NumericInput.svelte";
 
-  let { globals = $bindable(), table = $bindable() } = $props();
+  let { globals, table = $bindable() } = $props();
   let selected = $derived(globals.selected);
   let sheet = $derived(globals.currentSheet);
 

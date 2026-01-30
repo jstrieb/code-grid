@@ -127,9 +127,8 @@
   } from "./lib/helpers.js";
 
   let { urlData } = $props();
-  let globals = $state(
-    load(urlData) ?? new State([new Sheet("Sheet 1", 10, 10)]),
-  );
+  let globals;
+  globals = load(urlData) ?? new State([new Sheet("Sheet 1", 10, 10)]);
   let table = $state();
   let startHeight = $state(0);
   let scrollArea = $state();
@@ -162,7 +161,7 @@
         return undefined;
       }
     }
-    return State.load(data);
+    return State.loadNew(data);
   }
 
   let dontSave = $state(false);
@@ -309,15 +308,7 @@
       return;
     }
     dontSave = true;
-    globals = Object.assign(State.load(e.state), {
-      currentSheetIndex: globals.currentSheetIndex,
-      mode: globals.mode,
-      helpOpen: globals.helpOpen,
-      editorOpen: globals.editorOpen,
-      imageOpen: globals.imageOpen,
-      elements: globals.elements,
-      pasteBuffer: globals.pasteBuffer,
-    });
+    globals.load(e.state);
   }}
   bind:innerHeight
 />
@@ -326,12 +317,12 @@
 {#if navigator.maxTouchPoints <= 1}
   <!-- Else float the bar above the virtual keyboard -->
   <div>
-    <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
+    <FormulaBar {globals} bind:editor={globals.elements.formulaBar} />
   </div>
 {/if}
 
 <div class="tabs">
-  <Tabs bind:globals bind:value={globals.currentSheetIndex} />
+  <Tabs {globals} bind:value={globals.currentSheetIndex} />
 </div>
 
 <div
@@ -350,7 +341,7 @@
     Set --width and --height default values because if Table is in a Dialog, it
     will inherit the width and height of the dialog for table cells.
   -->
-  <Table bind:globals bind:table --width="auto" --height="auto" />
+  <Table {globals} bind:table --width="auto" --height="auto" />
 </div>
 
 <Dialog
@@ -387,7 +378,7 @@
         <p>Error {err}</p>
       {/await}
     </Details>
-    <SaveLoad bind:globals {imageData} />
+    <SaveLoad {globals} {imageData} />
   </div>
 </Dialog>
 
@@ -450,7 +441,7 @@
     </Details>
     <Details>
       {#snippet summary()}Settings{/snippet}
-      <Settings bind:globals />
+      <Settings {globals} />
     </Details>
   </div>
 </Dialog>
@@ -489,7 +480,7 @@
 {#if navigator.maxTouchPoints > 1}
   <!-- Must set top instead of bottom for correct placement on iOS -->
   <div class="keyboardbar" style:top="calc({visualBottom}px - 2.5em * 2)">
-    <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
+    <FormulaBar {globals} bind:editor={globals.elements.formulaBar} />
     {#if showInputButtons}
       <div class="buttonbar" style:z-index={nextZIndex()}>
         {@render insertTextButton("=")}
