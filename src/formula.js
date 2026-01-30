@@ -53,33 +53,17 @@ class Function extends Expression {
       col: c,
       // TODO: width, height, style, element
     };
-    if (computed.some((x) => x?.subscribe)) {
-      return derived(
-        computed.filter((x) => x?.subscribe),
-        (updated, set, update) => {
-          Object.assign(_this, { set, update });
-          // Mutating the updated array causes hard-to-debug problems with this
-          // store later on
-          updated = [...updated];
-          const result = f.apply(
-            _this,
-            computed.map((x) => (x?.subscribe ? updated.shift() : x)),
-          );
-          if (result instanceof Promise) {
-            // TODO: In this case, _this.cleanup may not be set by the time the
-            // function returns. That's why we check if result is a promise rather
-            // than awaiting everything
-            result.then((r) => set(r));
-          } else {
-            set(result);
-          }
-          return _this.cleanup;
-        },
-      );
-    } else {
-      return readable(null, (set, update) => {
+    return derived(
+      computed.filter((x) => x?.subscribe),
+      (updated, set, update) => {
         Object.assign(_this, { set, update });
-        const result = f.apply(_this, computed);
+        // Mutating the updated array causes hard-to-debug problems with this
+        // store later on
+        updated = [...updated];
+        const result = f.apply(
+          _this,
+          computed.map((x) => (x?.subscribe ? updated.shift() : x)),
+        );
         if (result instanceof Promise) {
           // TODO: In this case, _this.cleanup may not be set by the time the
           // function returns. That's why we check if result is a promise rather
@@ -89,8 +73,8 @@ class Function extends Expression {
           set(result);
         }
         return _this.cleanup;
-      });
-    }
+      },
+    );
   }
 }
 
