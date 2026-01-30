@@ -1,10 +1,12 @@
 <svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
   <style>@media (prefers-color-scheme: dark) { g { filter: invert(); } }</style>
-  <g transform="matrix(.9794 0 0 .9794 .3293 .3293)">
-    <rect x="3.9869" y="3.9869" width="28.35" height="28.35" fill="#fff"/>
-    <rect x="4.3289" y="4.3289" width="27.666" height="27.666" stroke="#000" stroke-width=".010417" fill="#000"/>
-    <rect x="-.33623" y="-.33623" width="29.338" height="29.338" fill="#fff"/>
-    <rect x=".5" y=".5" width="27.666" height="27.666" fill="#fff" stroke="#000"/>
-    <path d="m21.611 12.864h-14.556v-3.0525h14.556zm0 5.9911h-14.556v-3.0525h14.556z" fill="#000"/>
+  <g>
+    <rect x="4.2341" y="4.2341" width="27.766" height="27.766" fill="#fff" stroke-width=".9794"/>
+    <rect x="4.569" y="4.569" width="27.096" height="27.096" stroke="#000" stroke-width=".010202"/>
+  </g>
+  <g stroke-width=".9794">
+    <rect x="0" y="0" width="28.734" height="28.734" fill="#fff"/>
+    <rect x=".819" y=".819" width="27.096" height="27.096" fill="#fff" stroke="#000"/>
+    <path d="m21.495 12.928h-14.256v-2.9896h14.256zm0 5.8677h-14.256v-2.9896h14.256z"/>
   </g>
 </svg>
