@@ -53,14 +53,12 @@ class Function extends Expression {
         // store later on
         updated = [...updated];
         const args = computed.map((x) => (x?.subscribe ? updated.shift() : x));
-        if (args.some(({ error }) => error != null)) {
-          set(args.find(({ error }) => error != null));
+        let error = args.find(({ error: e }) => e != null);
+        if (error) {
+          set(error);
           return;
         }
         const _this = {
-          set: (x) => set({ value: x }),
-          update: (callback) =>
-            update((previous) => ({ value: callback(previous) })),
           globals,
           sheet,
           row: r,
@@ -74,7 +72,15 @@ class Function extends Expression {
               : document.createTextNode(x),
           ),
         };
-        let result, error;
+        Object.assign(_this, {
+          set: (x) => set({ value: x, element: _this.element }),
+          update: (callback) =>
+            update((previous) => ({
+              value: callback(previous),
+              element: _this.element,
+            })),
+        });
+        let result;
         try {
           result = f.apply(
             _this,
@@ -89,10 +95,23 @@ class Function extends Expression {
           // function returns. That's why we check if result is a promise rather
           // than awaiting everything
           result
-            .then((value) => set({ element: _this.element, value }))
+            .then((value) =>
+              set({
+                element:
+                  _this.element ??
+                  args.find(({ element }) => element != null)?.element,
+                value,
+              }),
+            )
             .catch((error) => set({ error }));
         } else {
-          set({ value: result, error, element: _this.element });
+          set({
+            value: result,
+            error,
+            element:
+              _this.element ??
+              args.find(({ element }) => element != null)?.element,
+          });
         }
         return _this.cleanup;
       },
@@ -177,6 +196,7 @@ class BinaryOperation extends Expression {
             } else {
               set({
                 value: BinaryOperation.evaluate(op, a.value ?? 0, b.value ?? 0),
+                element: a?.element ?? b?.element,
               });
             }
           }),
@@ -189,6 +209,7 @@ class BinaryOperation extends Expression {
             } else {
               set({
                 value: BinaryOperation.evaluate(op, a.value ?? 0, y ?? 0),
+                element: a?.element,
               });
             }
           }),
@@ -201,6 +222,7 @@ class BinaryOperation extends Expression {
             } else {
               set({
                 value: BinaryOperation.evaluate(op, x ?? 0, b.value ?? 0),
+                element: b?.element,
               });
             }
           }),
@@ -247,7 +269,10 @@ class UnaryOperation extends Expression {
         if (x.error) {
           set({ error: x.error });
         } else {
-          set({ value: UnaryOperation.evaluate(operator, x.value ?? 0) });
+          set({
+            value: UnaryOperation.evaluate(operator, x.value ?? 0),
+            element: x?.element,
+          });
         }
       });
     } else {

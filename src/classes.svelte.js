@@ -509,6 +509,7 @@ export class Sheet {
                   if (element) {
                     cell.element = element;
                   }
+                  this.globals.forceSave++;
                   return value;
                 });
               },
