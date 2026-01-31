@@ -475,34 +475,44 @@ export class Sheet {
               )
             : parsed;
           if (computed?.subscribe) {
-            cell.value.rederive([computed], ([result], _, update) => {
-              update((old) => {
-                // TODO: Find a better trigger for resets than just waiting
-                // after updates finish. If, for example, a self-referential
-                // cell's async formula takes longer than the debounce time to
-                // compute, it may run forever.
-                debouncedResetUpdateCount();
-                // Do a finite number of iterations if we're not converging.
-                if (updateCount++ > maxUpdates) {
-                  return old;
-                }
+            cell.value.rederive(
+              [computed],
+              ([{ value, error, element }], _, update) => {
+                update((old) => {
+                  // TODO: Find a better trigger for resets than just waiting
+                  // after updates finish. If, for example, a self-referential
+                  // cell's async formula takes longer than the debounce time to
+                  // compute, it may run forever.
+                  debouncedResetUpdateCount();
+                  // Do a finite number of iterations if we're not converging.
+                  if (updateCount++ > maxUpdates) {
+                    return old;
+                  }
 
-                // Svelte implementation of writable stores (from which
-                // rederivable stores inherit) does not check for approximate
-                // floating point equality when determining if dependents
-                // should refresh. Doing so here prevents spurious cyclic
-                // updates as values converge.
-                if (
-                  Number.isFinite(old) &&
-                  Number.isFinite(result) &&
-                  Math.abs(old - result) < Number.EPSILON
-                ) {
-                  return old;
-                }
-                return result;
-              });
-              // TODO: Update cell.style, element, etc?
-            });
+                  // Svelte implementation of writable stores (from which
+                  // rederivable stores inherit) does not check for approximate
+                  // floating point equality when determining if dependents
+                  // should refresh. Doing so here prevents spurious cyclic
+                  // updates as values converge.
+                  if (
+                    Number.isFinite(old) &&
+                    Number.isFinite(value) &&
+                    Math.abs(old - value) < Number.EPSILON
+                  ) {
+                    return old;
+                  }
+                  if (error) {
+                    cell.errorText = `Error: ${error.message ?? error}`;
+                    cell.errorStack = error?.stack;
+                    return undefined;
+                  }
+                  if (element) {
+                    cell.element = element;
+                  }
+                  return value;
+                });
+              },
+            );
           } else {
             cell.value.rederive([], (_, set) => set(computed));
           }

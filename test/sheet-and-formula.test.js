@@ -396,12 +396,12 @@ test("Formula this object has everything it's supposed to", async () => {
     `=from_this("sheet")`,
     `=from_this("set")`,
     `=from_this("update")`,
-    `=from_this("style")`,
     `=from_this("globals")`,
     `=from_this("width")`,
     `=from_this("height")`,
     `=!from_this("element")`,
-    `=from_this("element", DOLLARS(10))`,
+    `=from_this("childElements")`,
+    `=from_this("childElements", DOLLARS(10))`,
   ];
   const state = createSheet([cases]);
   await expectSheet(state.currentSheet, [cases.map(() => true)]);
@@ -693,3 +693,5 @@ test("Binary literals", async () => {
     [8, -8, -9, 7, 9],
   ]);
 });
+
+// TODO: Add tests validating that the cleanup function works

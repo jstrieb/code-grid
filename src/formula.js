@@ -52,38 +52,47 @@ class Function extends Expression {
         // Mutating the updated array causes hard-to-debug problems with this
         // store later on
         updated = [...updated];
+        const args = computed.map((x) => (x?.subscribe ? updated.shift() : x));
+        if (args.some(({ error }) => error != null)) {
+          set(args.find(({ error }) => error != null));
+          return;
+        }
         const _this = {
-          set,
-          update,
+          set: (x) => set({ value: x }),
+          update: (callback) =>
+            update((previous) => ({ value: callback(previous) })),
           globals,
           sheet,
           row: r,
           col: c,
           width: globals.sheets[sheet].widths[c],
           height: globals.sheets[sheet].heights[r],
-          // TODO: Do something with style and element
-          style: "",
           element: undefined,
+          childElements: args.map((x, i) =>
+            computed[i]?.subscribe
+              ? (x?.element ?? document.createTextNode(x.value))
+              : document.createTextNode(x),
+          ),
         };
-        // TODO: propagate errors
-        let result;
+        let result, error;
         try {
           result = f.apply(
             _this,
-            computed.map((x) => (x?.subscribe ? updated.shift() : x)),
+            args.map((x, i) => (computed[i]?.subscribe ? x.value : x)),
           );
         } catch (e) {
           result = undefined;
+          error = e;
         }
         if (result instanceof Promise) {
           // TODO: In this case, _this.cleanup may not be set by the time the
           // function returns. That's why we check if result is a promise rather
           // than awaiting everything
-          // TODO: Handle element and style after they have been set
-          // TODO: Handle async error propagation
-          result.catch(() => undefined).then((r) => set(r));
+          result
+            .then((value) => set({ element: _this.element, value }))
+            .catch((error) => set({ error }));
         } else {
-          set(result);
+          set({ value: result, error, element: _this.element });
         }
         return _this.cleanup;
       },
@@ -160,21 +169,41 @@ class BinaryOperation extends Expression {
 
       if (isXStore && isYStore) {
         ast.unshift(
-          derived([x, y], ([a, b], set) =>
-            set(BinaryOperation.evaluate(op, a ?? 0, b ?? 0)),
-          ),
+          derived([x, y], ([a, b], set) => {
+            if (a.error) {
+              set({ error: a.error });
+            } else if (b.error) {
+              set({ error: b.error });
+            } else {
+              set({
+                value: BinaryOperation.evaluate(op, a.value ?? 0, b.value ?? 0),
+              });
+            }
+          }),
         );
       } else if (isXStore) {
         ast.unshift(
-          derived([x], ([a], set) =>
-            set(BinaryOperation.evaluate(op, a ?? 0, y ?? 0)),
-          ),
+          derived([x], ([a], set) => {
+            if (a.error) {
+              set({ error: a.error });
+            } else {
+              set({
+                value: BinaryOperation.evaluate(op, a.value ?? 0, y ?? 0),
+              });
+            }
+          }),
         );
       } else if (isYStore) {
         ast.unshift(
-          derived([y], ([b], set) =>
-            set(BinaryOperation.evaluate(op, x ?? 0, b ?? 0)),
-          ),
+          derived([y], ([b], set) => {
+            if (b.error) {
+              set({ error: b.error });
+            } else {
+              set({
+                value: BinaryOperation.evaluate(op, x ?? 0, b.value ?? 0),
+              });
+            }
+          }),
         );
       } else {
         ast.unshift(BinaryOperation.evaluate(op, x ?? 0, y ?? 0));
@@ -214,9 +243,13 @@ class UnaryOperation extends Expression {
     const { operand, operator } = this;
     const computed = operand?.compute ? operand.compute(...args) : operand;
     if (computed?.subscribe) {
-      return derived([computed], ([x], set) =>
-        set(UnaryOperation.evaluate(operator, x ?? 0)),
-      );
+      return derived([computed], ([x], set) => {
+        if (x.error) {
+          set({ error: x.error });
+        } else {
+          set({ value: UnaryOperation.evaluate(operator, x.value ?? 0) });
+        }
+      });
     } else {
       return UnaryOperation.evaluate(operator, computed ?? 0);
     }
@@ -277,7 +310,7 @@ class Ref extends Expression {
     }
 
     try {
-      return rows[row][col].value;
+      return derived([rows[row][col].value], ([value], set) => set({ value }));
     } catch {
       if (sheet == s) {
         throw new Error(`Invalid cell R${row}C${col}`);
@@ -374,13 +407,14 @@ class Range extends Expression {
     const height = Math.abs(startRow - endRow) + 1;
     const width = Math.abs(startCol - endCol) + 1;
 
+    // TODO: Handle range errors from slicing
     return derived(
       rows
         .slice(startRow, endRow + 1)
         .map((r) => r.slice(startCol, endCol + 1))
         .flat()
         .map(({ value }) => value),
-      (values, set) => set(reshape(values, height, width)),
+      (values, set) => set({ value: reshape(values, height, width) }),
     );
   }
 }

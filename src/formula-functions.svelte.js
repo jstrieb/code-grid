@@ -105,7 +105,8 @@ functions.slider = function slider(min, max, step, value) {
 };
 
 functions.bold = function (s) {
-  this.style += "font-weight: bold;";
+  this.element = document.createElement("b");
+  this.childElements.forEach((e) => this.element.appendChild(e));
   return s;
 };
 
@@ -125,7 +126,7 @@ functions.center = function (s) {
       min-height: 0;
     `,
   });
-  this.element.appendChild(e ?? document.createTextNode(s));
+  this.childElements.forEach((e) => this.element.appendChild(e));
   return s;
 };
 
