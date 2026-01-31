@@ -46,29 +46,42 @@ class Function extends Expression {
     const computed = this.args.map((arg) =>
       arg?.compute ? arg.compute(globals, sheet, r, c) : arg,
     );
-    const _this = {
-      globals,
-      sheet,
-      row: r,
-      col: c,
-      // TODO: width, height, style, element
-    };
     return derived(
       computed.filter((x) => x?.subscribe),
       (updated, set, update) => {
-        Object.assign(_this, { set, update });
         // Mutating the updated array causes hard-to-debug problems with this
         // store later on
         updated = [...updated];
-        const result = f.apply(
-          _this,
-          computed.map((x) => (x?.subscribe ? updated.shift() : x)),
-        );
+        const _this = {
+          set,
+          update,
+          globals,
+          sheet,
+          row: r,
+          col: c,
+          width: globals.sheets[sheet].widths[c],
+          height: globals.sheets[sheet].heights[r],
+          // TODO: Do something with style and element
+          style: "",
+          element: undefined,
+        };
+        // TODO: propagate errors
+        let result;
+        try {
+          result = f.apply(
+            _this,
+            computed.map((x) => (x?.subscribe ? updated.shift() : x)),
+          );
+        } catch (e) {
+          result = undefined;
+        }
         if (result instanceof Promise) {
           // TODO: In this case, _this.cleanup may not be set by the time the
           // function returns. That's why we check if result is a promise rather
           // than awaiting everything
-          result.then((r) => set(r));
+          // TODO: Handle element and style after they have been set
+          // TODO: Handle async error propagation
+          result.catch(() => undefined).then((r) => set(r));
         } else {
           set(result);
         }
@@ -201,7 +214,7 @@ class UnaryOperation extends Expression {
     const { operand, operator } = this;
     const computed = operand?.compute ? operand.compute(...args) : operand;
     if (computed?.subscribe) {
-      return derived([computed], (x, set) =>
+      return derived([computed], ([x], set) =>
         set(UnaryOperation.evaluate(operator, x ?? 0)),
       );
     } else {

@@ -393,10 +393,13 @@ test("Formula this object has everything it's supposed to", async () => {
     `=!from_this("fake")`,
     `=from_this("row")`,
     `=from_this("col")`,
+    `=from_this("sheet")`,
     `=from_this("set")`,
     `=from_this("update")`,
     `=from_this("style")`,
     `=from_this("globals")`,
+    `=from_this("width")`,
+    `=from_this("height")`,
     `=!from_this("element")`,
     `=from_this("element", DOLLARS(10))`,
   ];
