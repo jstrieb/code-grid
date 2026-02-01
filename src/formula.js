@@ -57,7 +57,7 @@ class Function extends Expression {
       // store later on
       updated = [...updated];
       const args = computed.map((x) => (isStore(x) ? updated.shift() : x));
-      let error = args.find(({ error: e }) => e != null);
+      let error = args.find((arg) => arg?.error != null);
       if (error) {
         set(error);
         return;
@@ -72,7 +72,7 @@ class Function extends Expression {
         element: undefined,
         childElements: args.map((x, i) =>
           isStore(computed[i])
-            ? (x?.element ?? document.createTextNode(x.value))
+            ? (x?.element ?? document.createTextNode(x?.value ?? ""))
             : document.createTextNode(x),
         ),
       };
@@ -95,6 +95,7 @@ class Function extends Expression {
         error = e;
       }
       if (result instanceof Promise) {
+        set({ element: document.createTextNode("Loading...") });
         // TODO: In this case, _this.cleanup may not be set by the time the
         // function returns. That's why we check if result is a promise rather
         // than awaiting everything
@@ -103,7 +104,7 @@ class Function extends Expression {
             set({
               element:
                 _this.element ??
-                args.find(({ element }) => element != null)?.element,
+                args.find((arg) => arg?.element != null)?.element,
               value,
             }),
           )
@@ -113,8 +114,7 @@ class Function extends Expression {
           value: result,
           error,
           element:
-            _this.element ??
-            args.find(({ element }) => element != null)?.element,
+            _this.element ?? args.find((arg) => arg?.element != null)?.element,
         });
       }
       return _this.cleanup;

@@ -479,6 +479,11 @@ export class Sheet {
               [computed],
               ([{ value, error, element }], _, update) => {
                 update((old) => {
+                  if (error) {
+                    cell.errorText = `Error: ${error.message ?? error}`;
+                    cell.errorStack = error?.stack;
+                    return undefined;
+                  }
                   // TODO: Find a better trigger for resets than just waiting
                   // after updates finish. If, for example, a self-referential
                   // cell's async formula takes longer than the debounce time to
@@ -501,14 +506,7 @@ export class Sheet {
                   ) {
                     return old;
                   }
-                  if (error) {
-                    cell.errorText = `Error: ${error.message ?? error}`;
-                    cell.errorStack = error?.stack;
-                    return undefined;
-                  }
-                  if (element) {
-                    cell.element = element;
-                  }
+                  cell.element = element;
                   this.globals.forceSave++;
                   return value;
                 });
