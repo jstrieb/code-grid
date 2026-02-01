@@ -450,7 +450,6 @@ export class Sheet {
       // Having this effect outside of the Cell.svelte file means that we can
       // lazily render cells, and still have off-screen cell values be updated.
       $effect(() => {
-        cell.style = "";
         cell.errorText = undefined;
         cell.errorStack = undefined;
         cell.element = undefined;
@@ -631,7 +630,6 @@ export class Sheet {
 
 export class Cell {
   value = $state();
-  style = $state("");
   errorText = $state();
   errorStack = $state();
   element = $state();
@@ -678,15 +676,16 @@ export class Cell {
     if (value != null) {
       const div = Object.assign(document.createElement("div"), {
         // Match padding of cell in Cell.svelte
-        style: `padding: 0.1em 0.2em; 
-                z-index: -1; 
-                min-width: max-content;
-                width: max-content;
-                max-width: max-content;
-                min-height: max-content;
-                height: max-content;
-                max-height: max-content; 
-                ${this.style ?? ""}`,
+        style: `
+          padding: 0.1em 0.2em; 
+          z-index: -1; 
+          min-width: max-content;
+          width: max-content;
+          max-width: max-content;
+          min-height: max-content;
+          height: max-content;
+          max-height: max-content; 
+        `,
       });
       if (this.element != null) {
         div.appendChild(this.element.cloneNode(true));

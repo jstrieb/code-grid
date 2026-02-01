@@ -157,7 +157,6 @@
   let value = $derived(cell.value);
   let errorText = $derived(cell.errorText);
   let errorStack = $derived(cell.errorStack);
-  let style = $derived(cell.style);
   let element = $derived(cell.element);
 
   let innerNode = $state(undefined);
@@ -190,7 +189,6 @@
   class:top={cell.topBorder}
   class:bottom={cell.bottomBorder}
   class:editing={cell.editing}
-  style={cell.editing ? undefined : style}
   onfocus={() => {
     /* TODO */
   }}
