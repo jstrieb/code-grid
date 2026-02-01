@@ -169,3 +169,7 @@ export async function domToImage(node) {
   });
   return canvas.toDataURL("image/png");
 }
+
+export function isStore(x) {
+  return x?.subscribe != null;
+}

@@ -1,7 +1,7 @@
 import { formula } from "./formula.js";
 import { functions, evalCode } from "./formula-functions.svelte.js";
 
-import { debounce, randomId } from "./lib/helpers.js";
+import { debounce, randomId, isStore } from "./lib/helpers.js";
 import { ParseError } from "./lib/parsers.js";
 import { rederivable } from "./lib/store.js";
 
@@ -474,7 +474,7 @@ export class Sheet {
                 cell.col,
               )
             : parsed;
-          if (computed?.subscribe) {
+          if (isStore(computed)) {
             cell.value.rederive(
               [computed],
               ([{ value, error, element }], _, update) => {

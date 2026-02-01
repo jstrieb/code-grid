@@ -3,6 +3,7 @@ import {
   sum as arraySum,
   reshape,
   undefinedArgsToIdentity,
+  isStore,
 } from "./lib/helpers.js";
 import {
   str,
@@ -17,6 +18,13 @@ import {
   anyChar,
 } from "./lib/parsers.js";
 import { readable, derived } from "svelte/store";
+
+function compute(x, ...args) {
+  if (x?.compute != null) {
+    return x.compute(...args);
+  }
+  return x;
+}
 
 class Expression {
   // Return a concrete value from an expression given the values in the other
@@ -43,79 +51,74 @@ class Function extends Expression {
     if (f == null) {
       throw new Error(`"${name}" is not a function`);
     }
-    const computed = this.args.map((arg) =>
-      arg?.compute ? arg.compute(globals, sheet, r, c) : arg,
-    );
-    return derived(
-      computed.filter((x) => x?.subscribe),
-      (updated, set, update) => {
-        // Mutating the updated array causes hard-to-debug problems with this
-        // store later on
-        updated = [...updated];
-        const args = computed.map((x) => (x?.subscribe ? updated.shift() : x));
-        let error = args.find(({ error: e }) => e != null);
-        if (error) {
-          set(error);
-          return;
-        }
-        const _this = {
-          globals,
-          sheet,
-          row: r,
-          col: c,
-          width: globals.sheets[sheet].widths[c],
-          height: globals.sheets[sheet].heights[r],
-          element: undefined,
-          childElements: args.map((x, i) =>
-            computed[i]?.subscribe
-              ? (x?.element ?? document.createTextNode(x.value))
-              : document.createTextNode(x),
-          ),
-        };
-        Object.assign(_this, {
-          set: (x) => set({ value: x, element: _this.element }),
-          update: (callback) =>
-            update((previous) => ({
-              value: callback(previous),
-              element: _this.element,
-            })),
+    const computed = this.args.map((arg) => compute(arg, globals, sheet, r, c));
+    return derived(computed.filter(isStore), (updated, set, update) => {
+      // Mutating the updated array causes hard-to-debug problems with this
+      // store later on
+      updated = [...updated];
+      const args = computed.map((x) => (isStore(x) ? updated.shift() : x));
+      let error = args.find(({ error: e }) => e != null);
+      if (error) {
+        set(error);
+        return;
+      }
+      const _this = {
+        globals,
+        sheet,
+        row: r,
+        col: c,
+        width: globals.sheets[sheet].widths[c],
+        height: globals.sheets[sheet].heights[r],
+        element: undefined,
+        childElements: args.map((x, i) =>
+          isStore(computed[i])
+            ? (x?.element ?? document.createTextNode(x.value))
+            : document.createTextNode(x),
+        ),
+      };
+      Object.assign(_this, {
+        set: (x) => set({ value: x, element: _this.element }),
+        update: (callback) =>
+          update((previous) => ({
+            value: callback(previous),
+            element: _this.element,
+          })),
+      });
+      let result;
+      try {
+        result = f.apply(
+          _this,
+          args.map((x, i) => (isStore(computed[i]) ? x.value : x)),
+        );
+      } catch (e) {
+        result = undefined;
+        error = e;
+      }
+      if (result instanceof Promise) {
+        // TODO: In this case, _this.cleanup may not be set by the time the
+        // function returns. That's why we check if result is a promise rather
+        // than awaiting everything
+        result
+          .then((value) =>
+            set({
+              element:
+                _this.element ??
+                args.find(({ element }) => element != null)?.element,
+              value,
+            }),
+          )
+          .catch((error) => set({ error }));
+      } else {
+        set({
+          value: result,
+          error,
+          element:
+            _this.element ??
+            args.find(({ element }) => element != null)?.element,
         });
-        let result;
-        try {
-          result = f.apply(
-            _this,
-            args.map((x, i) => (computed[i]?.subscribe ? x.value : x)),
-          );
-        } catch (e) {
-          result = undefined;
-          error = e;
-        }
-        if (result instanceof Promise) {
-          // TODO: In this case, _this.cleanup may not be set by the time the
-          // function returns. That's why we check if result is a promise rather
-          // than awaiting everything
-          result
-            .then((value) =>
-              set({
-                element:
-                  _this.element ??
-                  args.find(({ element }) => element != null)?.element,
-                value,
-              }),
-            )
-            .catch((error) => set({ error }));
-        } else {
-          set({
-            value: result,
-            error,
-            element:
-              _this.element ??
-              args.find(({ element }) => element != null)?.element,
-          });
-        }
-        return _this.cleanup;
-      },
-    );
+      }
+      return _this.cleanup;
+    });
   }
 }
 
@@ -180,13 +183,11 @@ class BinaryOperation extends Expression {
         console.log(ast);
         throw new Error("Binary operation AST has incorrect length");
       }
-      const x = ((z) => (z?.compute ? z.compute(...args) : z))(ast.shift());
+      const x = compute(ast.shift(), ...args);
       const op = ast.shift();
-      const y = ((z) => (z?.compute ? z.compute(...args) : z))(ast.shift());
-      const isXStore = x?.subscribe;
-      const isYStore = y?.subscribe;
+      const y = compute(ast.shift(), ...args);
 
-      if (isXStore && isYStore) {
+      if (isStore(x) && isStore(y)) {
         ast.unshift(
           derived([x, y], ([a, b], set) => {
             if (a.error) {
@@ -201,7 +202,7 @@ class BinaryOperation extends Expression {
             }
           }),
         );
-      } else if (isXStore) {
+      } else if (isStore(x)) {
         ast.unshift(
           derived([x], ([a], set) => {
             if (a.error) {
@@ -214,7 +215,7 @@ class BinaryOperation extends Expression {
             }
           }),
         );
-      } else if (isYStore) {
+      } else if (isStore(y)) {
         ast.unshift(
           derived([y], ([b], set) => {
             if (b.error) {
@@ -263,8 +264,8 @@ class UnaryOperation extends Expression {
 
   compute(...args) {
     const { operand, operator } = this;
-    const computed = operand?.compute ? operand.compute(...args) : operand;
-    if (computed?.subscribe) {
+    const computed = compute(operand, ...args);
+    if (isStore(computed)) {
       return derived([computed], ([x], set) => {
         if (x.error) {
           set({ error: x.error });
