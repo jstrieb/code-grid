@@ -70,7 +70,16 @@ functions.avg = undefinedArgsToIdentity(
     args.flat(Infinity).reduce((i, j) => i + j) / args.flat(Infinity).length,
 );
 functions.randint = (n) => Math.floor(Math.random() * n);
-functions.if = (x, yes, no) => (x ? yes : no);
+functions.if = function (x, yes, no) {
+  const [_, yesElement, noElement] = this.childElements;
+  if (x) {
+    this.element = yesElement;
+    return yes;
+  } else {
+    this.element = noElement;
+    return no;
+  }
+};
 
 // Aliases
 functions.add = functions.sum;
@@ -96,9 +105,11 @@ functions.slider = function slider(min, max, step, value) {
     step,
     value,
     type: "range",
-    style: `width: 100%;
-            appearance: auto;
-            margin: 0 0.5ch;`,
+    style: `
+      width: 100%;
+      appearance: auto;
+      margin: 0 0.5ch;
+    `,
     oninput: (e) => this.set(Number(e.target.value)),
   });
   return value;
@@ -157,6 +168,7 @@ functions.percent = undefinedArgsToIdentity(function (p, return_str) {
 });
 
 functions.sparkbars = (...args) => {
+  args = args.flat(Infinity);
   const lines = "▁▂▃▄▅▆▇█";
   const min = Math.min(...args),
     max = Math.max(...args);
@@ -170,7 +182,6 @@ functions.checkbox = function (label) {
     value = !!previous;
     return value;
   });
-  const e = this.element;
   this.element = Object.assign(document.createElement("label"), {
     style: `
       display: flex; 
@@ -189,6 +200,9 @@ functions.checkbox = function (label) {
       oninput: (e) => this.set(e.target.checked),
     }),
   );
-  this.element.appendChild(e ?? document.createTextNode(label));
+  this.childElements.forEach((e) => this.element.appendChild(e));
+  if (label != null) {
+    this.element.appendChild(document.createTextNode(label));
+  }
   return value;
 };
