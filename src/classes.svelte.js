@@ -647,7 +647,7 @@ export class Cell {
 
   constructor(formula, value, row, col) {
     this.formula = formula;
-    this.value = rederivable(value ?? formula);
+    this.value = rederivable(value);
     this.row = row;
     this.col = col;
   }

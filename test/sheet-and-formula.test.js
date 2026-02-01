@@ -135,9 +135,7 @@ test("Simple custom formula functions", async () => {
 
 test("Errors in cells", async () => {
   const state = createSheet([["5", "=str_not_func(", "=factorial(RC0)"]]);
-  await expectSheet(state.currentSheet, [
-    [5, "=str_not_func(", "=factorial(RC0)"],
-  ]);
+  await expectSheet(state.currentSheet, [[5, "=str_not_func(", undefined]]);
   evalCode(
     `functions.factorial = (n) => n == 0 ? 1 : (n * functions.factorial(n - 1))`,
   );

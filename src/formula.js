@@ -1,10 +1,5 @@
 import { functions } from "./formula-functions.svelte.js";
-import {
-  sum as arraySum,
-  reshape,
-  undefinedArgsToIdentity,
-  isStore,
-} from "./lib/helpers.js";
+import { reshape, isStore } from "./lib/helpers.js";
 import {
   str,
   regex,
@@ -17,7 +12,7 @@ import {
   EOF,
   anyChar,
 } from "./lib/parsers.js";
-import { readable, derived } from "svelte/store";
+import { derived } from "svelte/store";
 
 function compute(x, ...args) {
   if (x?.compute != null) {
@@ -53,11 +48,13 @@ class Function extends Expression {
     }
     const computed = this.args.map((arg) => compute(arg, globals, sheet, r, c));
     return derived(computed.filter(isStore), (updated, set, update) => {
+      // Don't compute values if an async dependency hasn't ever settled.
+      if (updated.some((v) => v == null)) return;
       // Mutating the updated array causes hard-to-debug problems with this
       // store later on
       updated = [...updated];
       const args = computed.map((x) => (isStore(x) ? updated.shift() : x));
-      let error = args.find((arg) => arg?.error != null);
+      let error = args.find(({ error }) => error != null);
       if (error) {
         set(error);
         return;
@@ -104,7 +101,7 @@ class Function extends Expression {
             set({
               element:
                 _this.element ??
-                args.find((arg) => arg?.element != null)?.element,
+                args.find(({ element }) => element != null)?.element,
               value,
             }),
           )
@@ -114,7 +111,8 @@ class Function extends Expression {
           value: result,
           error,
           element:
-            _this.element ?? args.find((arg) => arg?.element != null)?.element,
+            _this.element ??
+            args.find(({ element }) => element != null)?.element,
         });
       }
       return _this.cleanup;
@@ -190,6 +188,7 @@ class BinaryOperation extends Expression {
       if (isStore(x) && isStore(y)) {
         ast.unshift(
           derived([x, y], ([a, b], set) => {
+            if (a == null || b == null) return;
             if (a.error) {
               set({ error: a.error });
             } else if (b.error) {
@@ -197,7 +196,7 @@ class BinaryOperation extends Expression {
             } else {
               set({
                 value: BinaryOperation.evaluate(op, a.value ?? 0, b.value ?? 0),
-                element: a?.element ?? b?.element,
+                element: a.element ?? b.element,
               });
             }
           }),
@@ -205,12 +204,13 @@ class BinaryOperation extends Expression {
       } else if (isStore(x)) {
         ast.unshift(
           derived([x], ([a], set) => {
+            if (a == null) return;
             if (a.error) {
               set({ error: a.error });
             } else {
               set({
                 value: BinaryOperation.evaluate(op, a.value ?? 0, y ?? 0),
-                element: a?.element,
+                element: a.element,
               });
             }
           }),
@@ -218,12 +218,13 @@ class BinaryOperation extends Expression {
       } else if (isStore(y)) {
         ast.unshift(
           derived([y], ([b], set) => {
+            if (b == null) return;
             if (b.error) {
               set({ error: b.error });
             } else {
               set({
                 value: BinaryOperation.evaluate(op, x ?? 0, b.value ?? 0),
-                element: b?.element,
+                element: b.element,
               });
             }
           }),
@@ -267,12 +268,13 @@ class UnaryOperation extends Expression {
     const computed = compute(operand, ...args);
     if (isStore(computed)) {
       return derived([computed], ([x], set) => {
+        if (x == null) return;
         if (x.error) {
           set({ error: x.error });
         } else {
           set({
             value: UnaryOperation.evaluate(operator, x.value ?? 0),
-            element: x?.element,
+            element: x.element,
           });
         }
       });
