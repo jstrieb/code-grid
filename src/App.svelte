@@ -128,7 +128,11 @@
 
   let { urlData } = $props();
   let globals;
-  globals = load(urlData) ?? new State([new Sheet("Sheet 1", 10, 10)]);
+  globals = load(urlData);
+  if (globals == null) {
+    globals = new State([]);
+    globals.addSheet("Sheet 1", 10, 10);
+  }
   let table = $state();
   let startHeight = $state(0);
   let scrollArea = $state();
@@ -348,7 +352,7 @@
   bind:open={globals.editorOpen}
   style="display: flex; flex-direction: column; align-items: stretch; overflow: hidden; gap: 0.25em;"
 >
-  <CodeEditor numbers={true} bind:editor bind:code={globals.formulaCode} />
+  <CodeEditor numbers bind:editor bind:code={globals.formulaCode} />
   {#if codeError}
     <p style="white-space: pre; overflow-x: auto; flex-shrink: 0;">
       {codeError}
