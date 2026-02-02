@@ -161,11 +161,10 @@
 
   let innerNode = $state(undefined);
   $effect(() => {
-    if (element == null) {
-      return;
-    }
     innerNode?.replaceChildren?.();
-    innerNode?.appendChild?.(element);
+    if (element != null) {
+      innerNode?.appendChild?.(element);
+    }
   });
 
   $effect(() => {
