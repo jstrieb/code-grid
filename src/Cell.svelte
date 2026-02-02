@@ -152,7 +152,7 @@
 </style>
 
 <script>
-  let { cell, row, col, width, height, globals = $bindable() } = $props();
+  let { cell, row, col, width, height, globals } = $props();
   let selected = $derived(globals.selected);
   let value = $derived(cell.value);
   let errorText = $derived(cell.errorText);

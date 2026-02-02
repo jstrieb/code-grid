@@ -13,7 +13,7 @@ test: node_modules
 	npx vitest run --coverage
 
 watch-test: node_modules
-	npx vitest --coverage
+	npx vitest --coverage --bail 1
 
 pre-commit-check: pre-commit-lint test
 

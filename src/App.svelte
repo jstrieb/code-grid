@@ -127,9 +127,12 @@
   } from "./lib/helpers.js";
 
   let { urlData } = $props();
-  let globals = $state(
-    load(urlData) ?? new State([new Sheet("Sheet 1", 10, 10)]),
-  );
+  let globals;
+  globals = load(urlData);
+  if (globals == null) {
+    globals = new State([]);
+    globals.addSheet("Sheet 1", 10, 10);
+  }
   let table = $state();
   let startHeight = $state(0);
   let scrollArea = $state();
@@ -162,7 +165,7 @@
         return undefined;
       }
     }
-    return State.load(data);
+    return State.loadNew(data);
   }
 
   let dontSave = $state(false);
@@ -191,26 +194,7 @@
     // Allow cell changes with get or update to trigger save. Those updates
     // change forceSave
     globals.forceSave;
-    save({
-      sheets: [
-        // Spreads necessary for reactivity
-        ...globals.sheets.map((sheet) => ({
-          name: sheet.name,
-          widths: [...sheet.widths],
-          heights: [...sheet.heights],
-          // TODO: Transpose for better compression
-          cells: [
-            ...sheet.cells.map((row) =>
-              row.map((cell) => ({
-                formula: cell.formula,
-                value: cell.get(),
-              })),
-            ),
-          ],
-        })),
-      ],
-      formulaCode: globals.formulaCode,
-    });
+    save(createSaveData(globals.sheets, globals.formulaCode));
   });
   $effect(() => {
     globals.currentSheetIndex;
@@ -309,15 +293,7 @@
       return;
     }
     dontSave = true;
-    globals = Object.assign(State.load(e.state), {
-      currentSheetIndex: globals.currentSheetIndex,
-      mode: globals.mode,
-      helpOpen: globals.helpOpen,
-      editorOpen: globals.editorOpen,
-      imageOpen: globals.imageOpen,
-      elements: globals.elements,
-      pasteBuffer: globals.pasteBuffer,
-    });
+    globals.load(e.state);
   }}
   bind:innerHeight
 />
@@ -326,12 +302,12 @@
 {#if navigator.maxTouchPoints <= 1}
   <!-- Else float the bar above the virtual keyboard -->
   <div>
-    <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
+    <FormulaBar {globals} bind:editor={globals.elements.formulaBar} />
   </div>
 {/if}
 
 <div class="tabs">
-  <Tabs bind:globals bind:value={globals.currentSheetIndex} />
+  <Tabs {globals} bind:value={globals.currentSheetIndex} />
 </div>
 
 <div
@@ -350,14 +326,14 @@
     Set --width and --height default values because if Table is in a Dialog, it
     will inherit the width and height of the dialog for table cells.
   -->
-  <Table bind:globals bind:table --width="auto" --height="auto" />
+  <Table {globals} bind:table --width="auto" --height="auto" />
 </div>
 
 <Dialog
   bind:open={globals.editorOpen}
   style="display: flex; flex-direction: column; align-items: stretch; overflow: hidden; gap: 0.25em;"
 >
-  <CodeEditor numbers={true} bind:editor bind:code={globals.formulaCode} />
+  <CodeEditor numbers bind:editor bind:code={globals.formulaCode} />
   {#if codeError}
     <p style="white-space: pre; overflow-x: auto; flex-shrink: 0;">
       {codeError}
@@ -387,7 +363,7 @@
         <p>Error {err}</p>
       {/await}
     </Details>
-    <SaveLoad bind:globals {imageData} />
+    <SaveLoad {globals} {imageData} />
   </div>
 </Dialog>
 
@@ -450,7 +426,7 @@
     </Details>
     <Details>
       {#snippet summary()}Settings{/snippet}
-      <Settings bind:globals />
+      <Settings {globals} />
     </Details>
   </div>
 </Dialog>
@@ -489,7 +465,7 @@
 {#if navigator.maxTouchPoints > 1}
   <!-- Must set top instead of bottom for correct placement on iOS -->
   <div class="keyboardbar" style:top="calc({visualBottom}px - 2.5em * 2)">
-    <FormulaBar bind:globals bind:editor={globals.elements.formulaBar} />
+    <FormulaBar {globals} bind:editor={globals.elements.formulaBar} />
     {#if showInputButtons}
       <div class="buttonbar" style:z-index={nextZIndex()}>
         {@render insertTextButton("=")}
