@@ -51,7 +51,7 @@ class Function extends Expression {
       // Don't compute values if an async dependency hasn't ever settled.
       if (updated.some((v) => v == null)) return;
       // Mutating the updated array causes hard-to-debug problems with this
-      // store later on
+      // store later on, so we clone it.
       updated = [...updated];
       const args = computed.map((x) => (isStore(x) ? updated.shift() : x));
       let error = args.find(({ error }) => error != null);
@@ -194,10 +194,18 @@ class BinaryOperation extends Expression {
             } else if (b.error) {
               set({ error: b.error });
             } else {
-              set({
-                value: BinaryOperation.evaluate(op, a.value ?? 0, b.value ?? 0),
-                element: a.element ?? b.element,
-              });
+              try {
+                set({
+                  value: BinaryOperation.evaluate(
+                    op,
+                    a.value ?? 0,
+                    b.value ?? 0,
+                  ),
+                  element: a.element ?? b.element,
+                });
+              } catch (error) {
+                set({ error });
+              }
             }
           }),
         );
@@ -208,10 +216,14 @@ class BinaryOperation extends Expression {
             if (a.error) {
               set({ error: a.error });
             } else {
-              set({
-                value: BinaryOperation.evaluate(op, a.value ?? 0, y ?? 0),
-                element: a.element,
-              });
+              try {
+                set({
+                  value: BinaryOperation.evaluate(op, a.value ?? 0, y ?? 0),
+                  element: a.element,
+                });
+              } catch (error) {
+                set({ error });
+              }
             }
           }),
         );
@@ -222,10 +234,14 @@ class BinaryOperation extends Expression {
             if (b.error) {
               set({ error: b.error });
             } else {
-              set({
-                value: BinaryOperation.evaluate(op, x ?? 0, b.value ?? 0),
-                element: b.element,
-              });
+              try {
+                set({
+                  value: BinaryOperation.evaluate(op, x ?? 0, b.value ?? 0),
+                  element: b.element,
+                });
+              } catch (error) {
+                set({ error });
+              }
             }
           }),
         );
@@ -272,10 +288,14 @@ class UnaryOperation extends Expression {
         if (x.error) {
           set({ error: x.error });
         } else {
-          set({
-            value: UnaryOperation.evaluate(operator, x.value ?? 0),
-            element: x.element,
-          });
+          try {
+            set({
+              value: UnaryOperation.evaluate(operator, x.value ?? 0),
+              element: x.element,
+            });
+          } catch (error) {
+            set({ error });
+          }
         }
       });
     } else {
