@@ -14,6 +14,29 @@ function minmax(min, x, max) {
   return Math.min(Math.max(x, min), max);
 }
 
+export function createSaveData(sheets, formulaCode) {
+  return {
+    sheets: [
+      // Spreads necessary for reactivity
+      ...sheets.map((sheet) => ({
+        name: sheet.name,
+        widths: [...sheet.widths],
+        heights: [...sheet.heights],
+        // TODO: Transpose for better compression
+        cells: [
+          ...sheet.cells.map((row) =>
+            row.map((cell) => ({
+              formula: cell.formula,
+              value: cell.get(),
+            })),
+          ),
+        ],
+      })),
+    ],
+    formulaCode: formulaCode,
+  };
+}
+
 export class State {
   sheets = $state([]);
   currentSheetIndex = $state(0);
@@ -79,7 +102,6 @@ functions.crypto = async (ticker) => {
         s.heights = sheet.heights;
         return s;
       }),
-      formulaCode: formulaCode,
     });
     if (formulaCode != null) {
       this.formulaCode = formulaCode;

@@ -194,26 +194,7 @@
     // Allow cell changes with get or update to trigger save. Those updates
     // change forceSave
     globals.forceSave;
-    save({
-      sheets: [
-        // Spreads necessary for reactivity
-        ...globals.sheets.map((sheet) => ({
-          name: sheet.name,
-          widths: [...sheet.widths],
-          heights: [...sheet.heights],
-          // TODO: Transpose for better compression
-          cells: [
-            ...sheet.cells.map((row) =>
-              row.map((cell) => ({
-                formula: cell.formula,
-                value: cell.get(),
-              })),
-            ),
-          ],
-        })),
-      ],
-      formulaCode: globals.formulaCode,
-    });
+    save(createSaveData(globals.sheets, globals.formulaCode));
   });
   $effect(() => {
     globals.currentSheetIndex;

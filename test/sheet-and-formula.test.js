@@ -1,4 +1,4 @@
-import { State } from "../src/classes.svelte.js";
+import { createSaveData, State } from "../src/classes.svelte.js";
 import { test, expect, beforeEach } from "vitest";
 import { evalCode, functions } from "../src/formula-functions.svelte.js";
 
@@ -25,6 +25,20 @@ function expectSheet(sheet, cells) {
           // time for new values to propagate through the graph, and for async
           // results to settle
           expect.poll(() => sheet.cells[i][j].get()).toEqual(cell),
+        ),
+      )
+      .flat(),
+  );
+}
+
+function expectSheetElements(sheet, elements) {
+  return Promise.all(
+    elements
+      .map((row, i) =>
+        row.map((tagName, j) =>
+          expect
+            .poll(() => sheet.cells[i][j].element?.tagName)
+            .toEqual(tagName),
         ),
       )
       .flat(),
@@ -711,4 +725,26 @@ test("State.load preserves elements", async () => {
   expect(state.elements.formulaBar.getAttribute("data-testid")).toBe(
     "shouldPreserve",
   );
+});
+
+test("State.load correctness", async () => {
+  const testFormulaCode = `functions.timesTwo = (x) => 2 * x;
+functions.H4 = function (x) { this.element = document.createElement("H4"); this.element.innerHTML = x; return x };
+`;
+  const state = createSheet(
+    [["1", "2", "=H4(RC0+timesTwo(RC[-1]))"]],
+    testFormulaCode,
+  );
+  await expectSheet(state.currentSheet, [[1, 2, 5]]);
+  await expectSheetElements(state.currentSheet, [[undefined, undefined, "H4"]]);
+
+  const snapshot = createSaveData([state.currentSheet], testFormulaCode);
+
+  state.currentSheet.cells[0][2].formula = "=7";
+
+  state.load(snapshot);
+
+  expect(state.formulaCode).toBe(testFormulaCode);
+  await expectSheet(state.currentSheet, [[1, 2, 5]]);
+  await expectSheetElements(state.currentSheet, [[undefined, undefined, "H4"]]);
 });
