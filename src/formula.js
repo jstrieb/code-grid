@@ -66,6 +66,7 @@ class Function extends Expression {
         col: c,
         width: globals.sheets[sheet].widths[c],
         height: globals.sheets[sheet].heights[r],
+        cell: globals.sheets[sheet].cells[r][c],
         element: undefined,
         childElements: args.map((x, i) =>
           isStore(computed[i])
@@ -76,10 +77,13 @@ class Function extends Expression {
       Object.assign(_this, {
         set: (x) => set({ value: x, element: _this.element }),
         update: (callback) =>
-          update((previous) => ({
-            value: callback(previous),
-            element: _this.element,
-          })),
+          update((previous) => {
+            if (previous == null) return;
+            return {
+              value: callback(previous.value),
+              element: _this.element,
+            };
+          }),
       });
       let result;
       try {
@@ -562,8 +566,8 @@ const value = lex(
     lex(string),
     lex(fun),
     lex(ref),
-    lex("true").map((_) => true),
-    lex("false").map((_) => false),
+    lex("true").map(() => true),
+    lex("false").map(() => false),
     lex("(").then(logic).skip(lex(")")),
   ),
 );

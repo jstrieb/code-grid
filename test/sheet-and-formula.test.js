@@ -397,6 +397,7 @@ test("Formula this object has everything it's supposed to", async () => {
     `=from_this("globals")`,
     `=from_this("width")`,
     `=from_this("height")`,
+    `=from_this("cell")`,
     `=!from_this("element")`,
     `=from_this("childElements")`,
     `=from_this("childElements", DOLLARS(10))`,

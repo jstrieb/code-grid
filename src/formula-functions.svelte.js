@@ -92,13 +92,17 @@ functions.rand = functions.random;
 
 // Miscellaneous utility functions
 functions.slider = function slider(min, max, step, value) {
-  this.update((previous) => {
+  // TODO: Improve rough heuristic
+  if (this.cell.formula.toLocaleLowerCase().startsWith("=slider(")) {
+    const previous = this.cell.get();
     if (previous != null && typeof previous !== "string") {
       value = previous;
     } else {
-      value = value ?? 0;
+      value = value ?? min;
     }
-  });
+  } else {
+    value = value ?? min;
+  }
   this.element = Object.assign(document.createElement("input"), {
     min,
     max,
@@ -178,10 +182,10 @@ functions.sparkbars = (...args) => {
 
 functions.checkbox = function (label) {
   let value;
-  this.update((previous) => {
-    value = !!previous;
-    return value;
-  });
+  // TODO: Imrpvoe rough heuristic
+  if (this.cell.formula.toLocaleLowerCase().startsWith("=checkbox(")) {
+    value = !!this.cell.get();
+  }
   this.element = Object.assign(document.createElement("label"), {
     style: `
       display: flex; 
@@ -205,4 +209,20 @@ functions.checkbox = function (label) {
     this.element.appendChild(document.createTextNode(label));
   }
   return value;
+};
+
+functions.tick = function (ms) {
+  const interval = setInterval(
+    () =>
+      this.update((i) => {
+        console.log(i);
+        return i + 1;
+      }),
+    ms,
+  );
+  this.cleanup = () => {
+    console.log("Clearing");
+    clearInterval(interval);
+  };
+  return 0;
 };
