@@ -1,4 +1,4 @@
-import { formula } from "./formula.js";
+import { formula, compute } from "./formula.js";
 import { functions, evalCode } from "./formula-functions.svelte.js";
 
 import { debounce, randomId, isStore } from "./lib/helpers.js";
@@ -465,21 +465,20 @@ export class Sheet {
 
         try {
           const parsed = formula.parse(cell.formula);
-          const computed = parsed?.compute
-            ? parsed.compute(
-                this.globals,
-                this.globals.sheets.indexOf(this),
-                cell.row,
-                cell.col,
-              )
-            : parsed;
+          const computed = compute(
+            parsed,
+            this.globals,
+            this.globals.sheets.indexOf(this),
+            cell.row,
+            cell.col,
+          );
           if (isStore(computed)) {
             cell.value.rederive(
               [computed],
               ([{ value, error, element }], _, update) => {
                 update((old) => {
                   if (error) {
-                    cell.errorText = `Error: ${error.message ?? error}`;
+                    cell.errorText = `Error: ${error?.message ?? error}`;
                     cell.errorStack = error?.stack;
                     return undefined;
                   }

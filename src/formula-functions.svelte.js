@@ -182,7 +182,7 @@ functions.sparkbars = (...args) => {
 
 functions.checkbox = function (label) {
   let value;
-  // TODO: Imrpvoe rough heuristic
+  // TODO: Improve rough heuristic
   if (this.cell.formula.toLocaleLowerCase().startsWith("=checkbox(")) {
     value = !!this.cell.get();
   }
@@ -215,12 +215,14 @@ functions.tick = function (ms) {
   const interval = setInterval(
     () =>
       this.update((i) => {
+        // TODO: Remove
         console.log(i);
         return i + 1;
       }),
     ms,
   );
   this.cleanup = () => {
+    // TODO: Remove
     console.log("Clearing");
     clearInterval(interval);
   };

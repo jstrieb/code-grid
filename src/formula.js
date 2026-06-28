@@ -14,7 +14,7 @@ import {
 } from "./lib/parsers.js";
 import { derived } from "svelte/store";
 
-function compute(x, ...args) {
+export function compute(x, ...args) {
   if (x?.compute != null) {
     return x.compute(...args);
   }
