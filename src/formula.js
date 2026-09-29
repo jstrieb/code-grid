@@ -334,6 +334,9 @@ class Ref extends Expression {
     } else {
       sheet = s + this.s.relative;
     }
+    if (sheet < 0 || sheet >= globals.sheets.length) {
+      throw new Error(`Invalid sheet index ${sheet}`);
+    }
     const rows = globals.sheets[sheet].cells;
 
     let row;
@@ -364,13 +367,9 @@ class Ref extends Expression {
     try {
       return derived([rows[row][col].value], ([value], set) => set({ value }));
     } catch {
-      if (sheet == s) {
-        throw new Error(`Invalid cell R${row}C${col}`);
-      } else {
-        throw new Error(
-          `Invalid cell R${i}C${j} in sheet ${globals.sheets[sheet].name}`,
-        );
-      }
+      throw new Error(
+        `Invalid cell R${row}C${col} in sheet "${globals.sheets[sheet].name}"`,
+      );
     }
   }
 }
