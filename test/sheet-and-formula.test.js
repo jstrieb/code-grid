@@ -693,4 +693,22 @@ test("Binary literals", async () => {
   ]);
 });
 
-// TODO: Add tests validating that the cleanup function works
+test("Cleanup", async () => {
+  evalCode(`
+    let notCleanedUp = 0;
+    functions.get = function() {
+      notCleanedUp += 1;
+      this.cleanup = () => notCleanedUp--;
+      return notCleanedUp;
+    }
+  `);
+  const state = createSheet([
+    ["=GET()", "=GET()", "=GET()", "", ""],
+    ["", "", "", "", "=GET()"],
+  ]);
+  state.currentSheet.cells[1][0].formula = "=GET()";
+  state.currentSheet.deleteRows(1);
+  state.currentSheet.deleteCols(3);
+  state.currentSheet.cells[0][1].formula = "asdf";
+  await expectSheet(state.currentSheet, [[1, "asdf"]]);
+});
