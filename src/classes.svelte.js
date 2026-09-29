@@ -482,6 +482,8 @@ export class Sheet {
                     cell.errorStack = error?.stack;
                     return undefined;
                   }
+                  cell.errorText = undefined;
+                  cell.errorStack = undefined;
                   // TODO: Find a better trigger for resets than just waiting
                   // after updates finish. If, for example, a self-referential
                   // cell's async formula takes longer than the debounce time to
