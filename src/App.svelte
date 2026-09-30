@@ -402,7 +402,11 @@
     </p>
     <Details open>
       {#snippet summary()}Tutorial{/snippet}
-      <p>Tutorial TODO</p>
+      <p>
+        <a href="https://spreadsheet.games" target="_blank"
+          >Play the interactive tutorial game.</a
+        >
+      </p>
       <p>
         Go to <a
           href="https://github.com/jstrieb/code-grid#api-documentation"
