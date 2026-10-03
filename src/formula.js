@@ -52,7 +52,7 @@ class Function extends Expression {
       if (updated.some((v) => v == null)) return;
       let error = updated.find(({ error }) => error != null);
       if (error) {
-        set(error);
+        set({ error });
         return;
       }
       // Mutating the updated array causes hard-to-debug problems with this
@@ -76,14 +76,18 @@ class Function extends Expression {
       };
       Object.assign(_this, {
         set: (x) => set({ value: x, element: _this.element }),
-        update: (callback) =>
+        update: (callback) => {
           update((previous) => {
-            if (previous == null) return;
-            return {
-              value: callback(previous.value),
-              element: _this.element,
-            };
-          }),
+            try {
+              return {
+                value: callback(previous?.value),
+                element: _this.element,
+              };
+            } catch (e) {
+              return { error: e };
+            }
+          });
+        },
       });
       let result;
       try {
@@ -96,20 +100,23 @@ class Function extends Expression {
         error = e;
       }
       if (result instanceof Promise) {
-        set({ element: document.createTextNode("Loading...") });
+        update((old) => ({
+          value: old?.value,
+          element: document.createTextNode("Loading..."),
+        }));
         // TODO: In this case, _this.cleanup may not be set by the time the
         // function returns. That's why we check if result is a promise rather
         // than awaiting everything
         result
-          .then((value) =>
+          .then((value) => {
             set({
               element:
                 _this.element ??
                 args.find(({ element }) => element != null)?.element,
               value,
-            }),
-          )
-          .catch((error) => set({ error }));
+            });
+          })
+          .catch((e) => set({ error: e }));
       } else {
         set({
           value: result,
@@ -183,12 +190,12 @@ class BinaryOperation extends Expression {
   compute(...args) {
     const ast = [...this.ast];
     if (ast.length < 3) {
-      console.log(ast);
+      console.error(ast);
       throw new Error("Binary operation AST has incorrect length");
     }
     while (ast.length > 1) {
       if (ast.length % 2 != 1) {
-        console.log(ast);
+        console.error(ast);
         throw new Error("Binary operation AST has incorrect length");
       }
       const x = compute(ast.shift(), ...args);

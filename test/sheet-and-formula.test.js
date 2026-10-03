@@ -1,4 +1,4 @@
-import { Sheet, State } from "../src/classes.svelte.js";
+import { State } from "../src/classes.svelte.js";
 import { test, expect, beforeEach } from "vitest";
 import { evalCode, functions } from "../src/formula-functions.svelte.js";
 
@@ -36,12 +36,9 @@ beforeEach(() => {
   // Restore the imported, destructively-modified, global functions object so
   // that tests cannot influence each other
   Object.keys(functions).forEach((k) => {
-    if (k in originalFunctions) return;
     delete functions[k];
   });
-  Object.keys(originalFunctions).forEach((k) => {
-    functions[k] = originalFunctions[k];
-  });
+  Object.assign(functions, originalFunctions);
 });
 
 test("Simple sheet with changes", async () => {
@@ -144,8 +141,10 @@ test("Errors in cells", async () => {
   state.currentSheet.cells[0][2].formula = '=error("test")';
   await expectSheet(state.currentSheet, [[5, "=str_not_func(", undefined]]);
   evalCode(`functions.error = async function(x) { throw new Error(x); }`);
+  state.currentSheet.cells[0][2].formula = '=error("test-async")';
   await expectSheet(state.currentSheet, [[5, "=str_not_func(", undefined]]);
   evalCode(`functions.error = (x) => { throw new Error(x); }`);
+  state.currentSheet.cells[0][2].formula = '=error("test-sync")';
   await expectSheet(state.currentSheet, [[5, "=str_not_func(", undefined]]);
 });
 
@@ -647,6 +646,11 @@ test("Operator overloading with monkeypatching", async () => {
   await expectSheet(state.currentSheet, [
     ["test ".repeat(3), "test ".repeat(9), "tEsT"],
   ]);
+  evalCode(`
+    delete String.prototype["*"];
+    delete Number.prototype["*"];
+    delete String.prototype["~"];
+  `);
 });
 
 test("Single-quoted strings", async () => {
@@ -722,4 +726,17 @@ test("Sensible empty cell values", async () => {
     [1, 1, undefined],
     ["abc", "abc", undefined],
   ]);
+});
+
+test("Throw in update", async () => {
+  evalCode(`functions.throw = function() {
+    this.update(() => { throw new Error("In update"); });
+    setTimeout(() => this.update(() => { throw new Error("In update"); }), 100);
+  }`);
+  const state = createSheet([["=2 * 2 ** 2"]]);
+  await expectSheet(state.currentSheet, [[8]]);
+  state.currentSheet.cells[0][0].formula = "=throw()";
+  await expectSheet(state.currentSheet, [[undefined]]);
+  state.currentSheet.cells[0][0].formula = "= 1 + 2";
+  await expectSheet(state.currentSheet, [[3]]);
 });
