@@ -72,7 +72,7 @@
     position: absolute;
     top: calc(-1 * var(--height));
     width: 300px;
-    max-width: 100vw - 2em;
+    max-width: calc(100vw - 2em);
   }
 
   .status {
