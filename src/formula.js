@@ -163,6 +163,12 @@ class BinaryOperation extends Expression {
   }
 
   static evaluate(op, x, y) {
+    if (x == null) {
+      x = typeof y === "string" ? "" : 0;
+    }
+    if (y == null) {
+      y = typeof x === "string" ? "" : 0;
+    }
     if (typeof x[op] === "function") {
       return x[op](y);
     } else if (typeof x[op]?.forward === "function") {
@@ -200,11 +206,7 @@ class BinaryOperation extends Expression {
             } else {
               try {
                 set({
-                  value: BinaryOperation.evaluate(
-                    op,
-                    a.value ?? 0,
-                    b.value ?? 0,
-                  ),
+                  value: BinaryOperation.evaluate(op, a.value, b.value),
                   element: a.element ?? b.element,
                 });
               } catch (error) {
@@ -222,7 +224,7 @@ class BinaryOperation extends Expression {
             } else {
               try {
                 set({
-                  value: BinaryOperation.evaluate(op, a.value ?? 0, y ?? 0),
+                  value: BinaryOperation.evaluate(op, a.value, y),
                   element: a.element,
                 });
               } catch (error) {
@@ -240,7 +242,7 @@ class BinaryOperation extends Expression {
             } else {
               try {
                 set({
-                  value: BinaryOperation.evaluate(op, x ?? 0, b.value ?? 0),
+                  value: BinaryOperation.evaluate(op, x, b.value),
                   element: b.element,
                 });
               } catch (error) {
@@ -250,7 +252,7 @@ class BinaryOperation extends Expression {
           }),
         );
       } else {
-        ast.unshift(BinaryOperation.evaluate(op, x ?? 0, y ?? 0));
+        ast.unshift(BinaryOperation.evaluate(op, x, y));
       }
     }
 

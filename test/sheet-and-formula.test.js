@@ -712,3 +712,14 @@ test("Cleanup", async () => {
   state.currentSheet.cells[0][1].formula = "asdf";
   await expectSheet(state.currentSheet, [[1, "asdf"]]);
 });
+
+test("Sensible empty cell values", async () => {
+  const state = createSheet([
+    ["=RC[1] + RC[2]", "1", null],
+    ["=RC[1] + RC[2]", "abc", ""],
+  ]);
+  await expectSheet(state.currentSheet, [
+    [1, 1, undefined],
+    ["abc", "abc", undefined],
+  ]);
+});
