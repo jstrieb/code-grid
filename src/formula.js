@@ -50,15 +50,15 @@ class Function extends Expression {
     return derived(computed.filter(isStore), (updated, set, update) => {
       // Don't compute values if an async dependency hasn't ever settled.
       if (updated.some((v) => v == null)) return;
-      // Mutating the updated array causes hard-to-debug problems with this
-      // store later on, so we clone it.
-      updated = [...updated];
-      const args = computed.map((x) => (isStore(x) ? updated.shift() : x));
-      let error = args.find(({ error }) => error != null);
+      let error = updated.find(({ error }) => error != null);
       if (error) {
         set(error);
         return;
       }
+      // Mutating the updated array causes hard-to-debug problems with this
+      // store later on, so we clone it.
+      updated = [...updated];
+      const args = computed.map((x) => (isStore(x) ? updated.shift() : x));
       const _this = {
         globals,
         sheet,
