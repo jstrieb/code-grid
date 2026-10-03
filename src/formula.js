@@ -50,9 +50,9 @@ class Function extends Expression {
     return derived(computed.filter(isStore), (updated, set, update) => {
       // Don't compute values if an async dependency hasn't ever settled.
       if (updated.some((v) => v == null)) return;
-      let error = updated.find(({ error }) => error != null);
-      if (error) {
-        set({ error });
+      let argWithError = updated.find(({ error }) => error != null);
+      if (argWithError) {
+        set(argWithError);
         return;
       }
       // Mutating the updated array causes hard-to-debug problems with this
@@ -83,13 +83,13 @@ class Function extends Expression {
                 value: callback(previous?.value),
                 element: _this.element,
               };
-            } catch (e) {
-              return { error: e };
+            } catch (error) {
+              return { error };
             }
           });
         },
       });
-      let result;
+      let result, error;
       try {
         result = f.apply(
           _this,
