@@ -104,7 +104,7 @@ class Function extends Expression {
       if (result instanceof Promise) {
         update((old) => ({
           value: old?.value,
-          element: document.createTextNode("Loading..."),
+          element: _this.element ?? document.createTextNode("Loading..."),
         }));
         // TODO: In this case, _this.cleanup may not be set by the time the
         // function returns. That's why we check if result is a promise rather
