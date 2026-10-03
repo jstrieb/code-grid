@@ -68,11 +68,13 @@ class Function extends Expression {
         height: globals.sheets[sheet].heights[r],
         cell: globals.sheets[sheet].cells[r][c],
         element: undefined,
-        childElements: args.map((x, i) =>
-          isStore(computed[i])
-            ? (x?.element ?? document.createTextNode(x?.value ?? ""))
-            : document.createTextNode(x),
-        ),
+        get childElements() {
+          return args.map((x, i) =>
+            isStore(computed[i])
+              ? (x?.element ?? document.createTextNode(x?.value ?? ""))
+              : document.createTextNode(x),
+          );
+        },
       };
       Object.assign(_this, {
         set: (x) => set({ value: x, element: _this.element }),
