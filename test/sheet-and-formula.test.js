@@ -729,7 +729,7 @@ test("Sensible empty cell values", async () => {
   ]);
 });
 
-test("Throw in update", async () => {
+test("Throw in update doesn't crash", async () => {
   evalCode(`functions.throw = function() {
     this.update(() => { throw new Error("In update"); });
     setTimeout(() => this.update(() => { throw new Error("In update"); }), 100);
@@ -751,4 +751,14 @@ test("Async results are correctly ordered", async () => {
   state.currentSheet.cells[0][1].formula = "1";
   await new Promise((r) => setTimeout(() => r(), 250));
   await expectSheet(state.currentSheet, [[1, 1]]);
+});
+
+test("Elements are set even when the value doesn't change", async () => {
+  const state = createSheet([["5"]]);
+  await expectSheet(state.currentSheet, [[5]]);
+  state.currentSheet.cells[0][0].formula = "=dollars(5)";
+  await expect
+    .poll(() => state.currentSheet.cells[0][0].element?.wholeText)
+    .toEqual("$5.00");
+  await expectSheet(state.currentSheet, [[5]]);
 });

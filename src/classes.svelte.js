@@ -493,7 +493,7 @@ export class Sheet {
                   if (updateCount++ > maxUpdates) {
                     return old;
                   }
-
+                  cell.element = element;
                   // Svelte implementation of writable stores (from which
                   // rederivable stores inherit) does not check for approximate
                   // floating point equality when determining if dependents
@@ -506,7 +506,6 @@ export class Sheet {
                   ) {
                     return old;
                   }
-                  cell.element = element;
                   this.globals.forceSave++;
                   return value;
                 });
