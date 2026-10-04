@@ -1,6 +1,7 @@
 import { State } from "../src/classes.svelte.js";
 import { test, expect, beforeEach } from "vitest";
 import { evalCode, functions } from "../src/formula-functions.svelte.js";
+import { tick } from "svelte";
 
 function createSheet(cells, formulaCode = "") {
   return State.load({
@@ -739,4 +740,15 @@ test("Throw in update", async () => {
   await expectSheet(state.currentSheet, [[undefined]]);
   state.currentSheet.cells[0][0].formula = "= 1 + 2";
   await expectSheet(state.currentSheet, [[3]]);
+});
+
+test("Async results are correctly ordered", async () => {
+  evalCode(`functions.delay = function(ms) {
+    return new Promise((r) => setTimeout(() => r(ms), ms));
+  }`);
+  const state = createSheet([["=delay(RC[1])", "100"]]);
+  await tick();
+  state.currentSheet.cells[0][1].formula = "1";
+  await new Promise((r) => setTimeout(() => r(), 250));
+  await expectSheet(state.currentSheet, [[1, 1]]);
 });

@@ -47,6 +47,7 @@ class Function extends Expression {
       throw new Error(`"${name}" is not a function`);
     }
     const computed = this.args.map((arg) => compute(arg, globals, sheet, r, c));
+    let previousPromise = Promise.resolve(undefined);
     return derived(computed.filter(isStore), (updated, set, update) => {
       // Don't compute values if an async dependency hasn't ever settled.
       if (updated.some((v) => v == null)) return;
@@ -77,7 +78,7 @@ class Function extends Expression {
         },
       };
       Object.assign(_this, {
-        set: (x) => set({ value: x, element: _this.element }),
+        set: (value) => set({ value, element: _this.element }),
         update: (callback) => {
           update((previous) => {
             try {
@@ -102,15 +103,16 @@ class Function extends Expression {
         error = e;
       }
       if (result instanceof Promise) {
-        update((old) => ({
-          value: old?.value,
-          element: _this.element ?? document.createTextNode("Loading..."),
-        }));
         // TODO: In this case, _this.cleanup may not be set by the time the
         // function returns. That's why we check if result is a promise rather
         // than awaiting everything
-        result
-          .then((value) => {
+        previousPromise = previousPromise
+          .then(async () => {
+            update((old) => ({
+              value: old?.value,
+              element: _this.element ?? document.createTextNode("Loading..."),
+            }));
+            const value = await result;
             set({
               element:
                 _this.element ??
