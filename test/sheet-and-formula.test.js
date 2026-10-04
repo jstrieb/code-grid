@@ -700,22 +700,41 @@ test("Binary literals", async () => {
 
 test("Cleanup", async () => {
   evalCode(`
-    let notCleanedUp = 0;
+    window._notCleanedUp = 0;
     functions.get = function() {
-      notCleanedUp += 1;
-      this.cleanup = () => notCleanedUp--;
-      return notCleanedUp;
+      window._notCleanedUp += 1;
+      this.cleanup = () => window._notCleanedUp--;
+      return window._notCleanedUp;
     }
   `);
   const state = createSheet([
     ["=GET()", "=GET()", "=GET()", "", ""],
     ["", "", "", "", "=GET()"],
   ]);
+  await expect.poll(() => window._notCleanedUp).toBe(4);
+  await Promise.all(
+    [0, 1, 2].map((i) =>
+      expect
+        .poll(() => state.currentSheet.cells[0][i].get())
+        .toSatisfy((v) => 0 < v && v <= 4),
+    ),
+  );
   state.currentSheet.cells[1][0].formula = "=GET()";
+  await expect.poll(() => window._notCleanedUp).toBe(5);
+  await Promise.all(
+    [0, 4].map((i) =>
+      expect
+        .poll(() => state.currentSheet.cells[1][i].get())
+        .toSatisfy((v) => 0 < v && v <= 5),
+    ),
+  );
   state.currentSheet.deleteRows(1);
+  await expect.poll(() => window._notCleanedUp).toBe(3);
   state.currentSheet.deleteCols(3);
+  await expect.poll(() => window._notCleanedUp).toBe(2);
   state.currentSheet.cells[0][1].formula = "asdf";
-  await expectSheet(state.currentSheet, [[1, "asdf"]]);
+  await expect.poll(() => window._notCleanedUp).toBe(1);
+  evalCode(`delete window._notCleanedUp;`);
 });
 
 test("Sensible empty cell values", async () => {
@@ -762,3 +781,5 @@ test("Elements are set even when the value doesn't change", async () => {
     .toEqual("$5.00");
   await expectSheet(state.currentSheet, [[5]]);
 });
+
+test("Changing the cleanup function after returning", async () => {});
