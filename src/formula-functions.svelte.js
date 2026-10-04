@@ -208,20 +208,8 @@ functions.checkbox = function (label) {
   return value;
 };
 
-functions.tick = function (ms) {
-  const interval = setInterval(
-    () =>
-      this.update((i) => {
-        // TODO: Remove
-        console.log(i);
-        return i + 1;
-      }),
-    ms,
-  );
-  this.cleanup = () => {
-    // TODO: Remove
-    console.log("Clearing");
-    clearInterval(interval);
-  };
+functions.tick = function (s = 1) {
+  const interval = setInterval(() => this.update((i) => i + 1), s * 1000);
+  this.cleanup = () => clearInterval(interval);
   return 0;
 };
