@@ -707,6 +707,7 @@ test("Cleanup", async () => {
       return window._notCleanedUp;
     }
   `);
+  await expect.poll(() => window._notCleanedUp).toBe(0);
   const state = createSheet([
     ["=GET()", "=GET()", "=GET()", "", ""],
     ["", "", "", "", "=GET()"],
@@ -734,7 +735,8 @@ test("Cleanup", async () => {
   await expect.poll(() => window._notCleanedUp).toBe(2);
   state.currentSheet.cells[0][1].formula = "asdf";
   await expect.poll(() => window._notCleanedUp).toBe(1);
-  evalCode(`delete window._notCleanedUp;`);
+  state.currentSheet.cells[0][0].formula = "";
+  await expect.poll(() => window._notCleanedUp).toBe(0);
 });
 
 test("Sensible empty cell values", async () => {
@@ -782,4 +784,31 @@ test("Elements are set even when the value doesn't change", async () => {
   await expectSheet(state.currentSheet, [[5]]);
 });
 
-test("Changing the cleanup function after returning", async () => {});
+test("Changing the cleanup function after returning", async () => {
+  evalCode(`
+    window._notCleanedUp = 0;
+    functions.get = function() {
+      setTimeout(() => {
+        this.cleanup = () => window._notCleanedUp--;
+      }, 100);
+      return window._notCleanedUp++;
+    }
+  `);
+  await expect.poll(() => window._notCleanedUp).toBe(0);
+  const state = createSheet([
+    ["=GET()", "=GET()", "=GET()", "", ""],
+    ["=GET()", "", "", "", "=GET()"],
+  ]);
+  await expect.poll(() => window._notCleanedUp).toBe(5);
+  await new Promise((r) => setTimeout(() => r(), 250));
+  state.currentSheet.deleteRows(1);
+  state.currentSheet.deleteCols(3);
+  state.currentSheet.cells[0][1].formula = "asdf";
+  // TODO: Figure out why R0C0 gets reinitialized here, causing us to need to
+  // wait for its cleanup function to be set again
+  await new Promise((r) => setTimeout(() => r(), 250));
+  await expect.poll(() => window._notCleanedUp).toBe(1);
+  state.currentSheet.cells[0][0].formula = "";
+  await expectSheet(state.currentSheet, [[undefined, "asdf"]]);
+  await expect.poll(() => window._notCleanedUp).toBe(0);
+});

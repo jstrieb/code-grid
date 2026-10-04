@@ -131,7 +131,9 @@ class Function extends Expression {
             args.find(({ element }) => element != null)?.element,
         });
       }
-      return _this.cleanup;
+      // Must wrap _this.cleanup so that the cleanup field can be asynchronously
+      // updated after the function returns but before cleanup happens
+      return (...args) => _this.cleanup?.(...args);
     });
   }
 }
