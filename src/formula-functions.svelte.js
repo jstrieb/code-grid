@@ -145,7 +145,7 @@ functions.center = function (s) {
   return s;
 };
 
-const dollarFormat = Intl.NumberFormat("en-US", {
+let dollarFormat = Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
 });
@@ -158,7 +158,7 @@ functions.dollars = undefinedArgsToIdentity(function (d, return_str) {
   return d;
 });
 
-const percentFormat = new Intl.NumberFormat("en-US", {
+let percentFormat = new Intl.NumberFormat("en-US", {
   style: "percent",
   maximumFractionDigits: 4,
 });
@@ -205,9 +205,6 @@ functions.checkbox = function (label) {
     }),
   );
   this.childElements.forEach((e) => this.element.appendChild(e));
-  if (label != null) {
-    this.element.appendChild(document.createTextNode(label));
-  }
   return value;
 };
 
