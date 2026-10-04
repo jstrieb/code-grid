@@ -26,7 +26,6 @@
   - Toggle off automatic cell updates
   - Change default styles for all cells in code editor
   - Highlight referenced cells when in insert mode
-  - Cells can run functions in a destructor
   - Context menu as last child of body, gets moved by right click
   - Settings input with numeric input and buttons on either side
   - CSP to restrict `worker-src` (except that we don't want to block web
@@ -141,6 +140,9 @@
     - Examples
     - Known Issues
   - Tutorial
+- Loading screen display error message on failure
+- When "tab" or "shift+tab" or other things in the editor that break the
+  textarea undo stack are done, force save with no debounce
 - Bugs
   - Cannot select on mobile
     - Is this necessary to fix?
