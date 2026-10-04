@@ -465,13 +465,12 @@ export class Sheet {
 
         try {
           const parsed = formula.parse(cell.formula);
-          const computed = compute(
-            parsed,
-            this.globals,
-            this.globals.sheets.indexOf(this),
-            cell.row,
-            cell.col,
-          );
+          const computed = compute(parsed, {
+            globals: this.globals,
+            sheet: this.globals.sheets.indexOf(this),
+            r: cell.row,
+            c: cell.col,
+          });
           if (isStore(computed)) {
             cell.value.rederive(
               [computed],

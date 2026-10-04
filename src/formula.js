@@ -25,7 +25,7 @@ class Expression {
   // Return a concrete value from an expression given the values in the other
   // rows and columns.
   /* v8 ignore next 3 */
-  compute(globals, sheet, r, c) {
+  compute({ globals, sheet, r, c }) {
     throw new Error("Not yet implemented");
   }
 }
@@ -40,13 +40,14 @@ class Function extends Expression {
     this.args = Array.from(args);
   }
 
-  compute(globals, sheet, r, c) {
+  compute(metadata) {
+    const { globals, sheet, r, c } = metadata;
     const name = this.name.toLocaleLowerCase();
     const f = functions[name];
     if (f == null) {
       throw new Error(`"${name}" is not a function`);
     }
-    const computed = this.args.map((arg) => compute(arg, globals, sheet, r, c));
+    const computed = this.args.map((arg) => compute(arg, metadata));
     let previousPromise = Promise.resolve(undefined);
     return derived(computed.filter(isStore), (updated, set, update) => {
       // Don't compute values if an async dependency hasn't ever settled.
@@ -333,7 +334,7 @@ class Ref extends Expression {
     this.c = c;
   }
 
-  compute(globals, s, r, c) {
+  compute({ globals, sheet: s, r, c }) {
     let sheet;
     if (this.s == null) {
       sheet = s;
@@ -403,7 +404,7 @@ class Range extends Expression {
     this.c2 = c2;
   }
 
-  compute(globals, s, r, c) {
+  compute({ globals, sheet: s, r, c }) {
     let sheet;
     if (this.s == null) {
       sheet = s;
