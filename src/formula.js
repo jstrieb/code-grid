@@ -104,9 +104,6 @@ class Function extends Expression {
         error = e;
       }
       if (result instanceof Promise) {
-        // TODO: In this case, _this.cleanup may not be set by the time the
-        // function returns. That's why we check if result is a promise rather
-        // than awaiting everything
         previousPromise = previousPromise
           .then(async () => {
             update((old) => ({

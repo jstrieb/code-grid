@@ -32,6 +32,10 @@ function expectSheet(sheet, cells) {
   );
 }
 
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 const originalFunctions = { ...functions };
 beforeEach(() => {
   // Restore the imported, destructively-modified, global functions object so
@@ -770,7 +774,7 @@ test("Async results are correctly ordered", async () => {
   const state = createSheet([["=delay(RC[1])", "100"]]);
   await tick();
   state.currentSheet.cells[0][1].formula = "1";
-  await new Promise((r) => setTimeout(() => r(), 250));
+  await sleep(250);
   await expectSheet(state.currentSheet, [[1, 1]]);
 });
 
@@ -800,15 +804,32 @@ test("Changing the cleanup function after returning", async () => {
     ["=GET()", "", "", "", "=GET()"],
   ]);
   await expect.poll(() => window._notCleanedUp).toBe(5);
-  await new Promise((r) => setTimeout(() => r(), 250));
+  await sleep(250);
   state.currentSheet.deleteRows(1);
   state.currentSheet.deleteCols(3);
   state.currentSheet.cells[0][1].formula = "asdf";
   // TODO: Figure out why R0C0 gets reinitialized here, causing us to need to
   // wait for its cleanup function to be set again
-  await new Promise((r) => setTimeout(() => r(), 250));
+  await sleep(250);
   await expect.poll(() => window._notCleanedUp).toBe(1);
   state.currentSheet.cells[0][0].formula = "";
   await expectSheet(state.currentSheet, [[undefined, "asdf"]]);
   await expect.poll(() => window._notCleanedUp).toBe(0);
+});
+
+test("Cleanup when dependencies change", async () => {
+  evalCode(`
+    let count = 0;
+    functions.count = function() {
+      this.cleanup = () => count--;
+      return ++count;
+    }
+  `);
+  const state = createSheet([["=COUNT(RC[1])", "1"]]);
+  await expectSheet(state.currentSheet, [[1, 1]]);
+  for (let i = 0; i < 50; i++) {
+    state.currentSheet.cells[0][1].formula = i.toString();
+    await tick();
+  }
+  await expectSheet(state.currentSheet, [[1, 49]]);
 });
