@@ -833,3 +833,39 @@ test("Cleanup when dependencies change", async () => {
   }
   await expectSheet(state.currentSheet, [[1, 49]]);
 });
+
+test("Basic cell memory", async () => {
+  evalCode(`
+    functions.memory = function(x) {
+      this.memory = this.memory ?? [];
+      if (x != null) this.memory.push(x);
+      while (this.memory.length > 3) this.memory.shift();
+      return this.memory;
+    }
+  `);
+  const state = createSheet([["=memory(RC[1])", "1"]]);
+  await expectSheet(state.currentSheet, [[[1], 1]]);
+  state.currentSheet.cells[0][1].formula = "10";
+  await expectSheet(state.currentSheet, [[[1, 10], 10]]);
+  state.currentSheet.cells[0][1].formula = "asdf";
+  await expectSheet(state.currentSheet, [[[1, 10, "asdf"], "asdf"]]);
+  state.currentSheet.cells[0][1].formula = "=2 * 3 + 1";
+  await expectSheet(state.currentSheet, [[[10, "asdf", 7], 7]]);
+});
+
+test("Memory gets cleaned up", async () => {
+  evalCode(`
+    functions.memory = function(x) {
+      this.memory = this.memory ?? [];
+      if (x != null) this.memory.push(x);
+      while (this.memory.length > 3) this.memory.shift();
+      return this.memory;
+    }
+  `);
+  const state = createSheet([["=memory(RC[1])", "1"]]);
+  await expectSheet(state.currentSheet, [[[1], 1]]);
+  state.currentSheet.cells[0][0].formula = "=2 * 3 + 1";
+  await expectSheet(state.currentSheet, [[7, 1]]);
+  state.currentSheet.cells[0][0].formula = "=memory(RC[1])";
+  await expectSheet(state.currentSheet, [[[1], 1]]);
+});

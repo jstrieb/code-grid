@@ -92,14 +92,9 @@ functions.rand = functions.random;
 
 // Miscellaneous utility functions
 functions.slider = function slider(min, max, step, value) {
-  // TODO: Improve rough heuristic
-  if (this.cell.formula.toLocaleLowerCase().startsWith("=slider(")) {
-    const previous = this.cell.get();
-    if (previous != null && typeof previous !== "string") {
-      value = previous;
-    } else {
-      value = value ?? min;
-    }
+  const previous = this.memory;
+  if (previous != null && typeof previous !== "string") {
+    value = previous;
   } else {
     value = value ?? min;
   }
@@ -114,7 +109,11 @@ functions.slider = function slider(min, max, step, value) {
       appearance: auto;
       margin: 0 0.5ch;
     `,
-    oninput: (e) => this.set(Number(e.target.value)),
+    oninput: (e) => {
+      const value = Number(e.target.value);
+      this.memory = value;
+      this.set(value);
+    },
   });
   return value;
 };
@@ -182,10 +181,7 @@ functions.sparkbars = (...args) => {
 
 functions.checkbox = function (label) {
   let value;
-  // TODO: Improve rough heuristic
-  if (this.cell.formula.toLocaleLowerCase().startsWith("=checkbox(")) {
-    value = !!this.cell.get();
-  }
+  value = !!this.memory;
   this.element = Object.assign(document.createElement("label"), {
     style: `
       display: flex; 
@@ -201,7 +197,10 @@ functions.checkbox = function (label) {
       type: "checkbox",
       style: "appearance: auto;",
       checked: value,
-      oninput: (e) => this.set(e.target.checked),
+      oninput: (e) => {
+        this.memory = e.target.checked;
+        this.set(e.target.checked);
+      },
     }),
   );
   this.childElements.forEach((e) => this.element.appendChild(e));

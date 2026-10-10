@@ -204,6 +204,10 @@
               row.map((cell) => ({
                 formula: cell.formula,
                 value: cell.get(),
+                // Save space by only saving memory if it's populated for a cell
+                memory: Object.keys(cell.memory).length
+                  ? cell.memory
+                  : undefined,
               })),
             ),
           ],

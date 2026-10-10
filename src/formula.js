@@ -41,8 +41,10 @@ class Function extends Expression {
   }
 
   compute(metadata) {
-    const { globals, sheet, r, c } = metadata;
+    const { globals, sheet, r, c, memory } = metadata;
     const name = this.name.toLocaleLowerCase();
+    const callCount = metadata.callCounts[name] ?? 0;
+    metadata.callCounts[name] = callCount + 1;
     const f = functions[name];
     if (f == null) {
       throw new Error(`"${name}" is not a function`);
@@ -76,6 +78,13 @@ class Function extends Expression {
               ? (x?.element ?? document.createTextNode(x?.value ?? ""))
               : document.createTextNode(x),
           );
+        },
+        get memory() {
+          return memory[name]?.[callCount];
+        },
+        set memory(v) {
+          if (memory[name] == null) memory[name] = {};
+          memory[name][callCount] = v;
         },
       };
       Object.assign(_this, {

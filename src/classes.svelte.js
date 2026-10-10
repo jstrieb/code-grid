@@ -65,6 +65,7 @@ functions.crypto = async (ticker) => {
           sheet.widths.length,
           (i, j) => sheet.cells[i][j].formula,
           (i, j) => sheet.cells[i][j].value,
+          (i, j) => sheet.cells[i][j].memory,
         );
         s.widths = sheet.widths;
         s.heights = sheet.heights;
@@ -419,7 +420,7 @@ export class Sheet {
   // circular reactive references.
   globals;
 
-  constructor(name, rows, cols, formula, initial) {
+  constructor(name, rows, cols, formula, initial, memory) {
     // TODO: Test optimizations using sparse arrays (without .fill)
     this.name = name;
     this.cells = new Array(rows)
@@ -427,14 +428,22 @@ export class Sheet {
       .map((_, i) =>
         new Array(cols)
           .fill()
-          .map((_, j) => this.newCell(formula?.(i, j), i, j, initial?.(i, j))),
+          .map((_, j) =>
+            this.newCell(
+              formula?.(i, j),
+              i,
+              j,
+              initial?.(i, j),
+              memory?.(i, j),
+            ),
+          ),
       );
     this.widths = new Array(cols).fill(DEFAULT_WIDTH);
     this.heights = new Array(rows).fill(DEFAULT_HEIGHT);
   }
 
-  newCell(initialFormula, row, col, initialValue) {
-    const cell = new Cell(initialFormula, initialValue, row, col);
+  newCell(initialFormula, row, col, initialValue, memory) {
+    const cell = new Cell(initialFormula, initialValue, row, col, memory);
 
     const maxUpdates = 1000;
     let updateCount = 0;
@@ -465,12 +474,28 @@ export class Sheet {
 
         try {
           const parsed = formula.parse(cell.formula);
+          const callCounts = {};
           const computed = compute(parsed, {
             globals: this.globals,
             sheet: this.globals.sheets.indexOf(this),
             r: cell.row,
             c: cell.col,
+            memory: cell.memory,
+            callCounts,
           });
+
+          for (const k of Object.keys(cell.memory)) {
+            if ((callCounts[k] ?? 0) == 0) {
+              delete cell.memory[k];
+            } else {
+              for (const count of Object.keys(cell.memory[k] ?? {})) {
+                if (count >= callCounts[k] ?? 0) {
+                  delete cell.memory[k][count];
+                }
+              }
+            }
+          }
+
           if (isStore(computed)) {
             cell.value.rederive(
               [computed],
@@ -641,12 +666,18 @@ export class Cell {
   rightBorder = $state(false);
   leftBorder = $state(false);
   editing = $state(false);
+  // If memory was a rune, updates would trigger cells to be re-evaluated, which
+  // could cause reactive loops. Anytime memory updates, the cell value should
+  // too, which will trigger a save. Changes to memory without updating cell
+  // values will not trigger a save.
+  memory = undefined;
 
-  constructor(formula, value, row, col) {
+  constructor(formula, value, row, col, memory) {
     this.formula = formula;
     this.value = rederivable(value);
     this.row = row;
     this.col = col;
+    this.memory = memory ?? {};
   }
 
   get() {
