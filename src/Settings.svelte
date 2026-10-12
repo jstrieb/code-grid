@@ -10,7 +10,7 @@
   import Button from "./components/Button.svelte";
   import NumericInput from "./components/NumericInput.svelte";
 
-  let { globals = $bindable() } = $props();
+  let { globals } = $props();
 
   $effect(() => {
     document

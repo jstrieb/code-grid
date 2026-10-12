@@ -86,7 +86,7 @@
 <script>
   import ContextMenu from "./components/ContextMenu.svelte";
 
-  let { globals = $bindable(), value = $bindable() } = $props();
+  let { globals, value = $bindable() } = $props();
   let tabs = $derived(globals.sheets.map((s) => s.name));
 
   let elements = $state(new Array(globals.sheets.length).fill());

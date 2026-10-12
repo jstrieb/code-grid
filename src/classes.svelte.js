@@ -14,6 +14,29 @@ function minmax(min, x, max) {
   return Math.min(Math.max(x, min), max);
 }
 
+export function createSaveData(sheets, formulaCode) {
+  return {
+    sheets: [
+      // Spreads necessary for reactivity
+      ...sheets.map((sheet) => ({
+        name: sheet.name,
+        widths: [...sheet.widths],
+        heights: [...sheet.heights],
+        // TODO: Transpose for better compression
+        cells: [
+          ...sheet.cells.map((row) =>
+            row.map((cell) => ({
+              formula: cell.formula,
+              value: cell.get(),
+            })),
+          ),
+        ],
+      })),
+    ],
+    formulaCode: formulaCode,
+  };
+}
+
 export class State {
   sheets = $state([]);
   currentSheetIndex = $state(0);
@@ -56,9 +79,17 @@ functions.crypto = async (ticker) => {
   });
   forceSave = $state(0);
 
-  static load(data) {
-    let result = new State(
-      data.sheets.map((sheet) => {
+  constructor(sheets, formulaCode) {
+    this.load({ sheets, formulaCode });
+  }
+
+  static loadNew(data) {
+    return new State(data.sheets, data.formulaCode);
+  }
+
+  load({ sheets, formulaCode }) {
+    Object.assign(this, {
+      sheets: sheets.map((sheet) => {
         let s = new Sheet(
           sheet.name,
           sheet.heights.length,
@@ -66,19 +97,11 @@ functions.crypto = async (ticker) => {
           (i, j) => sheet.cells[i][j].formula,
           (i, j) => sheet.cells[i][j].value,
         );
+        s.globals = this;
         s.widths = sheet.widths;
         s.heights = sheet.heights;
         return s;
       }),
-      data.formulaCode,
-    );
-    return result;
-  }
-
-  constructor(sheets, formulaCode) {
-    this.sheets = sheets;
-    this.sheets.forEach((sheet) => {
-      sheet.globals = this;
     });
     if (formulaCode != null) {
       this.formulaCode = formulaCode;

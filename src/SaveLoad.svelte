@@ -54,7 +54,7 @@
 
   import { compressText, decompressText } from "./lib/compress.js";
 
-  let { imageData, globals = $bindable() } = $props();
+  let { imageData, globals } = $props();
 
   let bottomText = $state("https://jstrieb.github.io/code-grid");
   let dataUrl = $derived(
@@ -72,7 +72,8 @@
       const data = reader.result.match(/,(.*)/)[1];
       decompressText(data)
         .then((result) => {
-          globals = State.load(JSON.parse(result));
+          globals.load(JSON.parse(result));
+          globals.imageOpen = false;
         })
         .catch((e) => {
           console.error(e);

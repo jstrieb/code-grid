@@ -1,3 +1,5 @@
 *.md
 *.yml
 coverage
+Makefile
+.prettierignore
